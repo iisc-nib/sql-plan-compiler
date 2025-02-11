@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List
+
+from helper import Pipeline
 schema = {
     "nation": {
         "n_nationkey": "int32_t",
@@ -82,6 +84,8 @@ schema = {
 
 allocated_state: set = set()
 
+control_params: Dict[str, str] = dict()
+
 
 @dataclass
 class Context:
@@ -94,8 +98,18 @@ class Context:
     kernel_code: str
     pipeline_id: int
     kernel_launch: str
+    global_kernel_code: str 
+    global_control_code: str
 
 
+
+def write_query(filename: str, context: Context):
+    control_scope = '''void control({params}){{
+{code}
+}}'''.format(params = ", ".join(["{ty} {param}".format(ty = val, param = key) for key, val in control_params.items()]), code = context.control_code)
+    with open(filename, "w") as f:
+        f.write(context.global_kernel_code + control_scope)
+        
 def RLN(attr: str):
     global schema
     for k, v in schema.items():
@@ -125,3 +139,4 @@ class Operator:
     def consume(self, context: Context):
         """Method to consume data."""
         raise NotImplementedError("Subclasses should implement this method.")
+

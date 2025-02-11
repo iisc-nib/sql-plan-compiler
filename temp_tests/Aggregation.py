@@ -62,7 +62,6 @@ class Aggregation(Operator):
 
         key_text = "int64_t agg_key_{} = 0;\n".format(self.hash_table_id)
         total_bytes = 0
-        print(context)
         for attr in self.alias_map:
             if attr != "*":  # reserve * only for count
                 load_to_register(attr, context)
@@ -102,8 +101,8 @@ class Aggregation(Operator):
         launch_param = ["{}_size".format(context.relation)]
         launch_param.extend(["d_" + attr for attr in context.pipeline_params])
         control_params = ", ".join(launch_param)
-        context.control_code += "gather_pipeline_{id}{launch}({params});\nauto HT{id}_size = HT{id}.size();\n".format(
-            id=self.hash_table_id, launch=context.kernel_launch, params=control_params
+        context.control_code += "gather_pipeline_{pid}{launch}({params});\nauto HT{id}_size = HT{id}.size();\n".format(
+            id = self.hash_table_id, pid=context.pipeline_id, launch=context.kernel_launch, params=control_params
         )
         for attr, alias in self.alias_map.items():
             ty = ""
@@ -119,7 +118,7 @@ cudaMemset(d_{alias}, 0, sizeof({ty}) * HT{id}_size);\n""".format(
                 ty=ty, alias=alias, id=self.hash_table_id
             )
 
-        print(gather_code)
+        context.global_kernel_code += (gather_code)
         # TODO: add control code for making sequential buffer
         context.control_code += """
 thrust::device_vector<int64_t> keys_{id}(HT{id}_size), vals_{id}(HT{id}_size);
@@ -165,9 +164,9 @@ HT{id}.insert(actual_dict_{id}.begin(), actual_dict_{id}.end());\n""".format(
             "pipeline_{}".format(context.pipeline_id),
             "aggregate_pipeline_{}".format(context.pipeline_id),
         )
-        print(agg_code)
+        context.global_kernel_code += (agg_code)
         context.control_code += "aggregate_pipeline_{id}{launch}({params});\n".format(
-            id=self.hash_table_id, launch=context.kernel_launch, params=control_params
+            id=context.pipeline_id, launch=context.kernel_launch, params=control_params
         )
         for attr, alias in self.alias_map.items():
             ty = ""
@@ -178,4 +177,9 @@ HT{id}.insert(actual_dict_{id}.begin(), actual_dict_{id}.end());\n""".format(
             context.control_code += "cudaMemcpy({alias}, d_{alias}, sizeof({ty}) * HT{id}_size, cudaMemcpyDeviceToHost);\n".format(
                 ty=ty, alias=alias, id=self.hash_table_id
             )
-        print(context.control_code)
+        context.control_code += "size_t {name}_size = HT{id}_size;\n".format(name = self.agg_table_name, id = self.hash_table_id)
+        context.global_control_code += (context.control_code)
+
+        if hasattr(self, "parent") and self.parent != None:
+            self.parent.consume(context)
+        

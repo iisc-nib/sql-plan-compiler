@@ -1,4 +1,4 @@
-from helper import RLN, Operator, hash_table_id, pipeline_id, allocated_state, load_to_register, schema
+from helper import RLN, Operator, hash_table_id, pipeline_id, allocated_state, load_to_register, schema, control_params
 
 
 from typing import Dict, List
@@ -19,17 +19,26 @@ class Scan(Operator):
         pargs = ["size_t {}_size".format(self.relation)]
         template_args = []
         global allocated_state
+        new_pipeline_params = []
         for param in context.pipeline_params:
             if RLN(param) != None:
-                pargs.append(schema[RLN(param)][param] + "* " + param)
+                if schema[RLN(param)][param] + "* " + param not in pargs: 
+                    pargs.append(schema[RLN(param)][param] + "* " + param)
+                    new_pipeline_params.append(param)
                 if param not in allocated_state and RLN(param) == self.relation:
+                    context.control_code += "{ty}* d_{param};\n".format(ty = schema[RLN(param)][param], param = param)
                     context.control_code += "cudaMalloc(&d_{param}, {rln}_size * sizeof({ty}));\ncudaMemcpy(d_{param}, {param}, {rln}_size * sizeof({ty}), cudaMemcpyHostToDevice);\n".format(
                         param=param, rln=self.relation, ty=schema[RLN(param)][param]
                     )
                     allocated_state.add(param)
+                    control_params[param] = schema[RLN(param)][param]+"*"
+                    if self.relation + "_size" not in control_params.keys():
+                        control_params[self.relation + "_size"] = "size_t"
             elif param.startswith("HT"):
                 template_args.append("typename MAP_" + param)
-                pargs.append("MAP_" + param + " " + param)
+                if "MAP_" + param + " " + param not in pargs:
+                    pargs.append("MAP_" + param + " " + param)
+                    new_pipeline_params.append(param)
                 ht = param.split("_")[0]
                 if ht not in allocated_state:
                     context.control_code += """auto {ht} = cuco::static_map{{ {est_size} * 2,
@@ -55,7 +64,10 @@ cuco::linear_probing<1, cuco::default_hash_function<int64_t>>()}};\n""".format(
                         )
                     allocated_state.add(param)
             else:
-                pargs.append(param)  # for normal index type of variables
+                if param not in pargs:
+                    pargs.append(param)  # for normal index type of variables
+                    new_pipeline_params.append(param)
+        context.pipeline_params = new_pipeline_params
         context.kernel_code += "template<" + ", ".join(template_args) + ">\n"
         context.kernel_code += "__global__ void pipeline_{pid}({pargs}) {{\n".format(
             pid=context.pipeline_id, pargs=", ".join(pargs)

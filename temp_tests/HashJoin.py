@@ -50,29 +50,30 @@ class HashJoin(Operator):
         self.hash_table_id = hash_table_id
         hash_table_id += 1
         self.relations: set[str] = set()
+        self.left_control_code = ""
+        self.left_kernel_code = ""
 
     def produce(self, context):
         self.left_context = copy.deepcopy(context)
         self.left_context.pipeline_params = [
             *self.left_keys,
             "HT{}_I".format(self.hash_table_id),
-            "int64_t* JOIN_IDX_{id}".format(id=self.hash_table_id),
             "<placeholder_{id}>".format(id=self.hash_table_id),
+            "int64_t* JOIN_IDX_{id}".format(id=self.hash_table_id),
         ]
-        print(self.left_context)
         self.left.produce(self.left_context)
         context.pipeline_params = [
             *self.right_keys,
             "HT{}_F".format(self.hash_table_id),
             *context.pipeline_params,
-            "int64_t* JOIN_IDX_{id}".format(id=self.hash_table_id),
             "<placeholder_{id}>".format(id=self.hash_table_id),
+            "int64_t* JOIN_IDX_{id}".format(id=self.hash_table_id),
         ]
         self.right.produce(context)
 
     def consume(self, context: Context):
-
         if context.source == self.left:
+            print("consuming: ",self.left_keys)
             res = prepare_keys(schema, self.left_keys, context, self.hash_table_id)
             if res == None:
                 print("Unable to pack keys of hash join, ending code generation")
@@ -101,8 +102,8 @@ class HashJoin(Operator):
             count_code = count_code.replace(
                 "pipeline_{}".format(self.hash_table_id),
                 "build_pipeline_count_{}".format(self.hash_table_id),
-            )
-            print(count_code)
+            ) # end of build pipeline
+            context.global_kernel_code += count_code
             context.control_code += "int64_t *d_JOIN_IDX_{};\n".format(
                 self.hash_table_id
             )
@@ -122,7 +123,7 @@ class HashJoin(Operator):
             )
             for rln in context.rid_dict:
                 context.kernel_code += (
-                    "JOIN_BUF_{id}_{rln}[B{id}_idx] = {rid}\n".format(
+                    "JOIN_BUF_{id}_{rln}[B{id}_idx] = {rid};\n".format(
                         id=self.hash_table_id, rln=rln, rid=context.rid_dict[rln]
                     )
                 )
@@ -131,7 +132,7 @@ class HashJoin(Operator):
                 )
                 self.relations.add(rln)
             context.kernel_code += "}"  # end the pipeline of build
-            templ = []
+            templ = ["{}_size".format(context.relation)]
             for p in context.pipeline_params:
                 if not p.startswith("<placeholder"):
                     templ.append(p)
@@ -159,7 +160,7 @@ class HashJoin(Operator):
                 context.control_code += "cudaMalloc(d_JOIN_BUF_{id}_{rln}, sizeof(int64_t) * BUILD_SIZE_{id});\n".format(
                     id=self.hash_table_id, rln=rln
                 )
-            print(
+            context.global_kernel_code += (
                 context.kernel_code.replace(
                     "pipeline_{}".format(self.hash_table_id),
                     "build_pipeline_{}".format(self.hash_table_id),
@@ -168,8 +169,13 @@ class HashJoin(Operator):
             context.control_code += "build_pipeline_{id}{launch}({params});\n".format(
                 id=self.hash_table_id, launch=context.kernel_launch, params=launch_params
             )
-            print(context.control_code)
+            context.global_control_code += (context.control_code)
+            self.left_control_code += context.global_control_code
+            self.left_kernel_code += context.global_kernel_code
         elif context.source == self.right:
+            context.control_code += self.left_control_code
+            context.global_control_code += self.left_control_code
+            context.global_kernel_code += self.left_kernel_code
             res = prepare_keys(schema, self.right_keys, context, self.hash_table_id)
             if res == None:
                 print("Unable to pack keys of hash join, ending code generation")

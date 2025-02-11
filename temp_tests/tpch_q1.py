@@ -1,10 +1,9 @@
 from Aggregation import Aggregation
-from HashJoin import HashJoin
 from Map import BinOp, Map, Var
+from Print import Print
 from Scan import Scan
 from Selection import Selection
-
-from helper import Context
+from helper import Context, write_query
 
 
 def tpch_q1():
@@ -68,47 +67,15 @@ def tpch_q1():
             "l_quantity": "sum_qty",
             "l_returnflag": "agg_l_returnflag",
             "l_linestatus": "agg_l_linestatus",
-            "l_extendedprice": "sum_base_charge",
+            "l_extendedprice": "sum_base_price",
             "l_discount": "sum_discount",
             "sum_disc_price": "sum_disc_price",
             "sum_charge": "sum_charge",
             "*": "count_order",
         },
     )
-    op.produce(Context(set(), {}, None, [], {}, "", "", 0, ""))
-
-
-def tpch_q3():
-    c_o_join = HashJoin(
-        Selection(Scan("customer"), "c_mktsegment", "= BUILDING"),
-        Selection(Scan("orders"), "o_orderdate", "< 9204"),
-        ["c_custkey"],
-        ["o_custkey"],
-    )
-    col_join = HashJoin(
-        c_o_join,
-        Selection(Scan("lineitem"), "l_shipdate", " > 9204"),
-        ["o_orderkey"],
-        ["l_orderkey"],
-    )
-    op = Aggregation(
-        "agg",
-        col_join,
-        ["l_orderkey"],
-        {
-            "l_extendedprice": "sum",
-            "o_shippriority": "any",
-            "o_orderdate": "any",
-            "l_orderkey": "any",
-        },
-        {
-            "l_extendedprice": "sum_l_ep",
-            "o_shippriority": "any_o_sp",
-            "o_orderdate": "any_o_od",
-            "l_orderkey": "any_l_ok",
-        },
-    )
-    op.produce(Context(set(), {}, None, [], {}, "", "", 0, ""))
-
-
-tpch_q1()
+    printed = Print("agg", ["agg_l_returnflag", "agg_l_linestatus", "sum_qty", "sum_base_price", "sum_disc_price", "sum_charge", "count_order"], op)
+    context = Context(set(), {}, None, [], {}, "", "", 0, "", "", "")
+    printed.produce(context)
+    write_query("tpch_q1.cu", context)
+    return context
