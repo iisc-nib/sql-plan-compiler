@@ -61,7 +61,7 @@ schema = {
         "o_orderdate": "int32_t",
         "o_orderpriority": "int32_t",
         "o_clerk": "StringColumn",
-        "o_shippriority": "int8_t",
+        "o_shippriority": "int32_t",
         "o_comment": "StringColumn",
     },
     "customer": {
@@ -87,7 +87,7 @@ def RLN(attr: str):
     for k, v in schema.items():
         if attr in v:
             return k
-    return None
+    raise Exception("{} does not belong to any table in the schema".format(attr))
 
 
 @dataclass
@@ -106,6 +106,7 @@ class Attribute:
 class Pipeline:
     id: int
     base_relation: str
+    joined_relations: set[str] = field(default_factory=set)
     input_attributes: set[Attribute] = field(default_factory=set)
     output_attributes: set[Attribute] = field(default_factory=set)
     other_vars: set[Attribute] = field(default_factory=set)
@@ -115,6 +116,16 @@ class Pipeline:
     rid_dict: Dict[str, str] = field(default_factory=dict)
     register_attrs: Dict[str, str] = field(default_factory=dict)
 
+def get_pipeline_kernel_code(pipeline: Pipeline):
+    res = (prepare_template(pipeline))
+    res += (
+        "\n__global__ void pipeline_{pid} ({sig}) {{\n{code}}}\n".format(
+            pid=pipeline.id,
+            sig=prepare_signature(pipeline),
+            code=pipeline.kernel_code,
+        )
+    )
+    return res
 
 def prepare_signature(pipeline: Pipeline):
     res = []
@@ -147,6 +158,8 @@ def prepare_params(pipeline: Pipeline):
 
 def prepare_template(pipeline: Pipeline):
     res = []
+    if len(pipeline.hash_tables) == 0: 
+        return ""
     for id in pipeline.hash_tables:
         res.append("typename TY_HT{}_I".format(id))
         res.append("typename TY_HT{}_F".format(id))
@@ -176,6 +189,25 @@ def load_attr_to_register(attr: str, pipeline: Pipeline):
         )
         pipeline.register_attrs[attr] = "reg_" + attr
     return pipeline.register_attrs[attr]
+
+
+def prepare_keys(operator_id: int, keys: List[str], pipeline: Pipeline):
+        total_bytes = 0
+        for key in keys:
+            pipeline.input_attributes.add(Attribute(typeof(key), key))
+            load_attr_to_register(key, pipeline)
+        pipeline.kernel_code += "int64_t key{} = 0;\n".format(
+            operator_id
+        )  # register allocated key variable
+        for key in keys:
+            pipeline.kernel_code += (
+                "key{id} |= (((int64_t){attr}) << {shift});\n".format(
+                    id=operator_id,
+                    attr=load_attr_to_register(key, pipeline),
+                    shift=8 * total_bytes,
+                )
+            )
+            total_bytes += sizeof(typeof(key))
 
 
 @dataclass

@@ -1,5 +1,5 @@
 from Operator import Operator
-from helper import Aggregate, Attribute, Context, Pipeline, load_attr_to_register, operator_id, pipeline_id, prepare_params, prepare_signature, prepare_template, schema, sizeof, typeof
+from helper import RLN, Aggregate, Attribute, Context, Pipeline, get_pipeline_kernel_code, load_attr_to_register, operator_id, pipeline_id, prepare_keys, prepare_params, prepare_signature, prepare_template, schema, sizeof, typeof
 
 
 import copy
@@ -30,33 +30,18 @@ class Aggregation(Operator):
     def consume(self, context: Context):
         # do a lookup in the hash table
         context.pipeline.hash_tables.add(self.id)
-        total_bytes = 0
-        for key in self.keys:
-            context.pipeline.input_attributes.add(Attribute(typeof(key), key))
-            load_attr_to_register(key, context.pipeline)
-        context.pipeline.kernel_code += "int64_t key{} = 0;\n".format(
-            self.id
-        )  # register allocated key variable
-        for key in self.keys:
-            context.pipeline.kernel_code += (
-                "key{id} |= (((int64_t){attr}) << {shift});\n".format(
-                    id=self.id,
-                    attr=load_attr_to_register(key, context.pipeline),
-                    shift=8 * total_bytes,
-                )
-            )
-            total_bytes += sizeof(typeof(key))
+        prepare_keys(self.id, self.keys, context.pipeline)
 
         # from here we want to fork and add 2 pipelines
         self.agg_pipeline = copy.deepcopy(context.pipeline)
-        self.count_pipeline = context.pipeline
+        self.agg_pipeline.id = next(pipeline_id)
 
+        self.count_pipeline = context.pipeline
         self.count_pipeline.kernel_code += "auto thread = cg::tiled_partition<1>(cg::this_thread_block());\n"  # reg alloc
         self.count_pipeline.kernel_code += (
             "HT{id}_I.insert(thread, cuco::pair{{key{id}, 1}});\n".format(id=self.id)
         )
 
-        self.agg_pipeline.id = next(pipeline_id)
         self.agg_pipeline.kernel_code += (
             "auto slot{id} = HT{id}_F.find(key{id});\n".format(id=self.id)
         )  # another reg alloc
@@ -109,27 +94,15 @@ class Aggregation(Operator):
             context.source = self
             self.parent.consume(context)
 
+    
+
     def print(self):
         self.child.print()
-        print(prepare_template(self.count_pipeline))
-        print(
-            "__global__ void pipeline_{pid} ({sig}) {{\n{code}}}".format(
-                pid=self.count_pipeline.id,
-                sig=prepare_signature(self.count_pipeline),
-                code=self.count_pipeline.kernel_code,
-            )
-        )
-        print(prepare_template(self.agg_pipeline))
-        print(
-            "__global__ void pipeline_{pid} ({sig}) {{\n{code}}}".format(
-                pid=self.agg_pipeline.id,
-                sig=prepare_signature(self.agg_pipeline),
-                code=self.agg_pipeline.kernel_code,
-            )
-        )
+        print(get_pipeline_kernel_code(self.count_pipeline))
+        print(get_pipeline_kernel_code(self.agg_pipeline))
 
-    def print_control(self):
-        self.child.print_control()
+    def print_control(self, allocated_attrs: set[Attribute]):
+        self.child.print_control(allocated_attrs)
         # prepare control code
         """
         1. Allocate all input buffers
@@ -142,33 +115,33 @@ class Aggregation(Operator):
         # 1
         # declare input and output buffers
         for attr in self.agg_pipeline.input_attributes:
-            print("{ty}* d_{attr};\n".format(ty=attr.ty, attr=attr.val))
-        for attr in self.agg_pipeline.output_attributes:
-            print("{ty}* d_{attr};\n".format(ty=attr.ty, attr=attr.val))
-        # allocate only input buffers
-        for attr in self.agg_pipeline.input_attributes:
-            print(
-                "cudaMalloc(&d_{attr}, sizeof({ty}) * {rln}_size);\n".format(
-                    attr=attr.val, ty=attr.ty, rln=self.agg_pipeline.base_relation
+            if attr not in allocated_attrs:
+                print("{ty}* d_{attr};\n".format(ty=attr.ty, attr=attr.val))
+                print(
+                    "cudaMalloc(&d_{attr}, sizeof({ty}) * {rln}_size);\n".format(
+                        attr=attr.val, ty=attr.ty, rln=RLN(attr.val)
+                    )
                 )
-            )
-        # initialize them
-        for attr in self.agg_pipeline.input_attributes:
-            print("cudaMemcpy(d_{attr}, {attr}, sizeof({ty}) * {rln}_size, cudaMemcpyHostToDevice);\n".format(
-                attr=attr.val, ty=attr.ty, rln=self.agg_pipeline.base_relation
-            ))
+                print(
+                    "cudaMemcpy(d_{attr}, {attr}, sizeof({ty}) * {rln}_size, cudaMemcpyHostToDevice);\n".format(
+                        attr=attr.val, ty=attr.ty, rln=RLN(attr.val)
+                    )
+                )
+                allocated_attrs.add(attr)
+        for attr in self.agg_pipeline.output_attributes:
+            if attr not in allocated_attrs:
+                print("{ty}* d_{attr};\n".format(ty=attr.ty, attr=attr.val))
+                # allocated_attrs.add(attr)
 
         # 2
-        # create all the hash tables
-        for id in self.agg_pipeline.hash_tables:
-            print(
-                "auto HT{id} = cuco::static_map{{ {est_size} * 2,cuco::empty_key{{(int64_t)-1}},cuco::empty_value{{(int64_t)-1}},thrust::equal_to<int64_t>{{}},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>()}};\n".format(
-                    id=id, est_size=self.agg_pipeline.base_relation + "_size"
-                )
+        # create the hash table
+        print(
+            "auto HT{id} = cuco::static_map{{ {est_size} * 2,cuco::empty_key{{(int64_t)-1}},cuco::empty_value{{(int64_t)-1}},thrust::equal_to<int64_t>{{}},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>()}};\n".format(
+                id=self.id, est_size=self.agg_pipeline.base_relation + "_size"
             )
-        for id in self.agg_pipeline.hash_tables:
-            print("auto d_HT{id}_F = HT{id}.ref(cuco::find);\n".format(id=id))
-            print("auto d_HT{id}_I = HT{id}.ref(cuco::insert);\n".format(id=id))
+        )
+        print("auto d_HT{id}_F = HT{id}.ref(cuco::find);\n".format(id=self.id))
+        print("auto d_HT{id}_I = HT{id}.ref(cuco::insert);\n".format(id=self.id))
         # 3
         # launch count pipeline
         print(

@@ -13,5 +13,5 @@ class Operator:
     def print(self):
         raise NotImplementedError("")
 
-    def print_control(self):
+    def print_control(self, allocated_attrs: set):
         raise NotImplementedError("")

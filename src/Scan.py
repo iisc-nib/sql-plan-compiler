@@ -11,6 +11,7 @@ class Scan(Operator):
     def produce(self, context: Context):
         global pipeline_id
         new_pipeline = Pipeline(next(pipeline_id), self.relation)
+        new_pipeline.joined_relations.add(self.relation)
         new_pipeline.kernel_code += "int64_t tid = blockDim.x * blockIdx.x + threadIdx.x;\nif (tid >= {}_size) return;\n".format(
             self.relation
         )
@@ -25,5 +26,5 @@ class Scan(Operator):
     def print(self):
         return
 
-    def print_control(self):
+    def print_control(self, allocated_attrs: set[str]):
         return
