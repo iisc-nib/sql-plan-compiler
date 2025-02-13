@@ -46,7 +46,8 @@ class Aggregation(Operator):
             "auto slot{id} = HT{id}_F.find(key{id});\n".format(id=self.id)
         )  # another reg alloc
         for key, val in self.agg_map.items():
-            load_attr_to_register(key, self.agg_pipeline)
+            if val.function != "count":
+                load_attr_to_register(key, self.agg_pipeline)
         for key, val in self.agg_map.items():
             if val.function == "any":
                 self.agg_pipeline.kernel_code += (
@@ -83,6 +84,11 @@ class Aggregation(Operator):
             schema[self.materialized_name][v.alias] = ty
 
         for k, val in self.agg_map.items():
+            if val.function == "count":
+                self.agg_pipeline.output_attributes.add(
+                    Attribute(typeof(val.alias), val.alias)
+                )
+                continue    
             if RLN(k) != "additional":
                 self.agg_pipeline.input_attributes.add(
                     Attribute(typeof(k), k)
@@ -191,3 +197,7 @@ class Aggregation(Operator):
                 args=prepare_params(self.agg_pipeline),
             )
         )
+        
+        # 7 
+        # store the size in variable for further use
+        print("size_t {table}_size = HT{id}_size;".format(table=self.materialized_name, id = self.id))
