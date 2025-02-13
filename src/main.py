@@ -1,25 +1,69 @@
-
 from Aggregation import Aggregation
+from Map import BinOp, Map, Var
 from Scan import Scan
 from HashJoin import HashJoin
 from Selection import Selection
 from helper import Aggregate, Context, typeof
+from Operator import print_plan
 
 def tpch_q1():
+    s1 = Map(
+        "sum_disc_price",
+        BinOp(
+            BinOp(None, None, Var("attr", "l_extendedprice"), ""),
+            BinOp(
+                BinOp(None, None, Var("const", "1"), ""),
+                BinOp(None, None, Var("attr", "l_discount"), ""),
+                None,
+                " - ",
+            ),
+            None,
+            " * ",
+        ),
+        Selection(Scan("lineitem"), "l_shipdate", "<= 10471"),
+        "double",
+    )
+    s2 = Map(
+        "sum_charge",
+        BinOp(
+            BinOp(
+                BinOp(None, None, Var("attr", "l_extendedprice"), ""),
+                BinOp(
+                    BinOp(None, None, Var("const", "1"), ""),
+                    BinOp(None, None, Var("attr", "l_discount"), ""),
+                    None,
+                    " - ",
+                ),
+                None,
+                " * ",
+            ),
+            BinOp(
+                BinOp(None, None, Var("const", "1"), ""),
+                BinOp(None, None, Var("attr", "l_tax"), ""),
+                None,
+                " + ",
+            ),
+            None,
+            " * ",
+        ),
+        s1,
+        "double",
+    )
     q = Aggregation(
         "agg",
-        Scan("lineitem"),
+        s2,
         ["l_returnflag", "l_linestatus"],
         {
             "l_returnflag": Aggregate("agg_l_returnflag", "any"),
             "l_linestatus": Aggregate("agg_l_linestatus", "any"),
             "l_quantity": Aggregate("sum_qty", "sum"),
             "l_discount": Aggregate("sum_discount", "sum"),
+            "l_extendedprice": Aggregate("sum_base_price", "sum"),
+            "sum_disc_price": Aggregate("sum_disc_price", "sum"),
+            "sum_charge": Aggregate("sum_charge", "sum"),
         },
     )
-    q.produce(Context())
-    q.print()
-    q.print_control()
+    print_plan(q)
 
 def tpch_q3():
     join = HashJoin(["c_custkey"], ["o_custkey"], 
@@ -35,12 +79,7 @@ def tpch_q3():
                           "o_shippriority": Aggregate("agg_o_shippriority", "any"),
                           "o_orderdate": Aggregate("agg_o_orderdate", "any"),
                       })
-    agg.produce(Context())
-    agg.print()
-    allocated_attrs = set()
-    agg.print_control(allocated_attrs)
-    for attr in allocated_attrs:
-        print(attr.ty, "*", attr.val, ",")
+    print_plan(agg)
 
 if __name__ == "__main__":
-    tpch_q3()    
+    tpch_q1()    

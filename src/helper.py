@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from io import StringIO
 from typing import Dict, List
 
 schema = {
@@ -100,6 +101,8 @@ class Attribute:
 
     def __hash__(self):
         return hash(self.ty + self.val)
+    def __lt__(self, value):
+        return self.val < value.val
 
 
 @dataclass
@@ -224,3 +227,6 @@ class Aggregate:
 
 pipeline_id = id_gen()
 operator_id = id_gen()
+
+
+

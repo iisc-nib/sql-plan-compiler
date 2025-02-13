@@ -83,9 +83,10 @@ class Aggregation(Operator):
             schema[self.materialized_name][v.alias] = ty
 
         for k, val in self.agg_map.items():
-            self.agg_pipeline.input_attributes.add(
-                Attribute(typeof(k), k)
-            )
+            if RLN(k) != "additional":
+                self.agg_pipeline.input_attributes.add(
+                    Attribute(typeof(k), k)
+                )
             self.agg_pipeline.output_attributes.add(
                 Attribute(typeof(val.alias), val.alias)
             )
