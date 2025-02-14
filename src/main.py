@@ -155,4 +155,4 @@ def tpch_q18():
     print_plan(p)
 
 if __name__ == "__main__":
-    tpch_q18()    
+    tpch_q1()    
