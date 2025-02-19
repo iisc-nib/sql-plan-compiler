@@ -88,4 +88,11 @@ endfunction(ConfigureExample)
 
 
 ConfigureExample(Q1_AUTO "${CMAKE_CURRENT_SOURCE_DIR}/tpch_auto_generated/q1.cu") 
+ConfigureExample(Q2_AUTO "${CMAKE_CURRENT_SOURCE_DIR}/tpch_auto_generated/q2.cu") 
+ConfigureExample(Q3_AUTO "${CMAKE_CURRENT_SOURCE_DIR}/tpch_auto_generated/q3.cu") 
+ConfigureExample(Q4_AUTO "${CMAKE_CURRENT_SOURCE_DIR}/tpch_auto_generated/q4.cu") 
+ConfigureExample(Q5_AUTO "${CMAKE_CURRENT_SOURCE_DIR}/tpch_auto_generated/q5.cu") 
+ConfigureExample(Q6_AUTO "${CMAKE_CURRENT_SOURCE_DIR}/tpch_auto_generated/q6.cu") 
+ConfigureExample(Q9_AUTO "${CMAKE_CURRENT_SOURCE_DIR}/tpch_auto_generated/q9.cu") 
+ConfigureExample(Q18_AUTO "${CMAKE_CURRENT_SOURCE_DIR}/tpch_auto_generated/q18.cu") 
 

@@ -7,28 +7,75 @@
 #include <parquet/arrow/reader.h>
 
 #include <iostream>
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 struct StringColumn {
   int* sizes;
-  int* offsets;
+  int64_t* offsets;
   char* data;
   StringColumn() {}
 };
 struct StringDictEncodedColumn {
-  std::unordered_map<std::string, int8_t> dict;
+  std::map<std::string, int8_t> dict;
   int8_t* column;
 };
 
+__device__ int32_t extract_year(int32_t date) {
+  int32_t year       = 1998;
+    if (date < 8035)
+      year = 1991;
+    else if (date < 8401)
+      year = 1992;
+    else if (date < 8766)
+      year = 1993;
+    else if (date < 9131)
+      year = 1994;
+    else if (date < 9496)
+      year = 1995;
+    else if (date < 9862)
+      year = 1996;
+    else if (date < 10227)
+      year = 1997;
+    return year;
+}
+
+__device__ bool like_operator(char* address, int size, const char* pattern, int p_size) {
+  bool filter    = false;
+  // brute force string matching
+  for (int i = 0; i < size - p_size + 1; i++) {
+    bool match = true;
+    for (int j = 0; j < p_size; j++) {
+      if (pattern[j] != *(address + i + j)) {
+        match = false;
+        break;
+      }
+    }
+    if (match) {
+      return true;
+    }
+  }
+  return false;
+}
 __device__ void aggregate_sum(int64_t* a, int64_t v) {
-  atomicAdd((unsigned long long int*)a, (unsigned long long int)v);
+  atomicAdd((int*)a, (int)v);
 }
 __device__ void aggregate_sum(int32_t* a, int32_t v) {
   atomicAdd((int*)a, (int)v);
 }
 __device__ void aggregate_sum(double* a, double v) {
   atomicAdd(a, v);
+}
+
+__device__ void aggregate_min(double* a, double v) {
+  unsigned long long int* address_as_ull = (unsigned long long int*) a;
+  unsigned long long int old = *address_as_ull, assumed;
+  do {
+      assumed = old;
+      old = atomicCAS(address_as_ull, assumed,
+          __double_as_longlong(fmin(v, __longlong_as_double(assumed))));
+  } while (assumed != old);
+  // return __longlong_as_double(old);
 }
 
 template <typename T>
@@ -103,10 +150,13 @@ StringDictEncodedColumn* read_string_dict_encoded_column(std::shared_ptr<arrow::
     for (int i = 0; i < string_arr->length(); i++) {
       auto str = string_arr->GetString(i);
       if (result->dict.find(str) == result->dict.end()) {
-        result->dict[str] = uid;
-        uid++;
+        result->dict[str] = 1;
       }
     }
+  }
+  int i = 0;
+  for (auto &p: result->dict) {
+    p.second = i++;
   }
   result->column = new int8_t[table->num_rows()];
   int j          = 0;
@@ -127,17 +177,17 @@ StringColumn* read_string_column(std::shared_ptr<arrow::Table>& table, const std
 
   // calculate the size of data
   result->sizes   = (int*)malloc(sizeof(int) * table->num_rows());
-  result->offsets = (int*)malloc(sizeof(int*) * table->num_rows());
-  int data_size   = 0;
-  int j           = 0;
+  result->offsets = (int64_t*)malloc(sizeof(int64_t*) * table->num_rows());
+  int64_t data_size   = 0;
+  int64_t j           = 0;
   if (table->num_rows() > 0) result->offsets[0] = 0;
   for (auto chunk : arrow_col->chunks()) {
     auto string_arr = std::static_pointer_cast<arrow::LargeStringArray>(chunk);
-    for (int i = 0; i < string_arr->length(); i++) {
+    for (int64_t i = 0; i < string_arr->length(); i++) {
       auto str = string_arr->GetString(i);
       data_size += str.size();
       result->sizes[j++] = str.size();
-      if (j > 0) { result->offsets[j] = result->offsets[j - 1] + result->sizes[j - 1]; }
+      if (j > 0) { result->offsets[j] = result->offsets[j - 1] + (int64_t)result->sizes[j - 1]; }
     }
   }
   result->data  = (char*)malloc(sizeof(char) * data_size);

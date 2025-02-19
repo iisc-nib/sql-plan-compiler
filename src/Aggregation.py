@@ -1,5 +1,5 @@
 from Operator import Operator
-from helper import RLN, Aggregate, Attribute, Context, Pipeline, get_pipeline_kernel_code, load_attr_to_register, operator_id, pipeline_id, prepare_keys, prepare_params, prepare_signature, prepare_template, schema, sizeof, typeof
+from helper import RLN, Aggregate, Attribute, Context, Pipeline, allocate_and_initialize, get_pipeline_kernel_code, load_attr_to_register, operator_id, pipeline_id, prepare_keys, prepare_params, prepare_signature, prepare_template, schema, sizeof, typeof
 
 
 import copy
@@ -41,6 +41,9 @@ class Aggregation(Operator):
         self.count_pipeline.kernel_code += (
             "HT{id}_I.insert(thread, cuco::pair{{key{id}, 1}});\n".format(id=self.id)
         )
+        # end the count pipeline
+        for i in range(self.count_pipeline.for_each_count):
+                self.count_pipeline.kernel_code += "});\n"
 
         self.agg_pipeline.kernel_code += (
             "auto slot{id} = HT{id}_F.find(key{id});\n".format(id=self.id)
@@ -72,6 +75,9 @@ class Aggregation(Operator):
                         val=load_attr_to_register(key, self.agg_pipeline),
                     )
                 )
+        # end the aggregation pipeline
+        for i in range(self.agg_pipeline.for_each_count):
+            self.agg_pipeline.kernel_code += "});\n"
 
         # add new attributes into the schema
         schema[self.materialized_name] = dict()
@@ -121,20 +127,7 @@ class Aggregation(Operator):
         """
         # 1
         # declare input and output buffers
-        for attr in self.agg_pipeline.input_attributes:
-            if attr not in allocated_attrs:
-                print("{ty}* d_{attr};\n".format(ty=attr.ty, attr=attr.val))
-                print(
-                    "cudaMalloc(&d_{attr}, sizeof({ty}) * {rln}_size);\n".format(
-                        attr=attr.val, ty=attr.ty, rln=RLN(attr.val)
-                    )
-                )
-                print(
-                    "cudaMemcpy(d_{attr}, {attr}, sizeof({ty}) * {rln}_size, cudaMemcpyHostToDevice);\n".format(
-                        attr=attr.val, ty=attr.ty, rln=RLN(attr.val)
-                    )
-                )
-                allocated_attrs.add(attr)
+        allocate_and_initialize(allocated_attrs, self.agg_pipeline)
         for attr in self.agg_pipeline.output_attributes:
             if attr not in allocated_attrs:
                 print("{ty}* d_{attr};\n".format(ty=attr.ty, attr=attr.val))

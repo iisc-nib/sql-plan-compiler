@@ -1,22 +1,14 @@
 from Operator import Operator
 from helper import (
     RLN,
-    Aggregate,
     Attribute,
-    Context,
     Pipeline,
     allocate_and_initialize,
     get_pipeline_kernel_code,
-    load_attr_to_register,
     operator_id,
     pipeline_id,
     prepare_keys,
     prepare_params,
-    prepare_signature,
-    prepare_template,
-    schema,
-    sizeof,
-    typeof,
 )
 
 
@@ -24,7 +16,7 @@ import copy
 from typing import Dict, List
 
 
-class HashJoin(Operator):
+class HashJoinMultimap(Operator):
     def __init__(
         self,
         left_keys: List[str],
@@ -65,10 +57,6 @@ class HashJoin(Operator):
             context.pipeline.other_vars.add(
                 Attribute("int64_t*", "B{}_idx".format(self.id))
             )
-            for key in self.left_keys:
-                context.pipeline.input_attributes.add(Attribute(ty=typeof(key), val=key))
-            for key in self.right_keys:
-                context.pipeline.input_attributes.add(Attribute(ty=typeof(key), val=key))        
             # fork the pipeline , one for count, the other for insert
             self.build_count_pipeline = copy.deepcopy(context.pipeline)
             self.build_count_pipeline.id = next(pipeline_id)
@@ -77,6 +65,8 @@ class HashJoin(Operator):
             self.build_count_pipeline.kernel_code += (
                 "atomicAdd((int*)B{}_idx, 1);\n".format(self.id)
             )
+            for i in range(self.build_count_pipeline.for_each_count):
+                self.build_count_pipeline.kernel_code += "});\n"
             # end the count pipeline
 
             self.build_pipeline.hash_tables.add(self.id)
@@ -102,6 +92,8 @@ class HashJoin(Operator):
                         id=self.id, rln=rln, rid=self.build_pipeline.rid_dict[rln]
                     )
                 )
+            for i in range(self.build_pipeline.for_each_count):
+                self.build_pipeline.kernel_code += "});\n"
 
             # 5 End the pipelie
         else:
@@ -117,14 +109,14 @@ class HashJoin(Operator):
 
             # 2
             context.pipeline.kernel_code += (
-                "auto slot{id} = HT{id}_F.find(key{id});\n".format(id=self.id)
+                "HT{id}_F.for_each(key{id}, [&] __device__ (auto const slot{id}) {{\nauto const [slot{id}_key, slot{id}_val] = slot{id};\n".format(id = self.id)
             )
-            context.pipeline.kernel_code += "if (slot{id} == HT{id}_F.end()) return;\n".format(id = self.id)
+            context.pipeline.for_each_count += 1
 
             # 3
             for rln in self.build_pipeline.joined_relations:
                 context.pipeline.joined_relations.add(rln)
-                context.pipeline.rid_dict[rln] = "B{id}_{rln}[slot{id}->second]".format(id = self.id, rln=rln)
+                context.pipeline.rid_dict[rln] = "B{id}_{rln}[slot{id}_val]".format(id = self.id, rln=rln)
                 context.pipeline.other_vars.add(
                     Attribute("int64_t*", "B{id}_{rln}".format(id=self.id, rln=rln))
                 )
@@ -171,11 +163,11 @@ class HashJoin(Operator):
         for rln in self.build_count_pipeline.joined_relations:
             print("cudaMalloc(&B{id}_{rln}, sizeof(int64_t) * h_B{id}_idx);".format(id=self.id, rln=rln))
         print(
-            "auto HT{id} = cuco::static_map{{ {est_size} * 2,cuco::empty_key{{(int64_t)-1}},cuco::empty_value{{(int64_t)-1}},thrust::equal_to<int64_t>{{}},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>()}};\n".format(
+            "auto HT{id} = cuco::experimental::static_multimap{{ {est_size} * 2, cuco::empty_key{{(int64_t)-1}}, cuco::empty_value{{(int64_t)-1}}, {{}}, cuco::linear_probing<1, cuco::default_hash_function<int64_t>>(), {{}}, cuco::storage<2>{{}} }};\n".format(
                 id=self.id, est_size="h_B{id}_idx".format(id=self.id)
             )
         )
-        print("auto d_HT{id}_F = HT{id}.ref(cuco::find);\n".format(id=self.id))
+        print("auto d_HT{id}_F = HT{id}.ref(cuco::for_each);\n".format(id=self.id))
         print("auto d_HT{id}_I = HT{id}.ref(cuco::insert);\n".format(id=self.id))
     
         #4 launch the build pipeline
@@ -188,5 +180,3 @@ class HashJoin(Operator):
         )       
         
         self.right_child.print_control(allocated_attrs)
-
-    

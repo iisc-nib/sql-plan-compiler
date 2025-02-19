@@ -49,6 +49,7 @@ class Print(Operator):
             # TODO: handle things for int8_t
             if (at.ty == "int8_t"):
                 print("std::cout << (int)p_{attr}[i] << \"\\t\";".format(attr = at.val))
-            print("std::cout << p_{attr}[i] << \"\\t\";".format(attr = at.val))
+            else:
+                print("std::cout << p_{attr}[i] << \"\\t\";".format(attr = at.val))
         print("std::cout << std::endl;")
         print("}")

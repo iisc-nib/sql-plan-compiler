@@ -18,19 +18,19 @@ schema = {
         "s_acctbal": "double",
         "s_comment": "StringColumn",
     },
-    "partsupplier": {
+    "partsupp": {
         "ps_suppkey": "int32_t",
         "ps_partkey": "int32_t",
-        "ps_avialqty": "double",
-        "ps_supplycost": "int32_t",
+        "ps_availqty": "int64_t",
+        "ps_supplycost": "double",
         "ps_comment": "StringColumn",
     },
     "part": {
         "p_partkey": "int32_t",
         "p_name": "StringColumn",
-        "p_mfgr": "StringColumn",
+        "p_mfgr": "int8_t",
         "p_brand": "StringColumn",
-        "p_type": "int8_t",
+        "p_type": "StringColumn",
         "p_size": "int32_t",
         "p_container": "int8_t",
         "p_retailprice": "double",
@@ -60,7 +60,7 @@ schema = {
         "o_custkey": "int32_t",
         "o_totalprice": "double",
         "o_orderdate": "int32_t",
-        "o_orderpriority": "int32_t",
+        "o_orderpriority": "int8_t",
         "o_clerk": "StringColumn",
         "o_shippriority": "int32_t",
         "o_comment": "StringColumn",
@@ -77,12 +77,12 @@ schema = {
     },
     "region": {
         "r_regionkey": "int32_t",
-        "r_name": "StringColumn",
+        "r_name": "int8_t",
         "r_comment": "StringColumn",
     },
 }
 
-        
+
 def RLN(attr: str):
     global schema
     for k, v in schema.items():
@@ -101,6 +101,7 @@ class Attribute:
 
     def __hash__(self):
         return hash(self.ty + self.val)
+
     def __lt__(self, value):
         return self.val < value.val
 
@@ -118,22 +119,80 @@ class Pipeline:
     control_code: str = ""
     rid_dict: Dict[str, str] = field(default_factory=dict)
     register_attrs: Dict[str, str] = field(default_factory=dict)
+    for_each_count: int = 0
+
 
 def get_pipeline_kernel_code(pipeline: Pipeline):
-    res = (prepare_template(pipeline))
-    res += (
-        "\n__global__ void pipeline_{pid} ({sig}) {{\n{code}}}\n".format(
-            pid=pipeline.id,
-            sig=prepare_signature(pipeline),
-            code=pipeline.kernel_code,
-        )
+    res = prepare_template(pipeline)
+    res += "\n__global__ void pipeline_{pid} ({sig}) {{\n{code}}}\n".format(
+        pid=pipeline.id,
+        sig=prepare_signature(pipeline),
+        code=pipeline.kernel_code,
     )
     return res
+
+
+def allocate_and_initialize(allocated_attrs, pipeline: Pipeline):
+    for attr in pipeline.input_attributes:
+        if attr not in allocated_attrs:
+            if attr.ty == "StringColumn":
+                print("char* d_{attr};\n".format(attr=attr.val))
+                print("int64_t* d_{attr}_offsets;\n".format(attr=attr.val))
+                print("int* d_{attr}_sizes;\n".format(attr=attr.val))
+                print(
+                    "cudaMalloc(&d_{attr}, sizeof(char) * ({attr}->offsets[{rln}_size - 1] + {attr}->sizes[{rln}_size - 1]));\n".format(
+                        attr=attr.val, rln=RLN(attr.val)
+                    )
+                )
+                print(
+                    "cudaMemcpy(d_{attr}, {attr}->data, sizeof(char) * ({attr}->offsets[{rln}_size - 1] + {attr}->sizes[{rln}_size - 1]), cudaMemcpyHostToDevice);\n".format(
+                        attr=attr.val, rln=RLN(attr.val)
+                    )
+                )
+                print(
+                    "cudaMalloc(&d_{attr}_offsets, sizeof(int64_t) * {rln}_size);\n".format(
+                        attr=attr.val, rln=RLN(attr.val)
+                    )
+                )
+                print(
+                    "cudaMemcpy(d_{attr}_offsets, {attr}->offsets, sizeof(int64_t) * {rln}_size, cudaMemcpyHostToDevice);\n".format(
+                        attr=attr.val, rln=RLN(attr.val)
+                    )
+                )
+                print(
+                    "cudaMalloc(&d_{attr}_sizes, sizeof(int) * {rln}_size);\n".format(
+                        attr=attr.val, rln=RLN(attr.val)
+                    )
+                )
+                print(
+                    "cudaMemcpy(d_{attr}_sizes, {attr}->sizes, sizeof(int) * {rln}_size, cudaMemcpyHostToDevice);\n".format(
+                        attr=attr.val, rln=RLN(attr.val)
+                    )
+                )
+            else:
+                print("{ty}* d_{attr};\n".format(ty=attr.ty, attr=attr.val))
+                print(
+                    "cudaMalloc(&d_{attr}, sizeof({ty}) * {rln}_size);\n".format(
+                        attr=attr.val, ty=attr.ty, rln=RLN(attr.val)
+                    )
+                )
+                print(
+                    "cudaMemcpy(d_{attr}, {attr}, sizeof({ty}) * {rln}_size, cudaMemcpyHostToDevice);\n".format(
+                        attr=attr.val, ty=attr.ty, rln=RLN(attr.val)
+                    )
+                )
+            allocated_attrs.add(attr)
+
 
 def prepare_signature(pipeline: Pipeline):
     res = []
     for attr in pipeline.input_attributes:
-        res.append("{ty}* {attr}".format(ty=attr.ty, attr=attr.val))
+        if attr.ty == "StringColumn":
+            res.append("char* {attr}".format(attr=attr.val))
+            res.append("int64_t* {attr}_offsets".format(attr=attr.val))
+            res.append("int* {attr}_sizes".format(attr=attr.val))
+        else:
+            res.append("{ty}* {attr}".format(ty=attr.ty, attr=attr.val))
     for attr in pipeline.output_attributes:
         res.append("{ty}* {attr}".format(ty=attr.ty, attr=attr.val))
     for id in pipeline.hash_tables:
@@ -147,7 +206,12 @@ def prepare_signature(pipeline: Pipeline):
 def prepare_params(pipeline: Pipeline):
     res = []
     for attr in pipeline.input_attributes:
-        res.append("d_{attr}".format(attr=attr.val))
+        if attr.ty == "StringColumn":
+            res.append("d_{attr}".format(attr=attr.val))
+            res.append("d_{attr}_offsets".format(attr=attr.val))
+            res.append("d_{attr}_sizes".format(attr=attr.val))
+        else:
+            res.append("d_{attr}".format(attr=attr.val))
     for attr in pipeline.output_attributes:
         res.append("d_{attr}".format(attr=attr.val))
     for id in pipeline.hash_tables:
@@ -161,7 +225,7 @@ def prepare_params(pipeline: Pipeline):
 
 def prepare_template(pipeline: Pipeline):
     res = []
-    if len(pipeline.hash_tables) == 0: 
+    if len(pipeline.hash_tables) == 0:
         return ""
     for id in pipeline.hash_tables:
         res.append("typename TY_HT{}_I".format(id))
@@ -195,14 +259,21 @@ def load_attr_to_register(attr: str, pipeline: Pipeline):
 
 
 def prepare_keys(operator_id: int, keys: List[str], pipeline: Pipeline):
-        total_bytes = 0
-        for key in keys:
-            pipeline.input_attributes.add(Attribute(typeof(key), key))
-            load_attr_to_register(key, pipeline)
-        pipeline.kernel_code += "int64_t key{} = 0;\n".format(
-            operator_id
-        )  # register allocated key variable
-        for key in keys:
+    total_bytes = 0
+    for key in keys:
+        pipeline.input_attributes.add(Attribute(typeof(key), key))
+        load_attr_to_register(key, pipeline)
+    pipeline.kernel_code += "int64_t key{} = 0;\n".format(
+        operator_id
+    )  # register allocated key variable
+    for key in keys:
+        if typeof(key) == "double":
+            pipeline.kernel_code += "key{id} |= (((int64_t)__double_as_longlong({attr})) << {shift});\n".format(
+                id=operator_id,
+                attr=load_attr_to_register(key, pipeline),
+                shift=8 * total_bytes,
+            )
+        else:
             pipeline.kernel_code += (
                 "key{id} |= (((int64_t){attr}) << {shift});\n".format(
                     id=operator_id,
@@ -210,7 +281,7 @@ def prepare_keys(operator_id: int, keys: List[str], pipeline: Pipeline):
                     shift=8 * total_bytes,
                 )
             )
-            total_bytes += sizeof(typeof(key))
+        total_bytes += sizeof(typeof(key))
 
 
 @dataclass
@@ -227,6 +298,3 @@ class Aggregate:
 
 pipeline_id = id_gen()
 operator_id = id_gen()
-
-
-
