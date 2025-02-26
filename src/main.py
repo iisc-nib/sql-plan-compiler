@@ -243,6 +243,7 @@ def tpch_q18():  # done without sort
     print_plan(p)
 
 
+# major issue: from the dependency
 def tpch_q2():  # problem with int32 and double being key for the hash tablek
 
     j2 = HashJoin(

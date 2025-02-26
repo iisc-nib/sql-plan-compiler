@@ -7,7 +7,7 @@
 #include <thrust/host_vector.h>
 namespace cg = cooperative_groups;
 
-__global__ void pipeline_1(int32_t *s_nationkey, int32_t *l_suppkey, int32_t *c_nationkey, int32_t *s_suppkey, int64_t *B4_idx, size_t supplier_size)
+__global__ void pipeline_1(int32_t *s_nationkey, int32_t *c_nationkey, int32_t *l_suppkey, int32_t *s_suppkey, size_t supplier_size, int64_t *B4_idx)
 {
     int64_t tid = blockDim.x * blockIdx.x + threadIdx.x;
     if (tid >= supplier_size)
@@ -21,7 +21,7 @@ __global__ void pipeline_1(int32_t *s_nationkey, int32_t *l_suppkey, int32_t *c_
 }
 
 template <typename TY_HT4_I, typename TY_HT4_F>
-__global__ void pipeline_0(int32_t *s_nationkey, int32_t *l_suppkey, int32_t *c_nationkey, int32_t *s_suppkey, TY_HT4_I HT4_I, TY_HT4_F HT4_F, int64_t *B4_idx, size_t supplier_size, int64_t *B4_supplier)
+__global__ void pipeline_0(int32_t *s_nationkey, int32_t *c_nationkey, int32_t *l_suppkey, int32_t *s_suppkey, TY_HT4_I HT4_I, TY_HT4_F HT4_F, int64_t *B4_idx, int64_t *B4_supplier, size_t supplier_size)
 {
     int64_t tid = blockDim.x * blockIdx.x + threadIdx.x;
     if (tid >= supplier_size)
@@ -37,7 +37,7 @@ __global__ void pipeline_0(int32_t *s_nationkey, int32_t *l_suppkey, int32_t *c_
     B4_supplier[reg_B4_idx] = tid;
 }
 
-__global__ void pipeline_3(int8_t *r_name, int32_t *r_regionkey, int32_t *n_regionkey, size_t region_size, int64_t *B0_idx)
+__global__ void pipeline_3(int32_t *r_regionkey, int32_t *n_regionkey, int8_t *r_name, size_t region_size, int64_t *B0_idx)
 {
     int64_t tid = blockDim.x * blockIdx.x + threadIdx.x;
     if (tid >= region_size)
@@ -52,7 +52,7 @@ __global__ void pipeline_3(int8_t *r_name, int32_t *r_regionkey, int32_t *n_regi
 }
 
 template <typename TY_HT0_I, typename TY_HT0_F>
-__global__ void pipeline_2(int8_t *r_name, int32_t *r_regionkey, int32_t *n_regionkey, TY_HT0_I HT0_I, TY_HT0_F HT0_F, size_t region_size, int64_t *B0_idx, int64_t *B0_region)
+__global__ void pipeline_2(int32_t *n_regionkey, int32_t *r_regionkey, int8_t *r_name, TY_HT0_I HT0_I, TY_HT0_F HT0_F, size_t region_size, int64_t *B0_idx, int64_t *B0_region)
 {
     int64_t tid = blockDim.x * blockIdx.x + threadIdx.x;
     if (tid >= region_size)
@@ -70,7 +70,7 @@ __global__ void pipeline_2(int8_t *r_name, int32_t *r_regionkey, int32_t *n_regi
 }
 
 template <typename TY_HT0_I, typename TY_HT0_F>
-__global__ void pipeline_5(int32_t *n_nationkey, int32_t *c_nationkey, int32_t *n_regionkey, TY_HT0_I HT0_I, TY_HT0_F HT0_F, size_t nation_size, int64_t *B0_region, int64_t *B1_idx)
+__global__ void pipeline_5(int32_t *c_nationkey, int32_t *n_regionkey, int32_t *n_nationkey, TY_HT0_I HT0_I, TY_HT0_F HT0_F, size_t nation_size, int64_t *B0_region, int64_t *B1_idx)
 {
     int64_t tid = blockDim.x * blockIdx.x + threadIdx.x;
     if (tid >= nation_size)
@@ -88,7 +88,7 @@ __global__ void pipeline_5(int32_t *n_nationkey, int32_t *c_nationkey, int32_t *
 }
 
 template <typename TY_HT0_I, typename TY_HT0_F, typename TY_HT1_I, typename TY_HT1_F>
-__global__ void pipeline_4(int32_t *n_nationkey, int32_t *c_nationkey, int32_t *n_regionkey, TY_HT0_I HT0_I, TY_HT0_F HT0_F, TY_HT1_I HT1_I, TY_HT1_F HT1_F, int64_t *B1_region, int64_t *B0_region, int64_t *B1_nation, size_t nation_size, int64_t *B1_idx)
+__global__ void pipeline_4(int32_t *c_nationkey, int32_t *n_regionkey, int32_t *n_nationkey, TY_HT0_I HT0_I, TY_HT0_F HT0_F, TY_HT1_I HT1_I, TY_HT1_F HT1_F, int64_t *B1_nation, int64_t *B0_region, size_t nation_size, int64_t *B1_region, int64_t *B1_idx)
 {
     int64_t tid = blockDim.x * blockIdx.x + threadIdx.x;
     if (tid >= nation_size)
@@ -110,7 +110,7 @@ __global__ void pipeline_4(int32_t *n_nationkey, int32_t *c_nationkey, int32_t *
 }
 
 template <typename TY_HT1_I, typename TY_HT1_F>
-__global__ void pipeline_7(int32_t *o_custkey, int32_t *c_custkey, int32_t *c_nationkey, TY_HT1_I HT1_I, TY_HT1_F HT1_F, size_t customer_size, int64_t *B2_idx, int64_t *B1_region, int64_t *B1_nation)
+__global__ void pipeline_7(int32_t *c_custkey, int32_t *o_custkey, int32_t *c_nationkey, TY_HT1_I HT1_I, TY_HT1_F HT1_F, int64_t *B1_nation, int64_t *B1_region, int64_t *B2_idx, size_t customer_size)
 {
     int64_t tid = blockDim.x * blockIdx.x + threadIdx.x;
     if (tid >= customer_size)
@@ -128,7 +128,7 @@ __global__ void pipeline_7(int32_t *o_custkey, int32_t *c_custkey, int32_t *c_na
 }
 
 template <typename TY_HT1_I, typename TY_HT1_F, typename TY_HT2_I, typename TY_HT2_F>
-__global__ void pipeline_6(int32_t *o_custkey, int32_t *c_custkey, int32_t *c_nationkey, TY_HT1_I HT1_I, TY_HT1_F HT1_F, TY_HT2_I HT2_I, TY_HT2_F HT2_F, int64_t *B2_nation, int64_t *B2_customer, int64_t *B1_region, int64_t *B2_region, int64_t *B2_idx, size_t customer_size, int64_t *B1_nation)
+__global__ void pipeline_6(int32_t *o_custkey, int32_t *c_nationkey, int32_t *c_custkey, TY_HT1_I HT1_I, TY_HT1_F HT1_F, TY_HT2_I HT2_I, TY_HT2_F HT2_F, int64_t *B1_nation, int64_t *B2_customer, int64_t *B2_idx, int64_t *B1_region, size_t customer_size, int64_t *B2_region, int64_t *B2_nation)
 {
     int64_t tid = blockDim.x * blockIdx.x + threadIdx.x;
     if (tid >= customer_size)
@@ -145,13 +145,13 @@ __global__ void pipeline_6(int32_t *o_custkey, int32_t *c_custkey, int32_t *c_na
     auto reg_B2_idx = atomicAdd((int *)B2_idx, 1);
     auto thread = cg::tiled_partition<1>(cg::this_thread_block());
     HT2_I.insert(thread, cuco::pair{key2, reg_B2_idx});
-    B2_customer[reg_B2_idx] = tid;
     B2_region[reg_B2_idx] = B1_region[slot1->second];
     B2_nation[reg_B2_idx] = B1_nation[slot1->second];
+    B2_customer[reg_B2_idx] = tid;
 }
 
 template <typename TY_HT2_I, typename TY_HT2_F>
-__global__ void pipeline_9(int32_t *o_custkey, int32_t *o_orderdate, int32_t *o_orderkey, int32_t *l_orderkey, TY_HT2_I HT2_I, TY_HT2_F HT2_F, int64_t *B2_nation, int64_t *B3_idx, int64_t *B2_customer, int64_t *B2_region, size_t orders_size)
+__global__ void pipeline_9(int32_t *o_custkey, int32_t *o_orderkey, int32_t *o_orderdate, int32_t *l_orderkey, TY_HT2_I HT2_I, TY_HT2_F HT2_F, int64_t *B2_customer, int64_t *B3_idx, size_t orders_size, int64_t *B2_region, int64_t *B2_nation)
 {
     int64_t tid = blockDim.x * blockIdx.x + threadIdx.x;
     if (tid >= orders_size)
@@ -174,7 +174,7 @@ __global__ void pipeline_9(int32_t *o_custkey, int32_t *o_orderdate, int32_t *o_
 }
 
 template <typename TY_HT2_I, typename TY_HT2_F, typename TY_HT3_I, typename TY_HT3_F>
-__global__ void pipeline_8(int32_t *o_custkey, int32_t *l_orderkey, int32_t *o_orderkey, int32_t *o_orderdate, TY_HT2_I HT2_I, TY_HT2_F HT2_F, TY_HT3_I HT3_I, TY_HT3_F HT3_F, int64_t *B3_orders, int64_t *B2_nation, int64_t *B3_region, int64_t *B3_idx, int64_t *B3_nation, int64_t *B2_customer, int64_t *B2_region, size_t orders_size, int64_t *B3_customer)
+__global__ void pipeline_8(int32_t *o_custkey, int32_t *o_orderkey, int32_t *o_orderdate, int32_t *l_orderkey, TY_HT2_I HT2_I, TY_HT2_F HT2_F, TY_HT3_I HT3_I, TY_HT3_F HT3_F, int64_t *B2_customer, int64_t *B3_idx, int64_t *B3_orders, size_t orders_size, int64_t *B2_region, int64_t *B3_customer, int64_t *B3_region, int64_t *B3_nation, int64_t *B2_nation)
 {
     int64_t tid = blockDim.x * blockIdx.x + threadIdx.x;
     if (tid >= orders_size)
@@ -196,14 +196,14 @@ __global__ void pipeline_8(int32_t *o_custkey, int32_t *l_orderkey, int32_t *o_o
     auto reg_B3_idx = atomicAdd((int *)B3_idx, 1);
     auto thread = cg::tiled_partition<1>(cg::this_thread_block());
     HT3_I.insert(thread, cuco::pair{key3, reg_B3_idx});
-    B3_customer[reg_B3_idx] = B2_customer[slot2->second];
+    B3_region[reg_B3_idx] = B2_region[slot2->second];
     B3_nation[reg_B3_idx] = B2_nation[slot2->second];
     B3_orders[reg_B3_idx] = tid;
-    B3_region[reg_B3_idx] = B2_region[slot2->second];
+    B3_customer[reg_B3_idx] = B2_customer[slot2->second];
 }
 
 template <typename TY_HT3_I, typename TY_HT3_F, typename TY_HT4_I, typename TY_HT4_F, typename TY_HT5_I, typename TY_HT5_F>
-__global__ void pipeline_10(int32_t *l_suppkey, int8_t *n_name, double *l_extendedprice, int32_t *c_nationkey, int32_t *l_orderkey, double *l_discount, TY_HT3_I HT3_I, TY_HT3_F HT3_F, TY_HT4_I HT4_I, TY_HT4_F HT4_F, TY_HT5_I HT5_I, TY_HT5_F HT5_F, int64_t *B3_orders, int64_t *B3_region, int64_t *B3_nation, size_t lineitem_size, int64_t *B4_supplier, int64_t *B3_customer)
+__global__ void pipeline_10(int8_t *n_name, double *l_extendedprice, double *l_discount, int32_t *l_suppkey, int32_t *c_nationkey, int32_t *l_orderkey, TY_HT3_I HT3_I, TY_HT3_F HT3_F, TY_HT4_I HT4_I, TY_HT4_F HT4_F, TY_HT5_I HT5_I, TY_HT5_F HT5_F, int64_t *B4_supplier, int64_t *B3_orders, size_t lineitem_size, int64_t *B3_customer, int64_t *B3_region, int64_t *B3_nation)
 {
     int64_t tid = blockDim.x * blockIdx.x + threadIdx.x;
     if (tid >= lineitem_size)
@@ -233,7 +233,7 @@ __global__ void pipeline_10(int32_t *l_suppkey, int8_t *n_name, double *l_extend
 }
 
 template <typename TY_HT3_I, typename TY_HT3_F, typename TY_HT4_I, typename TY_HT4_F, typename TY_HT5_I, typename TY_HT5_F>
-__global__ void pipeline_11(int32_t *l_suppkey, int8_t *n_name, double *l_extendedprice, int32_t *c_nationkey, int32_t *l_orderkey, double *l_discount, double *agg_revenue, int8_t *agg_n_name, TY_HT3_I HT3_I, TY_HT3_F HT3_F, TY_HT4_I HT4_I, TY_HT4_F HT4_F, TY_HT5_I HT5_I, TY_HT5_F HT5_F, int64_t *B3_region, int64_t *B3_orders, int64_t *B3_nation, size_t lineitem_size, int64_t *B4_supplier, int64_t *B3_customer)
+__global__ void pipeline_11(int8_t *n_name, double *l_extendedprice, double *l_discount, int32_t *l_suppkey, int32_t *c_nationkey, int32_t *l_orderkey, double *agg_revenue, int8_t *agg_n_name, TY_HT3_I HT3_I, TY_HT3_F HT3_F, TY_HT4_I HT4_I, TY_HT4_F HT4_F, TY_HT5_I HT5_I, TY_HT5_F HT5_F, int64_t *B3_nation, int64_t *B3_orders, size_t lineitem_size, int64_t *B3_customer, int64_t *B3_region, int64_t *B4_supplier)
 {
     int64_t tid = blockDim.x * blockIdx.x + threadIdx.x;
     if (tid >= lineitem_size)
@@ -293,17 +293,17 @@ void control(
 
     cudaMemcpy(d_s_nationkey, s_nationkey, sizeof(int32_t) * supplier_size, cudaMemcpyHostToDevice);
 
-    int32_t *d_l_suppkey;
-
-    cudaMalloc(&d_l_suppkey, sizeof(int32_t) * lineitem_size);
-
-    cudaMemcpy(d_l_suppkey, l_suppkey, sizeof(int32_t) * lineitem_size, cudaMemcpyHostToDevice);
-
     int32_t *d_c_nationkey;
 
     cudaMalloc(&d_c_nationkey, sizeof(int32_t) * customer_size);
 
     cudaMemcpy(d_c_nationkey, c_nationkey, sizeof(int32_t) * customer_size, cudaMemcpyHostToDevice);
+
+    int32_t *d_l_suppkey;
+
+    cudaMalloc(&d_l_suppkey, sizeof(int32_t) * lineitem_size);
+
+    cudaMemcpy(d_l_suppkey, l_suppkey, sizeof(int32_t) * lineitem_size, cudaMemcpyHostToDevice);
 
     int32_t *d_s_suppkey;
 
@@ -315,7 +315,7 @@ void control(
     int64_t *B4_idx;
     cudaMalloc(&B4_idx, sizeof(int64_t));
     cudaMemset(B4_idx, 0, sizeof(int64_t));
-    pipeline_1<<<std::ceil((float)supplier_size / (float)32), 32>>>(d_s_nationkey, d_l_suppkey, d_c_nationkey, d_s_suppkey, B4_idx, supplier_size);
+    pipeline_1<<<std::ceil((float)supplier_size / (float)32), 32>>>(d_s_nationkey, d_c_nationkey, d_l_suppkey, d_s_suppkey, supplier_size, B4_idx);
 
     int64_t h_B4_idx;
     cudaMemcpy(&h_B4_idx, B4_idx, sizeof(int64_t), cudaMemcpyDeviceToHost);
@@ -327,19 +327,7 @@ void control(
 
     auto d_HT4_I = HT4.ref(cuco::insert);
 
-    pipeline_0<<<std::ceil((float)supplier_size / (float)32), 32>>>(d_s_nationkey, d_l_suppkey, d_c_nationkey, d_s_suppkey, d_HT4_I, d_HT4_F, B4_idx, supplier_size, B4_supplier);
-
-    int8_t *d_r_name;
-
-    cudaMalloc(&d_r_name, sizeof(int8_t) * region_size);
-
-    cudaMemcpy(d_r_name, r_name, sizeof(int8_t) * region_size, cudaMemcpyHostToDevice);
-
-    int32_t *d_r_regionkey;
-
-    cudaMalloc(&d_r_regionkey, sizeof(int32_t) * region_size);
-
-    cudaMemcpy(d_r_regionkey, r_regionkey, sizeof(int32_t) * region_size, cudaMemcpyHostToDevice);
+    pipeline_0<<<std::ceil((float)supplier_size / (float)32), 32>>>(d_s_nationkey, d_c_nationkey, d_l_suppkey, d_s_suppkey, d_HT4_I, d_HT4_F, B4_idx, B4_supplier, supplier_size);
 
     int32_t *d_n_regionkey;
 
@@ -347,11 +335,23 @@ void control(
 
     cudaMemcpy(d_n_regionkey, n_regionkey, sizeof(int32_t) * nation_size, cudaMemcpyHostToDevice);
 
+    int32_t *d_r_regionkey;
+
+    cudaMalloc(&d_r_regionkey, sizeof(int32_t) * region_size);
+
+    cudaMemcpy(d_r_regionkey, r_regionkey, sizeof(int32_t) * region_size, cudaMemcpyHostToDevice);
+
+    int8_t *d_r_name;
+
+    cudaMalloc(&d_r_name, sizeof(int8_t) * region_size);
+
+    cudaMemcpy(d_r_name, r_name, sizeof(int8_t) * region_size, cudaMemcpyHostToDevice);
+
     int64_t *B0_region;
     int64_t *B0_idx;
     cudaMalloc(&B0_idx, sizeof(int64_t));
     cudaMemset(B0_idx, 0, sizeof(int64_t));
-    pipeline_3<<<std::ceil((float)region_size / (float)32), 32>>>(d_r_name, d_r_regionkey, d_n_regionkey, region_size, B0_idx);
+    pipeline_3<<<std::ceil((float)region_size / (float)32), 32>>>(d_r_regionkey, d_n_regionkey, d_r_name, region_size, B0_idx);
 
     int64_t h_B0_idx;
     cudaMemcpy(&h_B0_idx, B0_idx, sizeof(int64_t), cudaMemcpyDeviceToHost);
@@ -363,7 +363,7 @@ void control(
 
     auto d_HT0_I = HT0.ref(cuco::insert);
 
-    pipeline_2<<<std::ceil((float)region_size / (float)32), 32>>>(d_r_name, d_r_regionkey, d_n_regionkey, d_HT0_I, d_HT0_F, region_size, B0_idx, B0_region);
+    pipeline_2<<<std::ceil((float)region_size / (float)32), 32>>>(d_n_regionkey, d_r_regionkey, d_r_name, d_HT0_I, d_HT0_F, region_size, B0_idx, B0_region);
 
     int32_t *d_n_nationkey;
 
@@ -376,7 +376,7 @@ void control(
     int64_t *B1_idx;
     cudaMalloc(&B1_idx, sizeof(int64_t));
     cudaMemset(B1_idx, 0, sizeof(int64_t));
-    pipeline_5<<<std::ceil((float)nation_size / (float)32), 32>>>(d_n_nationkey, d_c_nationkey, d_n_regionkey, d_HT0_I, d_HT0_F, nation_size, B0_region, B1_idx);
+    pipeline_5<<<std::ceil((float)nation_size / (float)32), 32>>>(d_c_nationkey, d_n_regionkey, d_n_nationkey, d_HT0_I, d_HT0_F, nation_size, B0_region, B1_idx);
 
     int64_t h_B1_idx;
     cudaMemcpy(&h_B1_idx, B1_idx, sizeof(int64_t), cudaMemcpyDeviceToHost);
@@ -389,7 +389,7 @@ void control(
 
     auto d_HT1_I = HT1.ref(cuco::insert);
 
-    pipeline_4<<<std::ceil((float)nation_size / (float)32), 32>>>(d_n_nationkey, d_c_nationkey, d_n_regionkey, d_HT0_I, d_HT0_F, d_HT1_I, d_HT1_F, B1_region, B0_region, B1_nation, nation_size, B1_idx);
+    pipeline_4<<<std::ceil((float)nation_size / (float)32), 32>>>(d_c_nationkey, d_n_regionkey, d_n_nationkey, d_HT0_I, d_HT0_F, d_HT1_I, d_HT1_F, B1_nation, B0_region, nation_size, B1_region, B1_idx);
 
     int32_t *d_o_custkey;
 
@@ -403,33 +403,27 @@ void control(
 
     cudaMemcpy(d_c_custkey, c_custkey, sizeof(int32_t) * customer_size, cudaMemcpyHostToDevice);
 
-    int64_t *B2_customer;
     int64_t *B2_region;
     int64_t *B2_nation;
+    int64_t *B2_customer;
     int64_t *B2_idx;
     cudaMalloc(&B2_idx, sizeof(int64_t));
     cudaMemset(B2_idx, 0, sizeof(int64_t));
-    pipeline_7<<<std::ceil((float)customer_size / (float)32), 32>>>(d_o_custkey, d_c_custkey, d_c_nationkey, d_HT1_I, d_HT1_F, customer_size, B2_idx, B1_region, B1_nation);
+    pipeline_7<<<std::ceil((float)customer_size / (float)32), 32>>>(d_c_custkey, d_o_custkey, d_c_nationkey, d_HT1_I, d_HT1_F, B1_nation, B1_region, B2_idx, customer_size);
 
     int64_t h_B2_idx;
     cudaMemcpy(&h_B2_idx, B2_idx, sizeof(int64_t), cudaMemcpyDeviceToHost);
     cudaMemset(B2_idx, 0, sizeof(int64_t));
-    cudaMalloc(&B2_customer, sizeof(int64_t) * h_B2_idx);
     cudaMalloc(&B2_region, sizeof(int64_t) * h_B2_idx);
     cudaMalloc(&B2_nation, sizeof(int64_t) * h_B2_idx);
+    cudaMalloc(&B2_customer, sizeof(int64_t) * h_B2_idx);
     auto HT2 = cuco::static_map{h_B2_idx * 2, cuco::empty_key{(int64_t)-1}, cuco::empty_value{(int64_t)-1}, thrust::equal_to<int64_t>{}, cuco::linear_probing<1, cuco::default_hash_function<int64_t>>()};
 
     auto d_HT2_F = HT2.ref(cuco::find);
 
     auto d_HT2_I = HT2.ref(cuco::insert);
 
-    pipeline_6<<<std::ceil((float)customer_size / (float)32), 32>>>(d_o_custkey, d_c_custkey, d_c_nationkey, d_HT1_I, d_HT1_F, d_HT2_I, d_HT2_F, B2_nation, B2_customer, B1_region, B2_region, B2_idx, customer_size, B1_nation);
-
-    int32_t *d_l_orderkey;
-
-    cudaMalloc(&d_l_orderkey, sizeof(int32_t) * lineitem_size);
-
-    cudaMemcpy(d_l_orderkey, l_orderkey, sizeof(int32_t) * lineitem_size, cudaMemcpyHostToDevice);
+    pipeline_6<<<std::ceil((float)customer_size / (float)32), 32>>>(d_o_custkey, d_c_nationkey, d_c_custkey, d_HT1_I, d_HT1_F, d_HT2_I, d_HT2_F, B1_nation, B2_customer, B2_idx, B1_region, customer_size, B2_region, B2_nation);
 
     int32_t *d_o_orderkey;
 
@@ -443,29 +437,35 @@ void control(
 
     cudaMemcpy(d_o_orderdate, o_orderdate, sizeof(int32_t) * orders_size, cudaMemcpyHostToDevice);
 
-    int64_t *B3_customer;
+    int32_t *d_l_orderkey;
+
+    cudaMalloc(&d_l_orderkey, sizeof(int32_t) * lineitem_size);
+
+    cudaMemcpy(d_l_orderkey, l_orderkey, sizeof(int32_t) * lineitem_size, cudaMemcpyHostToDevice);
+
+    int64_t *B3_region;
     int64_t *B3_nation;
     int64_t *B3_orders;
-    int64_t *B3_region;
+    int64_t *B3_customer;
     int64_t *B3_idx;
     cudaMalloc(&B3_idx, sizeof(int64_t));
     cudaMemset(B3_idx, 0, sizeof(int64_t));
-    pipeline_9<<<std::ceil((float)orders_size / (float)32), 32>>>(d_o_custkey, d_o_orderdate, d_o_orderkey, d_l_orderkey, d_HT2_I, d_HT2_F, B2_nation, B3_idx, B2_customer, B2_region, orders_size);
+    pipeline_9<<<std::ceil((float)orders_size / (float)32), 32>>>(d_o_custkey, d_o_orderkey, d_o_orderdate, d_l_orderkey, d_HT2_I, d_HT2_F, B2_customer, B3_idx, orders_size, B2_region, B2_nation);
 
     int64_t h_B3_idx;
     cudaMemcpy(&h_B3_idx, B3_idx, sizeof(int64_t), cudaMemcpyDeviceToHost);
     cudaMemset(B3_idx, 0, sizeof(int64_t));
-    cudaMalloc(&B3_customer, sizeof(int64_t) * h_B3_idx);
-    cudaMalloc(&B3_orders, sizeof(int64_t) * h_B3_idx);
-    cudaMalloc(&B3_nation, sizeof(int64_t) * h_B3_idx);
     cudaMalloc(&B3_region, sizeof(int64_t) * h_B3_idx);
+    cudaMalloc(&B3_nation, sizeof(int64_t) * h_B3_idx);
+    cudaMalloc(&B3_orders, sizeof(int64_t) * h_B3_idx);
+    cudaMalloc(&B3_customer, sizeof(int64_t) * h_B3_idx);
     auto HT3 = cuco::static_map{h_B3_idx * 2, cuco::empty_key{(int64_t)-1}, cuco::empty_value{(int64_t)-1}, thrust::equal_to<int64_t>{}, cuco::linear_probing<1, cuco::default_hash_function<int64_t>>()};
 
     auto d_HT3_F = HT3.ref(cuco::find);
 
     auto d_HT3_I = HT3.ref(cuco::insert);
 
-    pipeline_8<<<std::ceil((float)orders_size / (float)32), 32>>>(d_o_custkey, d_l_orderkey, d_o_orderkey, d_o_orderdate, d_HT2_I, d_HT2_F, d_HT3_I, d_HT3_F, B3_orders, B2_nation, B3_region, B3_idx, B3_nation, B2_customer, B2_region, orders_size, B3_customer);
+    pipeline_8<<<std::ceil((float)orders_size / (float)32), 32>>>(d_o_custkey, d_o_orderkey, d_o_orderdate, d_l_orderkey, d_HT2_I, d_HT2_F, d_HT3_I, d_HT3_F, B2_customer, B3_idx, B3_orders, orders_size, B2_region, B3_customer, B3_region, B3_nation, B2_nation);
 
     int8_t *d_n_name;
 
@@ -495,7 +495,7 @@ void control(
 
     auto d_HT5_I = HT5.ref(cuco::insert);
 
-    pipeline_10<<<std::ceil((float)lineitem_size / (float)32), 32>>>(d_l_suppkey, d_n_name, d_l_extendedprice, d_c_nationkey, d_l_orderkey, d_l_discount, d_HT3_I, d_HT3_F, d_HT4_I, d_HT4_F, d_HT5_I, d_HT5_F, B3_orders, B3_region, B3_nation, lineitem_size, B4_supplier, B3_customer);
+    pipeline_10<<<std::ceil((float)lineitem_size / (float)32), 32>>>(d_n_name, d_l_extendedprice, d_l_discount, d_l_suppkey, d_c_nationkey, d_l_orderkey, d_HT3_I, d_HT3_F, d_HT4_I, d_HT4_F, d_HT5_I, d_HT5_F, B4_supplier, B3_orders, lineitem_size, B3_customer, B3_region, B3_nation);
 
     auto HT5_size = HT5.size();
 
@@ -518,7 +518,7 @@ void control(
     }
     HT5.clear();
     HT5.insert(actual_dict_5.begin(), actual_dict_5.end());
-    pipeline_11<<<std::ceil((float)lineitem_size / (float)32), 32>>>(d_l_suppkey, d_n_name, d_l_extendedprice, d_c_nationkey, d_l_orderkey, d_l_discount, d_agg_revenue, d_agg_n_name, d_HT3_I, d_HT3_F, d_HT4_I, d_HT4_F, d_HT5_I, d_HT5_F, B3_region, B3_orders, B3_nation, lineitem_size, B4_supplier, B3_customer);
+    pipeline_11<<<std::ceil((float)lineitem_size / (float)32), 32>>>(d_n_name, d_l_extendedprice, d_l_discount, d_l_suppkey, d_c_nationkey, d_l_orderkey, d_agg_revenue, d_agg_n_name, d_HT3_I, d_HT3_F, d_HT4_I, d_HT4_F, d_HT5_I, d_HT5_F, B3_nation, B3_orders, lineitem_size, B3_customer, B3_region, B4_supplier);
 
     size_t agg_size = HT5_size;
     int8_t *p_agg_n_name = (int8_t *)malloc(sizeof(int8_t) * agg_size);
@@ -564,7 +564,7 @@ int main(int argc, const char **argv)
     auto l_orderkey = read_column_typecasted<int32_t>(lineitem_table, "l_orderkey");
     auto l_suppkey = read_column_typecasted<int32_t>(lineitem_table, "l_suppkey");
 
-    StringDictEncodedColumn* n_name = read_string_dict_encoded_column(nation_table, "n_name");
+    StringDictEncodedColumn *n_name = read_string_dict_encoded_column(nation_table, "n_name");
     auto n_nationkey = read_column_typecasted<int32_t>(nation_table, "n_nationkey");
     auto n_regionkey = read_column_typecasted<int32_t>(nation_table, "n_regionkey");
 
@@ -572,9 +572,8 @@ int main(int argc, const char **argv)
     auto o_orderkey = read_column_typecasted<int32_t>(orders_table, "o_orderkey");
     auto o_custkey = read_column_typecasted<int32_t>(orders_table, "o_custkey");
 
-    StringDictEncodedColumn* r_name = read_string_dict_encoded_column(region_table, "r_name");
+    StringDictEncodedColumn *r_name = read_string_dict_encoded_column(region_table, "r_name");
     auto r_regionkey = read_column_typecasted<int32_t>(region_table, "r_regionkey");
-
 
     auto s_nationkey = read_column_typecasted<int32_t>(supplier_table, "s_nationkey");
     auto s_suppkey = read_column_typecasted<int32_t>(supplier_table, "s_suppkey");
@@ -600,7 +599,6 @@ int main(int argc, const char **argv)
         lineitem_size,
         nation_size,
         orders_size,
-        region_size, 
-        supplier_size
-    );
+        region_size,
+        supplier_size);
 }
