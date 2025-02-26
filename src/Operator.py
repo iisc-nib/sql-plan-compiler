@@ -1,6 +1,6 @@
 from io import StringIO
 import sys
-from helper import Context
+from helper import RLN, Context, typeof
 
 
 class Operator:
@@ -21,6 +21,15 @@ class Operator:
 def print_plan(plan: Operator):
     context = Context()
     plan.produce(context)
+    print("""#include "utils.h"
+
+#include <cuco/static_map.cuh>
+
+#include <thrust/copy.h>
+#include <thrust/device_vector.h>
+#include <thrust/host_vector.h>
+namespace cg = cooperative_groups;
+""")
     plan.print()
     allocated_attrs = set()
     old_stdout = sys.stdout
@@ -46,3 +55,31 @@ def print_plan(plan: Operator):
             text += (",")
         print(text)
     print(") {{\n{code}}}".format(code = result.getvalue()))
+    
+    # printing the main function, reading all the attributes needed for the control function
+    
+    print("int main(int argc, const char **argv) {")
+    print("std::string dbDir = getDataDir(argv, argc);")
+    for rln in srted_rlns:
+        print("std::string {rln}_file = dbDir + \"{rln}.parquet\";".format(rln = rln))
+        print("auto {rln}_table = getArrowTable({rln}_file);".format(rln = rln))
+        print("size_t {rln}_size = {rln}_table->num_rows();".format(rln = rln))
+        
+    control_args = []
+    for attr in srted_params:
+        if attr.ty == "int8_t":
+            print("StringDictEncodedColumn *{attr} = read_string_dict_encoded_column({rln}_table, \"{attr}\");"
+                .format(attr = attr.val, rln = RLN(attr.val)))
+            control_args.append("{attr}->column".format(attr = attr.val))
+        elif attr.ty == "int32_t" and "key" in attr.val: # hardcoded to assume key
+            print("auto {attr} = read_column_typecasted<int32_t>({rln}_table, \"{attr}\");".format(attr = attr.val, rln = RLN(attr.val)))
+            control_args.append("{attr}.data()".format(attr = attr.val))
+        else:            # for the date columns
+            print("auto {attr} = read_column<{ty}>({rln}_table, \"{attr}\");".format(attr = attr.val, ty = typeof(attr.val), rln = RLN(attr.val)))
+            control_args.append("{attr}.data()".format(attr = attr.val))
+    for rln in srted_rlns:
+        control_args.append(rln + "_size")        
+    print("control({});".format(",".join(control_args)))
+    print("}")
+    
+        
