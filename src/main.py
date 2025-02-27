@@ -356,5 +356,26 @@ def tpch_q5():
     print_plan(plan)
 
 
+def tpch_q13(): # need to work on not like operator as well
+    j1 = HashJoin(["c_custkey"], ["o_custkey"],
+                  Scan("customer"),
+                  Selection(Scan("orders"), "o_comment", "like special"))
+    agg = Aggregation("agg", j1, ["c_custkey"], 
+                      {
+                          "c_custkey": Aggregate("agg_custkey", "any"),
+                          "*": Aggregate("agg_count", "count")
+                      })
+    pl = Print(["agg_custkey", "agg_count"], agg)
+    print_plan(pl)
+    agg.produce(Context())
+    agg2 = Aggregation("agg2", Scan("agg"), ["agg_count"], 
+                       {
+                           "agg_count": Aggregate("agg2_count", "any"),
+                            "*": Aggregate("agg2_dist", "count")
+                       })
+    pl = Print(["agg2_count", "agg2_dist"], agg2)
+    # print_plan(pl)
+
+
 if __name__ == "__main__":
-    tpch_q5()
+    tpch_q13()

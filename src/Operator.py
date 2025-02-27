@@ -67,7 +67,11 @@ namespace cg = cooperative_groups;
         
     control_args = []
     for attr in srted_params:
-        if attr.ty == "int8_t":
+        if attr.ty == "StringColumn":
+            print("auto {attr} = read_string_column({rln}_table, \"{attr}\");"
+                  .format(rln = RLN(attr.val), attr = attr.val)) 
+            control_args.append(attr.val)
+        elif attr.ty == "int8_t":
             print("StringDictEncodedColumn *{attr} = read_string_dict_encoded_column({rln}_table, \"{attr}\");"
                 .format(attr = attr.val, rln = RLN(attr.val)))
             control_args.append("{attr}->column".format(attr = attr.val))
