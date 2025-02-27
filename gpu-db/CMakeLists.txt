@@ -1,6 +1,8 @@
 ﻿
 cmake_minimum_required(VERSION 3.23.1 FATAL_ERROR)
 
+
+
 project(GPUDB VERSION 0.0.1 LANGUAGES CXX CUDA)
 
 
@@ -72,6 +74,7 @@ CPMAddPackage(
 )
 
 
+
 function(ConfigureExample EXAMPLE_NAME EXAMPLE_SRC)
     add_executable(${EXAMPLE_NAME} "${EXAMPLE_SRC}")
     set_target_properties(${EXAMPLE_NAME} PROPERTIES
@@ -80,9 +83,9 @@ function(ConfigureExample EXAMPLE_NAME EXAMPLE_SRC)
                                              "${CMAKE_CURRENT_SOURCE_DIR}"
                                               ${arrow_BINARY_DIR}/cpp/src
                                               )
-    set_property(TARGET ${EXAMPLE_NAME} PROPERTY CUDA_ARCHITECTURES 80)
+    set_property(TARGET ${EXAMPLE_NAME} PROPERTY CUDA_ARCHITECTURES 86)
     target_compile_options(${EXAMPLE_NAME} PRIVATE --compiler-options=-Wall --compiler-options=-Wextra
-      --expt-extended-lambda -Xcompiler -Wno-subobject-linkage -lineinfo -g -fdump-tree-original)
+      --expt-extended-lambda -Xcompiler -Wno-subobject-linkage -lineinfo -g)
     target_link_libraries(${EXAMPLE_NAME} cuco ${ARROW_LIBS} ${PARQUET_LIBS})
 endfunction(ConfigureExample)
 
@@ -94,5 +97,7 @@ ConfigureExample(Q4_AUTO "${CMAKE_CURRENT_SOURCE_DIR}/tpch_auto_generated/q4.cu"
 ConfigureExample(Q5_AUTO "${CMAKE_CURRENT_SOURCE_DIR}/tpch_auto_generated/q5.cu") 
 ConfigureExample(Q6_AUTO "${CMAKE_CURRENT_SOURCE_DIR}/tpch_auto_generated/q6.cu") 
 ConfigureExample(Q9_AUTO "${CMAKE_CURRENT_SOURCE_DIR}/tpch_auto_generated/q9.cu") 
+ConfigureExample(Q13_AUTO "${CMAKE_CURRENT_SOURCE_DIR}/tpch_auto_generated/q13.cu") 
+ConfigureExample(Q17_AUTO "${CMAKE_CURRENT_SOURCE_DIR}/tpch_auto_generated/q17.cu") 
 ConfigureExample(Q18_AUTO "${CMAKE_CURRENT_SOURCE_DIR}/tpch_auto_generated/q18.cu") 
 

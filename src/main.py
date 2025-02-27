@@ -33,7 +33,7 @@ def tpch_q1():  # done without sort except average
             None,
             " * ",
         ),
-        Selection(Scan("lineitem"), "l_comment", "like %hellothere%"),
+        Scan("lineitem"),
         "double",
     )
     s2 = Map(
@@ -320,7 +320,7 @@ def tpch_q4():  # needs semi join to be implemented to work
     print_plan(plan)
 
 
-def tpch_q5():
+def tpch_q5(): #done without sort
     l1 = Selection(Scan("region"), "r_name", " == 2")
     j1 = HashJoin(["r_regionkey"], ["n_regionkey"], l1, Scan("nation"))
     j2 = HashJoin(["n_nationkey"], ["c_nationkey"], j1, Scan("customer"))
@@ -332,50 +332,121 @@ def tpch_q5():
             Selection(
                 Scan("orders"), "o_orderdate", ">= {}".format(get_date("1994-01-01"))
             ),
-        "o_orderdate",
-        "< {}".format(get_date("1995-01-01"))
-        )
+            "o_orderdate",
+            "< {}".format(get_date("1995-01-01")),
+        ),
     )
     j4 = HashJoin(["o_orderkey"], ["l_orderkey"], j3, Scan("lineitem"))
-    j5 = HashJoin(["s_nationkey", "s_suppkey"], ["c_nationkey", "l_suppkey"],
-                  Scan("supplier"), j4)
-    mped = Map("revenue", BinOp(
-        BinOp(None, None, Var("attr", "l_extendedprice"), ""),
+    j5 = HashJoin(
+        ["s_nationkey", "s_suppkey"], ["c_nationkey", "l_suppkey"], Scan("supplier"), j4
+    )
+    mped = Map(
+        "revenue",
         BinOp(
-            BinOp(None, None, Var("const", "1"), ""),
-            BinOp(None, None, Var("attr", "l_discount"), ""),
-            None, 
-            " - "
-        ), None, " * "
-    ), j5, "double")
-    agg = Aggregation("agg", mped, ["n_name"], {
-        "n_name": Aggregate("agg_n_name", "any"),
-        "revenue": Aggregate("agg_revenue", "sum"),
-    })
+            BinOp(None, None, Var("attr", "l_extendedprice"), ""),
+            BinOp(
+                BinOp(None, None, Var("const", "1"), ""),
+                BinOp(None, None, Var("attr", "l_discount"), ""),
+                None,
+                " - ",
+            ),
+            None,
+            " * ",
+        ),
+        j5,
+        "double",
+    )
+    agg = Aggregation(
+        "agg",
+        mped,
+        ["n_name"],
+        {
+            "n_name": Aggregate("agg_n_name", "any"),
+            "revenue": Aggregate("agg_revenue", "sum"),
+        },
+    )
     plan = Print(["agg_n_name", "agg_revenue"], agg)
     print_plan(plan)
 
 
-def tpch_q13(): # need to work on not like operator as well
-    j1 = HashJoin(["c_custkey"], ["o_custkey"],
-                  Scan("customer"),
-                  Selection(Scan("orders"), "o_comment", "like special"))
-    agg = Aggregation("agg", j1, ["c_custkey"], 
-                      {
-                          "c_custkey": Aggregate("agg_custkey", "any"),
-                          "*": Aggregate("agg_count", "count")
-                      })
+def tpch_q13():  # need to work on not like operator as well, right now works with manual intervention for left join
+    j1 = HashJoin(
+        ["c_custkey"],
+        ["o_custkey"],
+        Scan("customer"),
+        Selection(Scan("orders"), "o_comment", "like special"),
+    )
+    agg = Aggregation(
+        "agg",
+        j1,
+        ["c_custkey"],
+        {
+            "c_custkey": Aggregate("agg_custkey", "any"),
+            "*": Aggregate("agg_count", "count"),
+        },
+    )
     pl = Print(["agg_custkey", "agg_count"], agg)
     print_plan(pl)
     agg.produce(Context())
-    agg2 = Aggregation("agg2", Scan("agg"), ["agg_count"], 
-                       {
-                           "agg_count": Aggregate("agg2_count", "any"),
-                            "*": Aggregate("agg2_dist", "count")
-                       })
+    agg2 = Aggregation(
+        "agg2",
+        Scan("agg"),
+        ["agg_count"],
+        {
+            "agg_count": Aggregate("agg2_count", "any"),
+            "*": Aggregate("agg2_dist", "count"),
+        },
+    )
     pl = Print(["agg2_count", "agg2_dist"], agg2)
     # print_plan(pl)
 
 
+def tpch_q17():
+    l1 = Selection(
+        Selection(Scan("part"), "p_container", "== 17"),
+        "p_brand", "== 7"
+    )
+    j1 = HashJoin(["p_partkey"], ["l_partkey"], l1, Scan("lineitem"))
+    agg = Aggregation(
+        "agg",
+        j1, 
+        ["l_partkey"],
+        {
+            "l_partkey": Aggregate("agg_partkey", "any"),
+            "l_quantity": Aggregate("sum_quantity", "sum"),
+            "*": Aggregate("agg_count", "count"),
+        }
+    )
+    agg.produce(Context())
+    # print_plan(agg)
+    
+    l2 = Map("avg_qty", BinOp(
+            BinOp(
+                None, None, 
+                Var("attr", "sum_quantity"), ""
+            ),
+            BinOp(None, None, Var("attr", "agg_count"), ""),
+            None, 
+            " / "
+        ), Scan("agg"), "double")
+    j2 = HashJoin(
+        ["agg_partkey"], 
+        ["l_partkey"],
+        l2, 
+        Scan("lineitem")
+    )  # need to add a condition while joining, if l_quantity(probe) > avg_qty(build side), doing manually for now
+    
+    agg2 = Aggregation(
+        "agg2",
+        j2, 
+        [],
+        {
+            "l_extendedprice": Aggregate("agg2_extendedprice", "sum")
+        }
+    )
+    
+    plan = Print(["agg2_extendedprice"], agg2)
+    print_plan(plan)
+
 if __name__ == "__main__":
-    tpch_q13()
+    tpch_q17()
