@@ -52,10 +52,10 @@ DBStringType* d_lineitem__l_shipmode;
 DBStringType* d_lineitem__comments;
 size_t lineitem_size;
 DBI32Type* d_orders__o_orderkey;
-DBStringType* d_orders__o_orderstatus;
+DBCharType* d_orders__o_orderstatus;
 DBI32Type* d_orders__o_custkey;
 DBDecimalType* d_orders__o_totalprice;
-DBI32Type* d_orders__o_orderdate;
+DBDateType* d_orders__o_orderdate;
 DBStringType* d_orders__o_orderpriority;
 DBStringType* d_orders__o_clerk;
 DBI32Type* d_orders__o_shippriority;
@@ -118,15 +118,15 @@ void initTpchDb(std::string dbDir) {
      d_lineitem__l_quantity = allocateAndTransfer<DBDecimalType>(l_quantity, lineitem_size); 
     free(l_quantity);
 
-    DBDecimalType* l_extendedprice = readIntegerColumn<DBDecimalType>(lineitem_table, "l_extendedprice");
+    DBDecimalType* l_extendedprice = readDecimalColumn(lineitem_table, "l_extendedprice");
      d_lineitem__l_extendedprice = allocateAndTransfer<DBDecimalType>(l_extendedprice, lineitem_size); 
     free(l_extendedprice);
 
-    DBDecimalType* l_discount = readIntegerColumn<DBDecimalType>(lineitem_table, "l_discount");
+    DBDecimalType* l_discount = readDecimalColumn(lineitem_table, "l_discount");
      d_lineitem__l_discount = allocateAndTransfer<DBDecimalType>(l_discount, lineitem_size); 
     free(l_discount);
     
-    DBDecimalType* l_tax = readIntegerColumn<DBDecimalType>(lineitem_table, "l_tax");
+    DBDecimalType* l_tax = readDecimalColumn(lineitem_table, "l_tax");
      d_lineitem__l_tax = allocateAndTransfer<DBDecimalType>(l_tax, lineitem_size); 
     free(l_tax);
 
@@ -161,6 +161,66 @@ void initTpchDb(std::string dbDir) {
     DBStringType* l_shipmode = readStringColumn(lineitem_table, "l_shipmode");
      d_lineitem__l_shipmode = allocateAndTransferStrings(l_shipmode, lineitem_size);
     free(l_shipmode);
+
+
+    // orders table
+    auto orders_table = getArrowTable(dbDir, "orders");
+    orders_size = orders_table->num_rows();
+
+    #ifdef PRINTSCHEMA
+    PrintColumnTypes(orders_table);
+    #endif
+
+    DBI32Type* o_orderkey = readIntegerColumn<DBI32Type>(orders_table, "o_orderkey");
+    d_orders__o_orderkey = allocateAndTransfer<DBI32Type>(o_orderkey, orders_size);
+    free(o_orderkey);
+
+    DBCharType* o_orderstatus = readCharColumn(orders_table, "o_orderstatus");
+    d_orders__o_orderstatus = allocateAndTransfer<DBCharType>(o_orderstatus, orders_size);
+    free(o_orderstatus);
+
+    DBI32Type* o_custkey = readIntegerColumn<DBI32Type>(orders_table, "o_custkey");
+    d_orders__o_custkey = allocateAndTransfer<DBI32Type>(o_custkey, orders_size);
+    free(o_custkey);
+
+    DBDecimalType* o_totalprice = readDecimalColumn(orders_table, "o_totalprice");
+    d_orders__o_totalprice = allocateAndTransfer<DBDecimalType>(o_totalprice, orders_size);
+    free(o_totalprice);
+
+    DBDateType* o_orderdate = readDateColumn(orders_table, "o_orderdate");
+    d_orders__o_orderdate = allocateAndTransfer<DBDateType>(o_orderdate, orders_size);
+    free(o_orderdate);
+
+    DBStringType* o_orderpriority = readStringColumn(orders_table, "o_orderpriority");
+    d_orders__o_orderpriority = allocateAndTransferStrings(o_orderpriority, orders_size);
+    free(o_orderpriority);
+
+    DBStringType* o_clerk = readStringColumn(orders_table, "o_clerk");
+    d_orders__o_clerk = allocateAndTransferStrings(o_clerk, orders_size);
+    free(o_clerk);
+
+    DBI32Type* o_shippriority = readIntegerColumn<DBI32Type>(orders_table, "o_shippriority");
+    d_orders__o_shippriority = allocateAndTransfer<DBI32Type>(o_shippriority, orders_size);
+    free(o_shippriority);
+
+    DBStringType* o_comment = readStringColumn(orders_table, "o_comment");
+    d_orders__o_comment = allocateAndTransferStrings(o_comment, orders_size);
+    free(o_comment);
+
+    // customer table
+    auto customer_table = getArrowTable(dbDir, "customer");
+    customer_size = customer_table->num_rows();
+    #ifdef PRINTSCHEMA
+    PrintColumnTypes(customer_table);
+    #endif
+
+    DBStringType* c_mktsegment = readStringColumn(customer_table, "c_mktsegment");
+    d_customer__c_mktsegment = allocateAndTransferStrings(c_mktsegment, customer_size);
+    free(c_mktsegment);
+
+    DBI32Type* c_custkey = readIntegerColumn<DBI32Type>(customer_table, "c_custkey");
+    d_customer__c_custkey = allocateAndTransfer<DBI32Type>(c_custkey, customer_size);
+    free(c_custkey);
 
     #ifdef TIMER
     auto end = std::chrono::high_resolution_clock::now();

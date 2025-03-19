@@ -8,144 +8,219 @@
 
 #include <arrow/array.h>
 #include <arrow/table.h>
+#include "db_types.h"
 __device__ void aggregate_sum(int64_t* a, int64_t v) {
-    atomicAdd((int*)a, (int)v);
-  }
-  __device__ void aggregate_sum(int32_t* a, int32_t v) {
-    atomicAdd((int*)a, (int)v);
-  }
-  __device__ void aggregate_sum(float* a, float v) {
-    atomicAdd(a, v);
-  }
-  __device__ void aggregate_any(int32_t* a, int32_t v) {
-    *a = v;
-  }
+  atomicAdd((int*)a, (int)v);
+}
+__device__ void aggregate_sum(int32_t* a, int32_t v) {
+  atomicAdd((int*)a, (int)v);
+}
+__device__ void aggregate_sum(float* a, float v) {
+  atomicAdd(a, v);
+}
+__device__ void aggregate_sum(double* a, double v) {
+  atomicAdd(a, v);
+}
+__device__ void aggregate_any(int32_t* a, int32_t v) {
+  *a = v;
+}
+__device__ void aggregate_count(int64_t* a, float v) {
+  atomicAdd((int*)a, 1);
+}
 
 
 
-template<int Radix>
-struct DBDecimalColumn {
-  __int128* buffer;
-  size_t radix = Radix;
-  __int128_t operator[](unsigned long long i) {
-    return buffer[i];  
-  }
+
+
+enum class Predicate {
+  eq, like, lt, gt, lte, gte, neq
 };
 
-typedef DBDecimalColumn<2> DBDecimalPrecisionType;
 
-typedef char* DBStringType;
-typedef int32_t DBDateType;
-typedef double DBDecimalType;
 
-DBStringType* readStringColumn(std::shared_ptr<arrow::Table>& table, const std::string& column) {
-  auto arrowCol = table->GetColumnByName(column);
-  DBStringType* res;
-  auto resSize = 0ull;
-  for (auto chunk: arrowCol->chunks()) {
-    auto stringArr = std::static_pointer_cast<arrow::LargeStringArray>(chunk);
-    for (auto i=0ull; i < stringArr->length(); i++) {
-      std::string str = stringArr->GetString(i);
-      resSize += (str.size() + 1); // null terminated string
-    }
-  }
-  char* CStringBuffer = (char*)malloc(sizeof(char) * resSize);
-  memset(CStringBuffer, '\0', sizeof(char) * resSize);
-  
-  res = (DBStringType*)malloc(sizeof(DBStringType) * table->num_rows());
-  resSize = 0ull;
-  auto resIdx = 0ull;
-  for (auto chunk: arrowCol->chunks()) {
-    auto stringArr = std::static_pointer_cast<arrow::LargeStringArray>(chunk);
-    for (auto i=0ull; i < stringArr->length(); i++) {
-      res[resIdx] = CStringBuffer + resSize;
-
-      std::string str = stringArr->GetString(i);
-      for (auto i=0ull; i<str.size(); i++) {
-        CStringBuffer[resSize + i] = str[i];
+__device__ static inline bool evaluatePredicate(DBStringType str1, DBStringType str2, Predicate pred) {
+  int i = 0, j = 0;
+  switch (pred) {
+    case Predicate::eq:
+    {
+      while(str1[i]!='\0' && str2[j]!='\0') {
+        if (str1[i++] != str2[j++]) return false;
       }
-      resSize += (str.size() + 1);
-      resIdx++;
+      return str1[i] == str2[j];
     }
-  }
-  return res;
-}
-
-char* readCharColumn(std::shared_ptr<arrow::Table>& table, const std::string &column) {
-  auto res = (char*)malloc(sizeof(char) * table->num_rows());
-  auto arrowCol = table->GetColumnByName(column);
-  auto idx = 0ull;
-  for (auto chunk:arrowCol->chunks()) {
-    auto strArr = std::static_pointer_cast<arrow::LargeStringArray>(chunk);
-    for (auto i=0ull; i<strArr->length(); i++)
+    break;
+    case Predicate::like:
     {
-      res[idx++] = strArr->GetString(i)[0];
+      //TODO(avinash, p2): handle the like operator 
+      printf("%s\n", str2);
+      return true;
     }
+    default:
+    break;
   }
-  return res;
+  return false;
 }
 
-DBDateType* readDateColumn(std::shared_ptr<arrow::Table>& table, const std::string &column) {
-  auto res = (DBDateType*)malloc(sizeof(DBDateType) * table->num_rows());
-  auto arrowCol = table->GetColumnByName(column);
-  auto idx = 0ull;
-  for (auto chunk:arrowCol->chunks()) {
-    auto dateArr = std::static_pointer_cast<arrow::Date32Array>(chunk);
-    for (auto i=0ull; i<dateArr->length(); i++)
-    {
-      res[idx++] = (DBDateType)dateArr->Value(i);
+
+
+__device__ static inline bool evaluatePredicate(DBCharType l, DBCharType r, Predicate pred) {
+  switch(pred) {
+    case Predicate::eq: {
+      return l == r;
     }
+    break;
+    case Predicate::lt: {
+
+      return l < r;
+    }
+    break;
+    case Predicate::gt: {
+      return l > r;
+    }
+    break;
+    case Predicate::lte: {
+      return l <= r;
+    }
+    break;
+    case Predicate::gte: {
+      return l >= r;
+    }
+    case Predicate::neq: {
+      return l != r;
+    }
+    break;
+    default:
+    break;
   }
-  return res;
+  return false;
+}
+__device__ static inline bool evaluatePredicate(DBDecimalType l, DBDecimalType r, Predicate pred) {
+  switch(pred) {
+    case Predicate::eq: {
+      return l == r;
+    }
+    break;
+    case Predicate::lt: {
+
+      return l < r;
+    }
+    break;
+    case Predicate::gt: {
+      return l > r;
+    }
+    break;
+    case Predicate::lte: {
+      return l <= r;
+    }
+    break;
+    case Predicate::gte: {
+      return l >= r;
+    }
+    case Predicate::neq: {
+      return l != r;
+    }
+    break;
+    default:
+    break;
+  }
+  return false;
+}
+__device__ static inline bool evaluatePredicate(DBI64Type l, DBI64Type r, Predicate pred) {
+  switch(pred) {
+    case Predicate::eq: {
+      return l == r;
+    }
+    break;
+    case Predicate::lt: {
+
+      return l < r;
+    }
+    break;
+    case Predicate::gt: {
+      return l > r;
+    }
+    break;
+    case Predicate::lte: {
+      return l <= r;
+    }
+    break;
+    case Predicate::gte: {
+      return l >= r;
+    }
+    case Predicate::neq: {
+      return l != r;
+    }
+    break;
+    default:
+    break;
+  }
+  return false;
+}
+__device__ static inline bool evaluatePredicate(DBI32Type l, DBI32Type r, Predicate pred) {
+  switch(pred) {
+    case Predicate::eq: {
+      return l == r;
+    }
+    break;
+    case Predicate::lt: {
+
+      return l < r;
+    }
+    break;
+    case Predicate::gt: {
+      return l > r;
+    }
+    break;
+    case Predicate::lte: {
+      return l <= r;
+    }
+    break;
+    case Predicate::gte: {
+      return l >= r;
+    }
+    case Predicate::neq: {
+      return l != r;
+    }
+    break;
+    default:
+    break;
+  }
+  return false;
 }
 
-DBDecimalType* readDecimalColumn(std::shared_ptr<arrow::Table>& table, const std::string &column) {
-  auto res = (DBDecimalType*)malloc(sizeof(DBDecimalType) * table->num_rows());
-  auto arrowCol = table->GetColumnByName(column);
-  auto idx = 0ull;
-  for (auto chunk: arrowCol->chunks()) {
-    auto arr = std::static_pointer_cast<arrow::DoubleArray>(chunk);
-    for (auto i=0ull; i<arr->length(); i++) {
-      res[idx++] = (DBDecimalType)arr->Value(i);
-    }
+
+DBStringType* allocateAndTransferStrings(DBStringType* h_strings, size_t table_size) {
+  char* d_buffer;
+  auto buf_size = 0ull;
+  for (auto i=0ull; i<table_size-1; i++) {
+    buf_size += (size_t)h_strings[i+1] - (size_t)h_strings[i];
   }
-  return res;
+  // count last string separately
+  for (auto i=0ull; h_strings[table_size-1][i] != '\0'; i++) {
+    buf_size++;
+  }
+
+  cudaMalloc(&d_buffer, sizeof(char)*buf_size);
+  cudaMemcpy(d_buffer, h_strings[0], sizeof(char)*buf_size, cudaMemcpyHostToDevice);
+
+  DBStringType* d_strings; 
+  DBStringType* hd_strings;
+  hd_strings = (DBStringType*)malloc(sizeof(DBStringType) * table_size);
+  hd_strings[0] = d_buffer;
+  for (auto i=1ull; i<table_size; i++) {
+    hd_strings[i] = (DBStringType)((size_t)hd_strings[i-1] + ((size_t)h_strings[i] - (size_t)h_strings[i-1]));
+  }
+  cudaMalloc(&d_strings, sizeof(DBStringType)*table_size);
+  cudaMemcpy(d_strings, hd_strings, sizeof(DBStringType)*table_size, cudaMemcpyHostToDevice);
+  free(hd_strings);
+
+  return d_strings;
 }
-__int128_t double_to_int128(double x, int radix) {
-  // Union to access raw IEEE 754 bits
-  union {
-      double d;
-      uint64_t u;
-  } value = { x * (std::pow(10, radix)) };
 
-  // Extract sign, exponent, and mantissa
-  uint64_t sign = value.u >> 63;
-  int64_t exponent = ((value.u >> 52) & 0x7FF) - 1023;
-  uint64_t mantissa = (value.u & 0xFFFFFFFFFFFFF) | (1ULL << 52); // Add implicit leading 1
-
-  // Convert to 128-bit integer
-  __int128_t result = mantissa;
-  
-  if (exponent > 52) {
-      result <<= (exponent - 52);  // Left shift if exponent is large
-  } else if (exponent < 52) {
-      result >>= (52 - exponent);  // Right shift if exponent is small
-  }
-
-  // Apply sign
-  return sign ? -result : result;
-}
-DBDecimalPrecisionType readDecimalPrecisionColumn(std::shared_ptr<arrow::Table>& table, const std::string &column) {
-  auto res = (__int128_t*)malloc(sizeof(__int128_t) * table->num_rows());
-  auto arrowCol = table->GetColumnByName(column);
-  auto idx = 0ull;
-  for (auto chunk: arrowCol->chunks()) {
-    auto arr = std::static_pointer_cast<arrow::DoubleArray>(chunk);
-    for (auto i=0ull; i<arr->length(); i++) {
-      res[idx++] = double_to_int128((double)arr->Value(i), 2);
-    }
-  }
-  DBDecimalPrecisionType returnRes;
-  returnRes.buffer = res;
-  return returnRes;
+template<typename T>
+T* allocateAndTransfer(T* h_data, size_t table_size) {
+  T* d_data;
+  cudaMalloc(&d_data, sizeof(T)*table_size);
+  cudaMemcpy(d_data, h_data, sizeof(T)*table_size, cudaMemcpyHostToDevice);
+  return d_data;
 }

@@ -24,7 +24,7 @@ int main(int argc, const char **argv)
     //  compile it with nvcc
     //  link it using dlopen, and execute the control function.
 
-    void *lib = dlopen("/media/ajayakar/space/src/sql-plan-compiler/gpu-db/tpch_auto_generated/q1_shared_expt.so", RTLD_LAZY);
+    void *lib = dlopen("/media/ajayakar/space/src/sql-plan-compiler/gpu-db/tpch_auto_generated/q3_shared_expt.so", RTLD_LAZY);
     if (!lib)
     {
         fprintf(stderr, "%s\n", dlerror());
@@ -83,7 +83,7 @@ int main(int argc, const char **argv)
             DBStringType *,
             size_t,
             DBI32Type *,
-            DBStringType *,
+            DBCharType *,
             DBI32Type *,
             DBDecimalType *,
             DBI32Type *,
