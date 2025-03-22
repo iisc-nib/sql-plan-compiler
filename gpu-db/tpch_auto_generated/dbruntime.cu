@@ -16,7 +16,11 @@ __global__ void sample(DBStringType *s1, DBStringType *s2, int *res)
 int main(int argc, const char **argv)
 {
     std::string dbDir = getDataDir(argv, argc);
+		std::cout << "Arg len: " << argc << std::endl;
+		assert(argc >= 4 && "Need 3 arguments, --data-dir <path to dir> <shared object query>");
+	  const char *soFile = argv[3];
     initTpchDb(dbDir);
+
 
     // TODO(avinash): the runtime should listen for sql queries,
     //  compile it with the lingodb toolchain
@@ -24,7 +28,8 @@ int main(int argc, const char **argv)
     //  compile it with nvcc
     //  link it using dlopen, and execute the control function.
 
-    void *lib = dlopen("/media/ajayakar/space/src/sql-plan-compiler/gpu-db/tpch_auto_generated/q3_shared_expt.so", RTLD_LAZY);
+    //void *lib = dlopen("/media/ajayakar/space/src/sql-plan-compiler/gpu-db/tpch_auto_generated/"+ soFile, RTLD_LAZY);
+    void *lib = dlopen(soFile, RTLD_LAZY);
     if (!lib)
     {
         fprintf(stderr, "%s\n", dlerror());
