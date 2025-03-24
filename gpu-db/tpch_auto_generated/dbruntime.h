@@ -222,6 +222,172 @@ void initTpchDb(std::string dbDir) {
     d_customer__c_custkey = allocateAndTransfer<DBI32Type>(c_custkey, customer_size);
     free(c_custkey);
 
+    DBStringType* c_name = readStringColumn(customer_table, "c_name");
+    d_customer__c_name = allocateAndTransferStrings(c_name, customer_size);
+    free(c_name);
+
+    DBStringType* c_address = readStringColumn(customer_table, "c_address");
+    d_customer__c_address = allocateAndTransferStrings(c_address, customer_size);
+    free(c_address);
+
+    DBI32Type* c_nationkey = readIntegerColumn<DBI32Type>(customer_table, "c_nationkey");
+    d_customer__c_nationkey = allocateAndTransfer<DBI32Type>(c_nationkey, customer_size);
+    free(c_nationkey);
+
+    DBStringType* c_phone = readStringColumn(customer_table, "c_phone");
+    d_customer__c_phone = allocateAndTransferStrings(c_phone, customer_size);
+    free(c_phone);
+
+    DBDecimalType* c_acctbal = readDecimalColumn(customer_table, "c_acctbal");
+    d_customer__c_acctbal = allocateAndTransfer<DBDecimalType>(c_acctbal, customer_size);
+    free(c_acctbal);
+
+    DBStringType* c_comment = readStringColumn(customer_table, "c_comment");
+    d_customer__c_comment = allocateAndTransferStrings(c_comment, customer_size);
+    free(c_comment);
+
+    auto region_table = getArrowTable(dbDir, "region");
+    region_size = region_table->num_rows();
+    #ifdef PRINTSCHEMA
+    PrintColumnTypes(region_table);
+    #endif
+
+    DBI32Type* r_regionkey = readIntegerColumn<DBI32Type>(region_table, "r_regionkey");
+    d_region__r_regionkey = allocateAndTransfer<DBI32Type>(r_regionkey, region_size);
+    free(r_regionkey);
+
+    DBStringType* r_name = readStringColumn(region_table, "r_name");
+    d_region__r_name = allocateAndTransferStrings(r_name, region_size);
+    free(r_name);
+
+    DBStringType* r_comment = readStringColumn(region_table, "r_comment");
+    d_region__r_comment = allocateAndTransferStrings(r_comment, region_size);
+    free(r_comment);
+
+    auto nation_table = getArrowTable(dbDir, "nation");
+    nation_size = nation_table->num_rows();
+    #ifdef PRINTSCHEMA
+    PrintColumnTypes(nation_table);
+    #endif
+
+    DBI32Type* n_nationkey = readIntegerColumn<DBI32Type>(nation_table, "n_nationkey");
+    d_nation__n_nationkey = allocateAndTransfer<DBI32Type>(n_nationkey, nation_size);
+    free(n_nationkey);
+
+    DBStringType* n_name = readStringColumn(nation_table, "n_name");
+    d_nation__n_name = allocateAndTransferStrings(n_name, nation_size);
+    free(n_name);
+
+    DBI32Type* n_regionkey = readIntegerColumn<DBI32Type>(nation_table, "n_regionkey");
+    d_nation__n_regionkey = allocateAndTransfer<DBI32Type>(n_regionkey, nation_size);
+    free(n_regionkey);
+
+    DBStringType* n_comment = readStringColumn(nation_table, "n_comment");
+    d_nation__n_comment = allocateAndTransferStrings(n_comment, nation_size);
+    free(n_comment);
+
+    auto supplier_table = getArrowTable(dbDir, "supplier");
+    supplier_size = supplier_table->num_rows();
+    #ifdef PRINTSCHEMA
+    PrintColumnTypes(supplier_table);
+    #endif
+
+    DBI32Type* s_suppkey = readIntegerColumn<DBI32Type>(supplier_table, "s_suppkey");
+    d_supplier__s_suppkey = allocateAndTransfer<DBI32Type>(s_suppkey, supplier_size);
+    free(s_suppkey);
+
+    DBI32Type* s_nationkey = readIntegerColumn<DBI32Type>(supplier_table, "s_nationkey");
+    d_supplier__s_nationkey = allocateAndTransfer<DBI32Type>(s_nationkey, supplier_size);
+    free(s_nationkey);
+
+    DBStringType* s_name = readStringColumn(supplier_table, "s_name");
+    d_supplier__s_name = allocateAndTransferStrings(s_name, supplier_size);
+    free(s_name);
+
+    DBStringType* s_address = readStringColumn(supplier_table, "s_address");
+    d_supplier__s_address = allocateAndTransferStrings(s_address, supplier_size);
+    free(s_address);
+
+    DBStringType* s_phone = readStringColumn(supplier_table, "s_phone");
+    d_supplier__s_phone = allocateAndTransferStrings(s_phone, supplier_size);
+    free(s_phone);
+
+    DBDecimalType* s_acctbal = readDecimalColumn(supplier_table, "s_acctbal");
+    d_supplier__s_acctbal = allocateAndTransfer<DBDecimalType>(s_acctbal, supplier_size);
+    free(s_acctbal);
+
+    DBStringType* s_comment = readStringColumn(supplier_table, "s_comment");
+    d_supplier__s_comment = allocateAndTransferStrings(s_comment, supplier_size);
+    free(s_comment);
+
+    auto partsupp_table = getArrowTable(dbDir, "partsupp");
+    partsupp_size = partsupp_table->num_rows();
+    #ifdef PRINTSCHEMA
+    PrintColumnTypes(partsupp_table);
+    #endif
+
+    DBI32Type* ps_suppkey = readIntegerColumn<DBI32Type>(partsupp_table, "ps_suppkey");
+    d_partsupp__ps_suppkey = allocateAndTransfer<DBI32Type>(ps_suppkey, partsupp_size);
+    free(ps_suppkey);
+
+    DBI32Type* ps_partkey = readIntegerColumn<DBI32Type>(partsupp_table, "ps_partkey");
+    d_partsupp__ps_partkey = allocateAndTransfer<DBI32Type>(ps_partkey, partsupp_size);
+    free(ps_partkey);
+
+    DBI32Type* ps_availqty = readIntegerColumn<DBI32Type>(partsupp_table, "ps_availqty");
+    d_partsupp__ps_availqty = allocateAndTransfer<DBI32Type>(ps_availqty, partsupp_size);
+    free(ps_availqty);
+
+    DBDecimalType* ps_supplycost = readDecimalColumn(partsupp_table, "ps_supplycost");
+    d_partsupp__ps_supplycost = allocateAndTransfer<DBDecimalType>(ps_supplycost, partsupp_size);
+    free(ps_supplycost);
+
+    DBStringType* ps_comment = readStringColumn(partsupp_table, "ps_comment");
+    d_partsupp__ps_comment = allocateAndTransferStrings(ps_comment, partsupp_size);
+    free(ps_comment);
+
+    auto part_table = getArrowTable(dbDir, "part");
+    part_size = part_table->num_rows();
+    #ifdef PRINTSCHEMA
+    PrintColumnTypes(part_table);
+    #endif
+
+    DBI32Type* p_partkey = readIntegerColumn<DBI32Type>(part_table, "p_partkey");
+    d_part__p_partkey = allocateAndTransfer<DBI32Type>(p_partkey, part_size);
+    free(p_partkey);
+
+    DBStringType* p_name = readStringColumn(part_table, "p_name");
+    d_part__p_name = allocateAndTransferStrings(p_name, part_size);
+    free(p_name);
+
+    DBStringType* p_mfgr = readStringColumn(part_table, "p_mfgr");
+    d_part__p_mfgr = allocateAndTransferStrings(p_mfgr, part_size);
+    free(p_mfgr);
+
+    DBStringType* p_brand = readStringColumn(part_table, "p_brand");
+    d_part__p_brand = allocateAndTransferStrings(p_brand, part_size);
+    free(p_brand);
+
+    DBStringType* p_type = readStringColumn(part_table, "p_type");
+    d_part__p_type = allocateAndTransferStrings(p_type, part_size);
+    free(p_type);
+
+    DBI32Type* p_size = readIntegerColumn<DBI32Type>(part_table, "p_size");
+    d_part__p_size = allocateAndTransfer<DBI32Type>(p_size, part_size);
+    free(p_size);
+
+    DBStringType* p_container = readStringColumn(part_table, "p_container");
+    d_part__p_container = allocateAndTransferStrings(p_container, part_size);
+    free(p_container);
+
+    DBDecimalType* p_retailprice = readDecimalColumn(part_table, "p_retailprice");
+    d_part__p_retailprice = allocateAndTransfer<DBDecimalType>(p_retailprice, part_size);
+    free(p_retailprice);
+
+    DBStringType* p_comment = readStringColumn(part_table, "p_comment");
+    d_part__p_comment = allocateAndTransferStrings(p_comment, part_size);
+    free(p_comment);
+
     #ifdef TIMER
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
