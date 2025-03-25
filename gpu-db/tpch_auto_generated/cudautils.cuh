@@ -24,6 +24,12 @@ __device__ void aggregate_sum(double* a, double v) {
 __device__ void aggregate_any(int32_t* a, int32_t v) {
   *a = v;
 }
+__device__ void aggregate_any(char** a, char* v) {
+  *a = v;
+}
+__device__ void aggregate_any(double* a, double v) {
+  *a = v;
+}
 __device__ void aggregate_count(int64_t* a, float v) {
   atomicAdd((int*)a, 1);
 }
@@ -47,7 +53,7 @@ enum class Predicate {
 
 
 
-__device__ static inline bool evaluatePredicate(DBStringType str1, DBStringType str2, Predicate pred) {
+__device__ static inline bool evaluatePredicate(const DBStringType str1, const DBStringType str2, Predicate pred) {
   int i = 0, j = 0;
   switch (pred) {
     case Predicate::eq:
@@ -72,7 +78,7 @@ __device__ static inline bool evaluatePredicate(DBStringType str1, DBStringType 
 
 
 
-__device__ static inline bool evaluatePredicate(DBCharType l, DBCharType r, Predicate pred) {
+__device__ static inline bool evaluatePredicate(const DBCharType l, const DBCharType r, Predicate pred) {
   switch(pred) {
     case Predicate::eq: {
       return l == r;
@@ -103,7 +109,7 @@ __device__ static inline bool evaluatePredicate(DBCharType l, DBCharType r, Pred
   }
   return false;
 }
-__device__ static inline bool evaluatePredicate(DBDecimalType l, DBDecimalType r, Predicate pred) {
+__device__ static inline bool evaluatePredicate(const DBDecimalType l, const DBDecimalType r, Predicate pred) {
   switch(pred) {
     case Predicate::eq: {
       return l == r;
@@ -134,7 +140,7 @@ __device__ static inline bool evaluatePredicate(DBDecimalType l, DBDecimalType r
   }
   return false;
 }
-__device__ static inline bool evaluatePredicate(DBI64Type l, DBI64Type r, Predicate pred) {
+__device__ static inline bool evaluatePredicate(const DBI64Type l, const DBI64Type r, Predicate pred) {
   switch(pred) {
     case Predicate::eq: {
       return l == r;
@@ -165,7 +171,7 @@ __device__ static inline bool evaluatePredicate(DBI64Type l, DBI64Type r, Predic
   }
   return false;
 }
-__device__ static inline bool evaluatePredicate(DBI32Type l, DBI32Type r, Predicate pred) {
+__device__ static inline bool evaluatePredicate(const DBI32Type l, const DBI32Type r, Predicate pred) {
   switch(pred) {
     case Predicate::eq: {
       return l == r;
