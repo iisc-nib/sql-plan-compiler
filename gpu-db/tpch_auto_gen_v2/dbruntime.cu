@@ -1,13 +1,11 @@
 #include <iostream>
 #include <string>
 #include <cuda_runtime.h>
-#include "cudautils.cuh"
 #include <dirent.h>
 #include <dlfcn.h>
 #include <iomanip>
-
+#include <chrono>
 #include "dbruntime.h"
-
 __global__ void sample(DBStringType *s1, DBStringType *s2, int *res)
 {
     if (evaluatePredicate(s1[0], s2[0], Predicate::eq))
@@ -37,6 +35,7 @@ int main(int argc, const char **argv)
         std::string libPath;
         std::cout << "> ";
         std::cin >> libPath;
+        libPath = "build/q" + libPath + ".codegen.so"; // input as integer now for convinience
         void *lib = dlopen(libPath.c_str(), RTLD_NOW);
         if (!lib)
         {
@@ -44,7 +43,7 @@ int main(int argc, const char **argv)
         }
         else
         {
-            std::cout << "Opening the shared lib was successful!" << std::endl;
+            std::cout << "Opening the shared lib " << libPath << " was successful!" << std::endl;
 
             auto control = reinterpret_cast<void (*)(
                 DBI32Type *,
@@ -116,6 +115,7 @@ int main(int argc, const char **argv)
                 DBStringType *,
                 DBStringType *,
                 size_t)>(dlsym(lib, "control"));
+            auto start = std::chrono::high_resolution_clock::now();
             control(
                 d_nation__n_nationkey,
                 d_nation__n_name,
@@ -186,7 +186,10 @@ int main(int argc, const char **argv)
                 d_region__r_name,
                 d_region__r_comment,
                 region_size);
+            auto stop = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop-start);
+            std::clog << "Query execution time: " << duration.count() / 1000. << "milliseconds.\n";
+            dlclose(lib);
         }
-        dlclose(lib);
     }
 }
