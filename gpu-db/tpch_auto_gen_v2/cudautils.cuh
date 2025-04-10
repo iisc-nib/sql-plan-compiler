@@ -9,6 +9,36 @@
 #include <arrow/array.h>
 #include <arrow/table.h>
 #include "db_types.h"
+
+#include <cuco/static_map.cuh>
+#include <cuco/static_multimap.cuh>
+
+
+template <typename T>
+class HostBuffer {
+  T* buffer;
+  size_t length;
+public:
+  HostBuffer(size_t length) : length(length) {
+    buffer = (T*)malloc(length * sizeof(T));
+  }
+  ~HostBuffer() {
+    free(buffer);
+  }
+  T* getHostPtr() {
+    return buffer;
+  }
+  void copyToDevice(T* d_buffer, size_t length) {
+    cudaMemcpy(d_buffer, buffer, length * sizeof(T), cudaMemcpyHostToDevice);
+  }
+  void copyFromDevice(T* d_buffer, size_t length) {
+    cudaMemcpy(buffer, d_buffer, sizeof(T) * length, cudaMemcpyDeviceToHost);
+  }
+  void clear() {
+    memset(buffer, 0, sizeof(T) * length);
+  }
+};
+
 __device__ void aggregate_sum(int64_t* a, int64_t v) {
   atomicAdd((int*)a, (int)v);
 }
@@ -34,6 +64,13 @@ __device__ void aggregate_count(int64_t* a, float v) {
   atomicAdd((int*)a, 1);
 }
 
+template<typename HT>
+__global__ void insertKeys(int64_t* keys, HT ht, size_t size) {
+  size_t tid = blockDim.x * blockIdx.x + threadIdx.x;
+  if (tid >= size) return;
+
+  ht.insert(cuco::pair{keys[tid], tid});
+}
 
 // TODO(avinash): right now only implemented the extract year 
 __device__ static inline DBI64Type ExtractFromDate(const char* attr, DBDateType date) {
