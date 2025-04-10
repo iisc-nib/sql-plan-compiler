@@ -95,46 +95,46 @@ void initTpchDb(std::string dbDir) {
     PrintColumnTypes(lineitem_table);
     #endif
 
-     lineitem_size = lineitem_table->num_rows();
+    lineitem_size = lineitem_table->num_rows();
 
-    DBI32Type* l_orderkey = readIntegerColumn<DBI32Type>(lineitem_table, "l_orderkey");
+    DBI32Type* l_orderkey = readIntegerColumn<DBI32Type, 1>(lineitem_table, "l_orderkey");
     d_lineitem__l_orderkey = allocateAndTransfer<DBI32Type>(l_orderkey, lineitem_size); 
     free(l_orderkey);
 
-    DBI32Type* l_partkey = readIntegerColumn<DBI32Type>(lineitem_table, "l_partkey");
+    DBI32Type* l_partkey = readIntegerColumn<DBI32Type, 1>(lineitem_table, "l_partkey");
     d_lineitem__l_partkey = allocateAndTransfer<DBI32Type>(l_partkey, lineitem_size); 
     free(l_partkey);
 
-    DBI32Type* l_suppkey = readIntegerColumn<DBI32Type>(lineitem_table, "l_suppkey");
+    DBI32Type* l_suppkey = readIntegerColumn<DBI32Type, 1>(lineitem_table, "l_suppkey");
      d_lineitem__l_suppkey = allocateAndTransfer<DBI32Type>(l_suppkey, lineitem_size); 
     free(l_suppkey);
 
 
-    DBI64Type* l_linenumber = readIntegerColumn<DBI64Type>(lineitem_table, "l_linenumber");
-     d_lineitem__l_linenumber = allocateAndTransfer<DBI64Type>(l_linenumber, lineitem_size); 
-    free(l_linenumber);
+    // DBI64Type* l_linenumber = readIntegerColumn<DBI64Type>(lineitem_table, "l_linenumber");
+    //  d_lineitem__l_linenumber = allocateAndTransfer<DBI64Type>(l_linenumber, lineitem_size); 
+    // free(l_linenumber);
 
-    DBDecimalType* l_quantity = readIntegerColumn<DBDecimalType>(lineitem_table, "l_quantity");
+    DBDecimalType* l_quantity = readDecimalColumn<1>(lineitem_table, "l_quantity");
      d_lineitem__l_quantity = allocateAndTransfer<DBDecimalType>(l_quantity, lineitem_size); 
     free(l_quantity);
 
-    DBDecimalType* l_extendedprice = readDecimalColumn(lineitem_table, "l_extendedprice");
+    DBDecimalType* l_extendedprice = readDecimalColumn<1>(lineitem_table, "l_extendedprice");
      d_lineitem__l_extendedprice = allocateAndTransfer<DBDecimalType>(l_extendedprice, lineitem_size); 
     free(l_extendedprice);
 
-    DBDecimalType* l_discount = readDecimalColumn(lineitem_table, "l_discount");
+    DBDecimalType* l_discount = readDecimalColumn<1>(lineitem_table, "l_discount");
      d_lineitem__l_discount = allocateAndTransfer<DBDecimalType>(l_discount, lineitem_size); 
     free(l_discount);
     
-    DBDecimalType* l_tax = readDecimalColumn(lineitem_table, "l_tax");
+    DBDecimalType* l_tax = readDecimalColumn<1>(lineitem_table, "l_tax");
      d_lineitem__l_tax = allocateAndTransfer<DBDecimalType>(l_tax, lineitem_size); 
     free(l_tax);
 
-    DBCharType* l_returnflag = readCharColumn(lineitem_table, "l_returnflag");
+    DBCharType* l_returnflag = readFixedSizeBinary(lineitem_table, "l_returnflag");
      d_lineitem__l_returnflag = allocateAndTransfer<DBCharType>(l_returnflag, lineitem_size); 
     free(l_returnflag);
 
-    DBCharType* l_linestatus = readCharColumn(lineitem_table, "l_linestatus");
+    DBCharType* l_linestatus = readFixedSizeBinary(lineitem_table, "l_linestatus");
      d_lineitem__l_linestatus = allocateAndTransfer<DBCharType>(l_linestatus, lineitem_size); 
     free(l_linestatus);
 
@@ -150,15 +150,15 @@ void initTpchDb(std::string dbDir) {
      d_lineitem__l_receiptdate = allocateAndTransfer<DBDateType>(l_receiptdate, lineitem_size); 
     free(l_receiptdate);
 
-    DBStringType* comments = readStringColumn(lineitem_table, "comments");
+    DBStringType* comments = readStringColumn<1>(lineitem_table, "l_comment");
      d_lineitem__comments = allocateAndTransferStrings(comments, lineitem_size);
     free(comments);
 
-    DBStringType* l_shipinstruct = readStringColumn(lineitem_table, "l_shipinstruct");
+    DBStringType* l_shipinstruct = readStringColumn<1>(lineitem_table, "l_shipinstruct");
      d_lineitem__l_shipinstruct = allocateAndTransferStrings(l_shipinstruct, lineitem_size);
     free(l_shipinstruct);
 
-    DBStringType* l_shipmode = readStringColumn(lineitem_table, "l_shipmode");
+    DBStringType* l_shipmode = readStringColumn<1>(lineitem_table, "l_shipmode");
      d_lineitem__l_shipmode = allocateAndTransferStrings(l_shipmode, lineitem_size);
     free(l_shipmode);
 
@@ -171,19 +171,19 @@ void initTpchDb(std::string dbDir) {
     PrintColumnTypes(orders_table);
     #endif
 
-    DBI32Type* o_orderkey = readIntegerColumn<DBI32Type>(orders_table, "o_orderkey");
+    DBI32Type* o_orderkey = readIntegerColumn<DBI32Type, 1>(orders_table, "o_orderkey");
     d_orders__o_orderkey = allocateAndTransfer<DBI32Type>(o_orderkey, orders_size);
     free(o_orderkey);
 
-    DBCharType* o_orderstatus = readCharColumn(orders_table, "o_orderstatus");
+    DBCharType* o_orderstatus = readFixedSizeBinary(orders_table, "o_orderstatus");
     d_orders__o_orderstatus = allocateAndTransfer<DBCharType>(o_orderstatus, orders_size);
     free(o_orderstatus);
 
-    DBI32Type* o_custkey = readIntegerColumn<DBI32Type>(orders_table, "o_custkey");
+    DBI32Type* o_custkey = readIntegerColumn<DBI32Type, 1>(orders_table, "o_custkey");
     d_orders__o_custkey = allocateAndTransfer<DBI32Type>(o_custkey, orders_size);
     free(o_custkey);
 
-    DBDecimalType* o_totalprice = readDecimalColumn(orders_table, "o_totalprice");
+    DBDecimalType* o_totalprice = readDecimalColumn<1>(orders_table, "o_totalprice");
     d_orders__o_totalprice = allocateAndTransfer<DBDecimalType>(o_totalprice, orders_size);
     free(o_totalprice);
 
@@ -191,19 +191,19 @@ void initTpchDb(std::string dbDir) {
     d_orders__o_orderdate = allocateAndTransfer<DBDateType>(o_orderdate, orders_size);
     free(o_orderdate);
 
-    DBStringType* o_orderpriority = readStringColumn(orders_table, "o_orderpriority");
+    DBStringType* o_orderpriority = readStringColumn<1>(orders_table, "o_orderpriority");
     d_orders__o_orderpriority = allocateAndTransferStrings(o_orderpriority, orders_size);
     free(o_orderpriority);
 
-    DBStringType* o_clerk = readStringColumn(orders_table, "o_clerk");
+    DBStringType* o_clerk = readStringColumn<1>(orders_table, "o_clerk");
     d_orders__o_clerk = allocateAndTransferStrings(o_clerk, orders_size);
     free(o_clerk);
 
-    DBI32Type* o_shippriority = readIntegerColumn<DBI32Type>(orders_table, "o_shippriority");
+    DBI32Type* o_shippriority = readIntegerColumn<DBI32Type, 1>(orders_table, "o_shippriority");
     d_orders__o_shippriority = allocateAndTransfer<DBI32Type>(o_shippriority, orders_size);
     free(o_shippriority);
 
-    DBStringType* o_comment = readStringColumn(orders_table, "o_comment");
+    DBStringType* o_comment = readStringColumn<1>(orders_table, "o_comment");
     d_orders__o_comment = allocateAndTransferStrings(o_comment, orders_size);
     free(o_comment);
 
@@ -214,35 +214,35 @@ void initTpchDb(std::string dbDir) {
     PrintColumnTypes(customer_table);
     #endif
 
-    DBStringType* c_mktsegment = readStringColumn(customer_table, "c_mktsegment");
+    DBStringType* c_mktsegment = readStringColumn<1>(customer_table, "c_mktsegment");
     d_customer__c_mktsegment = allocateAndTransferStrings(c_mktsegment, customer_size);
     free(c_mktsegment);
 
-    DBI32Type* c_custkey = readIntegerColumn<DBI32Type>(customer_table, "c_custkey");
+    DBI32Type* c_custkey = readIntegerColumn<DBI32Type, 1>(customer_table, "c_custkey");
     d_customer__c_custkey = allocateAndTransfer<DBI32Type>(c_custkey, customer_size);
     free(c_custkey);
 
-    DBStringType* c_name = readStringColumn(customer_table, "c_name");
+    DBStringType* c_name = readStringColumn<1>(customer_table, "c_name");
     d_customer__c_name = allocateAndTransferStrings(c_name, customer_size);
     free(c_name);
 
-    DBStringType* c_address = readStringColumn(customer_table, "c_address");
+    DBStringType* c_address = readStringColumn<1>(customer_table, "c_address");
     d_customer__c_address = allocateAndTransferStrings(c_address, customer_size);
     free(c_address);
 
-    DBI32Type* c_nationkey = readIntegerColumn<DBI32Type>(customer_table, "c_nationkey");
+    DBI32Type* c_nationkey = readIntegerColumn<DBI32Type, 1>(customer_table, "c_nationkey");
     d_customer__c_nationkey = allocateAndTransfer<DBI32Type>(c_nationkey, customer_size);
     free(c_nationkey);
 
-    DBStringType* c_phone = readStringColumn(customer_table, "c_phone");
+    DBStringType* c_phone = readStringColumn<1>(customer_table, "c_phone");
     d_customer__c_phone = allocateAndTransferStrings(c_phone, customer_size);
     free(c_phone);
 
-    DBDecimalType* c_acctbal = readDecimalColumn(customer_table, "c_acctbal");
+    DBDecimalType* c_acctbal = readDecimalColumn<1>(customer_table, "c_acctbal");
     d_customer__c_acctbal = allocateAndTransfer<DBDecimalType>(c_acctbal, customer_size);
     free(c_acctbal);
 
-    DBStringType* c_comment = readStringColumn(customer_table, "c_comment");
+    DBStringType* c_comment = readStringColumn<1>(customer_table, "c_comment");
     d_customer__c_comment = allocateAndTransferStrings(c_comment, customer_size);
     free(c_comment);
 
@@ -252,15 +252,15 @@ void initTpchDb(std::string dbDir) {
     PrintColumnTypes(region_table);
     #endif
 
-    DBI32Type* r_regionkey = readIntegerColumn<DBI32Type>(region_table, "r_regionkey");
+    DBI32Type* r_regionkey = readIntegerColumn<DBI32Type, 1>(region_table, "r_regionkey");
     d_region__r_regionkey = allocateAndTransfer<DBI32Type>(r_regionkey, region_size);
     free(r_regionkey);
 
-    DBStringType* r_name = readStringColumn(region_table, "r_name");
+    DBStringType* r_name = readStringColumn<1>(region_table, "r_name");
     d_region__r_name = allocateAndTransferStrings(r_name, region_size);
     free(r_name);
 
-    DBStringType* r_comment = readStringColumn(region_table, "r_comment");
+    DBStringType* r_comment = readStringColumn<1>(region_table, "r_comment");
     d_region__r_comment = allocateAndTransferStrings(r_comment, region_size);
     free(r_comment);
 
@@ -270,19 +270,19 @@ void initTpchDb(std::string dbDir) {
     PrintColumnTypes(nation_table);
     #endif
 
-    DBI32Type* n_nationkey = readIntegerColumn<DBI32Type>(nation_table, "n_nationkey");
+    DBI32Type* n_nationkey = readIntegerColumn<DBI32Type, 1>(nation_table, "n_nationkey");
     d_nation__n_nationkey = allocateAndTransfer<DBI32Type>(n_nationkey, nation_size);
     free(n_nationkey);
 
-    DBStringType* n_name = readStringColumn(nation_table, "n_name");
+    DBStringType* n_name = readStringColumn<1>(nation_table, "n_name");
     d_nation__n_name = allocateAndTransferStrings(n_name, nation_size);
     free(n_name);
 
-    DBI32Type* n_regionkey = readIntegerColumn<DBI32Type>(nation_table, "n_regionkey");
+    DBI32Type* n_regionkey = readIntegerColumn<DBI32Type, 1>(nation_table, "n_regionkey");
     d_nation__n_regionkey = allocateAndTransfer<DBI32Type>(n_regionkey, nation_size);
     free(n_regionkey);
 
-    DBStringType* n_comment = readStringColumn(nation_table, "n_comment");
+    DBStringType* n_comment = readStringColumn<1>(nation_table, "n_comment");
     d_nation__n_comment = allocateAndTransferStrings(n_comment, nation_size);
     free(n_comment);
 
@@ -292,31 +292,31 @@ void initTpchDb(std::string dbDir) {
     PrintColumnTypes(supplier_table);
     #endif
 
-    DBI32Type* s_suppkey = readIntegerColumn<DBI32Type>(supplier_table, "s_suppkey");
+    DBI32Type* s_suppkey = readIntegerColumn<DBI32Type, 1>(supplier_table, "s_suppkey");
     d_supplier__s_suppkey = allocateAndTransfer<DBI32Type>(s_suppkey, supplier_size);
     free(s_suppkey);
 
-    DBI32Type* s_nationkey = readIntegerColumn<DBI32Type>(supplier_table, "s_nationkey");
+    DBI32Type* s_nationkey = readIntegerColumn<DBI32Type, 1>(supplier_table, "s_nationkey");
     d_supplier__s_nationkey = allocateAndTransfer<DBI32Type>(s_nationkey, supplier_size);
     free(s_nationkey);
 
-    DBStringType* s_name = readStringColumn(supplier_table, "s_name");
+    DBStringType* s_name = readStringColumn<1>(supplier_table, "s_name");
     d_supplier__s_name = allocateAndTransferStrings(s_name, supplier_size);
     free(s_name);
 
-    DBStringType* s_address = readStringColumn(supplier_table, "s_address");
+    DBStringType* s_address = readStringColumn<1>(supplier_table, "s_address");
     d_supplier__s_address = allocateAndTransferStrings(s_address, supplier_size);
     free(s_address);
 
-    DBStringType* s_phone = readStringColumn(supplier_table, "s_phone");
+    DBStringType* s_phone = readStringColumn<1>(supplier_table, "s_phone");
     d_supplier__s_phone = allocateAndTransferStrings(s_phone, supplier_size);
     free(s_phone);
 
-    DBDecimalType* s_acctbal = readDecimalColumn(supplier_table, "s_acctbal");
+    DBDecimalType* s_acctbal = readDecimalColumn<1>(supplier_table, "s_acctbal");
     d_supplier__s_acctbal = allocateAndTransfer<DBDecimalType>(s_acctbal, supplier_size);
     free(s_acctbal);
 
-    DBStringType* s_comment = readStringColumn(supplier_table, "s_comment");
+    DBStringType* s_comment = readStringColumn<1>(supplier_table, "s_comment");
     d_supplier__s_comment = allocateAndTransferStrings(s_comment, supplier_size);
     free(s_comment);
 
@@ -326,23 +326,23 @@ void initTpchDb(std::string dbDir) {
     PrintColumnTypes(partsupp_table);
     #endif
 
-    DBI32Type* ps_suppkey = readIntegerColumn<DBI32Type>(partsupp_table, "ps_suppkey");
+    DBI32Type* ps_suppkey = readIntegerColumn<DBI32Type, 1>(partsupp_table, "ps_suppkey");
     d_partsupp__ps_suppkey = allocateAndTransfer<DBI32Type>(ps_suppkey, partsupp_size);
     free(ps_suppkey);
 
-    DBI32Type* ps_partkey = readIntegerColumn<DBI32Type>(partsupp_table, "ps_partkey");
+    DBI32Type* ps_partkey = readIntegerColumn<DBI32Type, 1>(partsupp_table, "ps_partkey");
     d_partsupp__ps_partkey = allocateAndTransfer<DBI32Type>(ps_partkey, partsupp_size);
     free(ps_partkey);
 
-    DBI32Type* ps_availqty = readIntegerColumn<DBI32Type>(partsupp_table, "ps_availqty");
+    DBI32Type* ps_availqty = readIntegerColumn<DBI32Type, 1>(partsupp_table, "ps_availqty");
     d_partsupp__ps_availqty = allocateAndTransfer<DBI32Type>(ps_availqty, partsupp_size);
     free(ps_availqty);
 
-    DBDecimalType* ps_supplycost = readDecimalColumn(partsupp_table, "ps_supplycost");
+    DBDecimalType* ps_supplycost = readDecimalColumn<1>(partsupp_table, "ps_supplycost");
     d_partsupp__ps_supplycost = allocateAndTransfer<DBDecimalType>(ps_supplycost, partsupp_size);
     free(ps_supplycost);
 
-    DBStringType* ps_comment = readStringColumn(partsupp_table, "ps_comment");
+    DBStringType* ps_comment = readStringColumn<1>(partsupp_table, "ps_comment");
     d_partsupp__ps_comment = allocateAndTransferStrings(ps_comment, partsupp_size);
     free(ps_comment);
 
@@ -352,39 +352,39 @@ void initTpchDb(std::string dbDir) {
     PrintColumnTypes(part_table);
     #endif
 
-    DBI32Type* p_partkey = readIntegerColumn<DBI32Type>(part_table, "p_partkey");
+    DBI32Type* p_partkey = readIntegerColumn<DBI32Type, 1>(part_table, "p_partkey");
     d_part__p_partkey = allocateAndTransfer<DBI32Type>(p_partkey, part_size);
     free(p_partkey);
 
-    DBStringType* p_name = readStringColumn(part_table, "p_name");
+    DBStringType* p_name = readStringColumn<1>(part_table, "p_name");
     d_part__p_name = allocateAndTransferStrings(p_name, part_size);
     free(p_name);
 
-    DBStringType* p_mfgr = readStringColumn(part_table, "p_mfgr");
+    DBStringType* p_mfgr = readStringColumn<1>(part_table, "p_mfgr");
     d_part__p_mfgr = allocateAndTransferStrings(p_mfgr, part_size);
     free(p_mfgr);
 
-    DBStringType* p_brand = readStringColumn(part_table, "p_brand");
+    DBStringType* p_brand = readStringColumn<1>(part_table, "p_brand");
     d_part__p_brand = allocateAndTransferStrings(p_brand, part_size);
     free(p_brand);
 
-    DBStringType* p_type = readStringColumn(part_table, "p_type");
+    DBStringType* p_type = readStringColumn<1>(part_table, "p_type");
     d_part__p_type = allocateAndTransferStrings(p_type, part_size);
     free(p_type);
 
-    DBI32Type* p_size = readIntegerColumn<DBI32Type>(part_table, "p_size");
+    DBI32Type* p_size = readIntegerColumn<DBI32Type, 1>(part_table, "p_size");
     d_part__p_size = allocateAndTransfer<DBI32Type>(p_size, part_size);
     free(p_size);
 
-    DBStringType* p_container = readStringColumn(part_table, "p_container");
+    DBStringType* p_container = readStringColumn<1>(part_table, "p_container");
     d_part__p_container = allocateAndTransferStrings(p_container, part_size);
     free(p_container);
 
-    DBDecimalType* p_retailprice = readDecimalColumn(part_table, "p_retailprice");
+    DBDecimalType* p_retailprice = readDecimalColumn<1>(part_table, "p_retailprice");
     d_part__p_retailprice = allocateAndTransfer<DBDecimalType>(p_retailprice, part_size);
     free(p_retailprice);
 
-    DBStringType* p_comment = readStringColumn(part_table, "p_comment");
+    DBStringType* p_comment = readStringColumn<1>(part_table, "p_comment");
     d_part__p_comment = allocateAndTransferStrings(p_comment, part_size);
     free(p_comment);
 
