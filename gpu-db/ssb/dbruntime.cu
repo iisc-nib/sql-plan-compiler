@@ -6,7 +6,7 @@
 #include <dlfcn.h>
 #include <iomanip>
 #include <chrono>
-#include "dbruntime_ssb.h"
+#include "dbruntime.h"
 
 int main(int argc, const char **argv)
 {

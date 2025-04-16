@@ -11,16 +11,22 @@ __global__ void count_57c908d41c20(HASHTABLE_INSERT HT_57c908d0d780, DBCharType*
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineitem_size) return;
 auto reg_lineitem__l_shipdate = lineitem__l_shipdate[tid];
+// shared
+// BlockLoad(shmem_l_shipdate, lineitem__l_shipdate + offset, tile_size);
 if (!(evaluatePredicate(reg_lineitem__l_shipdate, 10471, Predicate::lte))) return;
+// BlockPredicate(shmem_l_shipdate, 10471, Predicate::lte, shmem_pred1);
 uint64_t KEY_57c908d0d780 = 0;
 auto reg_lineitem__l_returnflag = lineitem__l_returnflag[tid];
-
-KEY_57c908d0d780 |= reg_lineitem__l_returnflag;
+// BlockLoad(shmem_l_returnflag, lineitem__l_returnflag + offset, tile_size);
 auto reg_lineitem__l_linestatus = lineitem__l_linestatus[tid];
+// BlockLoad(shmem_l_linestatus, lineitem__l_linestatus + offset, tile_size);
+KEY_57c908d0d780 |= reg_lineitem__l_returnflag;
 KEY_57c908d0d780 <<= 8;
 KEY_57c908d0d780 |= reg_lineitem__l_linestatus;
+// BlockBuildKeys(shmem_keys, shmem_l_returnflag, shmem_l_linestatus, tile_size);
 //Create aggregation hash table
 HT_57c908d0d780.insert(cuco::pair{KEY_57c908d0d780, 1});
+// BlockInsert(shmem_keys, HT_57...);
 }
 template<typename HASHTABLE_FIND>
 __global__ void main_57c908d41c20(HASHTABLE_FIND HT_57c908d0d780, DBCharType* KEY_57c908d0d780lineitem__l_linestatus, DBCharType* KEY_57c908d0d780lineitem__l_returnflag, DBDecimalType* aggr0__tmp_attr0, DBDecimalType* aggr0__tmp_attr1, DBDecimalType* aggr0__tmp_attr2, DBDecimalType* aggr0__tmp_attr4, DBI64Type* aggr0__tmp_attr9, DBDecimalType* aggr_rw__rw0, DBI64Type* aggr_rw__rw1, DBDecimalType* aggr_rw__rw2, DBI64Type* aggr_rw__rw3, DBDecimalType* aggr_rw__rw4, DBI64Type* aggr_rw__rw5, DBDecimalType* lineitem__l_discount, DBDecimalType* lineitem__l_extendedprice, DBCharType* lineitem__l_linestatus, DBDecimalType* lineitem__l_quantity, DBCharType* lineitem__l_returnflag, DBDateType* lineitem__l_shipdate, DBDecimalType* lineitem__l_tax, size_t lineitem_size) {
