@@ -111,7 +111,14 @@ DBStringType*,
 size_t,
 DBI16Type*,
 DBI16Type*,
-DBI16Type*
+DBI16Type*,
+DBI16Type*,
+DBI16Type*,
+std::unordered_map<DBI16Type, std::string>&,
+std::unordered_map<DBI16Type, std::string>&,
+std::unordered_map<DBI16Type, std::string>&,
+std::unordered_map<DBI16Type, std::string>&,
+std::unordered_map<DBI16Type, std::string>&
                )>(dlsym(lib, "control"));
             auto start = std::chrono::high_resolution_clock::now();
             control(
@@ -183,8 +190,15 @@ DBI16Type*
  d_region__r_comment,
  region_size,
  d_part__p_brand1_encoded,
+ d_supplier__s_nation_encoded,
+ d_customer__c_city_encoded,
+ d_supplier__s_city_encoded,
  d_customer__c_nation_encoded,
-d_supplier__s_nation_encoded
+ part__p_brand1_map,
+ supplier__s_nation_map,
+ customer__c_city_map,
+ supplier__s_city_map,
+ customer__c_nation_map
                 );
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop-start);

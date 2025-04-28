@@ -10,8 +10,11 @@ DBI32Type* d_supplier__s_suppkey;
 DBStringType* d_supplier__s_name;
 DBStringType* d_supplier__s_address;
 DBStringType* d_supplier__s_city;
+DBI16Type* d_supplier__s_city_encoded;
+std::unordered_map<DBI16Type, std::string> supplier__s_city_map;
 DBStringType* d_supplier__s_nation;
 DBI16Type* d_supplier__s_nation_encoded;
+std::unordered_map<DBI16Type, std::string> supplier__s_nation_map;
 DBStringType* d_supplier__s_region;
 DBStringType* d_supplier__s_phone;
 size_t supplier_size;
@@ -19,9 +22,11 @@ DBI32Type* d_part__p_partkey;
 DBStringType* d_part__p_name;
 DBStringType* d_part__p_mfgr;
 DBStringType* d_part__p_category;
+DBI16Type* d_part__p_category_encoded;
+std::unordered_map<DBI16Type, std::string> part__p_category_map;
 DBStringType* d_part__p_brand1;
 DBI16Type* d_part__p_brand1_encoded;
-std::unordered_map<std::string, DBI16Type> d_part__p_brand1_map;
+std::unordered_map<DBI16Type, std::string> part__p_brand1_map;
 DBStringType* d_part__p_color;
 DBStringType* d_part__p_type;
 DBI32Type* d_part__p_size;
@@ -67,8 +72,11 @@ DBI32Type* d_customer__c_custkey;
 DBStringType* d_customer__c_name;
 DBStringType* d_customer__c_address;
 DBStringType* d_customer__c_city;
+DBI16Type* d_customer__c_city_encoded;
+std::unordered_map<DBI16Type, std::string> customer__c_city_map;
 DBStringType* d_customer__c_nation;
 DBI16Type* d_customer__c_nation_encoded;
+std::unordered_map<DBI16Type, std::string> customer__c_nation_map;
 DBStringType* d_customer__c_region;
 DBStringType* d_customer__c_phone;
 DBStringType* d_customer__c_mktsegment;
@@ -172,9 +180,21 @@ void initSsbDb(std::string dbDir) {
     DBStringType* s_city = readStringColumn<1>(supplier_table, "s_city");
     d_supplier__s_city = allocateAndTransferStrings(s_city, supplier_size);
     free(s_city);
+    DBStringEncodedType* s_city_enc = readStringEncodedColumn<1>(supplier_table, "s_city");
+    d_supplier__s_city_encoded = allocateAndTransfer<DBI16Type>(s_city_enc->buffer, supplier_size);
+    supplier__s_city_map = s_city_enc->rev_dict;
+    free(s_city_enc->buffer);
+    free(s_city_enc);
+
     DBStringType* s_nation = readStringColumn<1>(supplier_table, "s_nation");
     d_supplier__s_nation = allocateAndTransferStrings(s_nation, supplier_size);
     free(s_nation);
+    DBStringEncodedType* s_nation_enc = readStringEncodedColumn<1>(supplier_table, "s_nation");
+    d_supplier__s_nation_encoded = allocateAndTransfer<DBI16Type>(s_nation_enc->buffer, supplier_size);
+    supplier__s_nation_map = s_nation_enc->rev_dict;
+    free(s_nation_enc->buffer);
+    free(s_nation_enc);
+
     DBStringType* s_region = readStringColumn<1>(supplier_table, "s_region");
     d_supplier__s_region = allocateAndTransferStrings(s_region, supplier_size);
     free(s_region);
@@ -182,10 +202,6 @@ void initSsbDb(std::string dbDir) {
     d_supplier__s_phone = allocateAndTransferStrings(s_phone, supplier_size);
     free(s_phone);
 
-    DBStringEncodedType* s_nation_enc = readStringEncodedColumn<1>(supplier_table, "s_nation");
-    d_supplier__s_nation_encoded = allocateAndTransfer<DBI16Type>(s_nation_enc->buffer, supplier_size);
-    free(s_nation_enc->buffer);
-    free(s_nation_enc);
     // date 
     auto date_table = getArrowTable(dbDir, "date");
     date_size = date_table->num_rows();
@@ -213,9 +229,9 @@ void initSsbDb(std::string dbDir) {
     d_date__d_yearmonthnum = allocateAndTransfer<DBI32Type>(d_yearmonthnum, date_size); 
     free(d_yearmonthnum);
     // TODO(avinash)
-    // DBStringType* d_yearmonth = readFixedSizeBinaryToString<7>(date_table, "d_yearmonth");
-    // d_date__d_yearmonth = allocateAndTransferStrings(d_yearmonth, date_size);
-    // free(d_yearmonth);
+    DBStringType* d_yearmonth = readFixedSizeBinaryToString<7>(date_table, "d_yearmonth");
+    d_date__d_yearmonth = allocateAndTransferStrings(d_yearmonth, date_size);
+    free(d_yearmonth);
     DBI32Type* d_daynuminweek = readIntegerColumn<DBI32Type, 1>(date_table, "d_daynuminweek");
     d_date__d_daynuminweek = allocateAndTransfer<DBI32Type>(d_daynuminweek, date_size); 
     free(d_daynuminweek);
@@ -258,13 +274,17 @@ void initSsbDb(std::string dbDir) {
     d_part__p_category = allocateAndTransferStrings(p_category, part_size);
     free(p_category);
 
+    DBStringType* p_mfgr = readFixedSizeBinaryToString<6>(part_table, "p_mfgr");
+    d_part__p_mfgr = allocateAndTransferStrings(p_mfgr, part_size);
+    free(p_mfgr);
+
     DBI32Type* p_partkey = readIntegerColumn<DBI32Type, 1>(part_table, "p_partkey");
     d_part__p_partkey = allocateAndTransfer<DBI32Type>(p_partkey, part_size); 
     free(p_partkey);    
 
     DBStringEncodedType* p_brand1 = readStringEncodedColumn<1>(part_table, "p_brand1");
     d_part__p_brand1_encoded = allocateAndTransfer<DBI16Type>(p_brand1->buffer, part_size);
-    d_part__p_brand1_map = p_brand1->dict;
+    part__p_brand1_map = p_brand1->rev_dict;
     free(p_brand1->buffer);
     free(p_brand1);
     
@@ -283,12 +303,21 @@ void initSsbDb(std::string dbDir) {
     d_customer__c_custkey = allocateAndTransfer<DBI32Type>(c_custkey, customer_size);
     free(c_custkey);
 
+    DBStringType* c_city = readStringColumn<1>(customer_table, "c_city");
+    d_customer__c_city = allocateAndTransferStrings(c_city, customer_size);
+    free(c_city);
+    DBStringEncodedType* c_city_enc = readStringEncodedColumn<1>(customer_table, "c_city");
+    d_customer__c_city_encoded = allocateAndTransfer<DBI16Type>(c_city_enc->buffer, customer_size);
+    customer__c_city_map = c_city_enc->rev_dict;
+    free(c_city_enc->buffer);
+    free(c_city_enc);
+
     DBStringType* c_nation = readStringColumn<1>(customer_table, "c_nation");
     d_customer__c_nation = allocateAndTransferStrings(c_nation, customer_size);
     free(c_nation);
-
     DBStringEncodedType* c_nation_enc = readStringEncodedColumn<1>(customer_table, "c_nation");
     d_customer__c_nation_encoded = allocateAndTransfer<DBI16Type>(c_nation_enc->buffer, customer_size);
+    customer__c_nation_map = c_nation_enc->rev_dict;
     free(c_nation_enc->buffer);
     free(c_nation_enc);
 
