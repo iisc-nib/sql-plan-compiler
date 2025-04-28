@@ -107,6 +107,26 @@ __device__ static inline bool evaluatePredicate(const DBStringType str1, const D
       printf("%s\n", str2);
       return true;
     }
+    case Predicate::lte: {
+      while(str1[i]!='\0' && str2[j]!='\0') {
+        if (str1[i] < str2[j]) return true;
+        else if (str1[i] > str2[j]) return false;
+        i++;
+        j++;
+      }
+      return str1[i] == '\0' && str2[j] == '\0';
+    }
+    break;
+    case Predicate::gte: {
+      while(str1[i]!='\0' && str2[j]!='\0') {
+        if (str1[i] > str2[j]) return true;
+        else if (str1[i] < str2[j]) return false;
+        i++;
+        j++;
+      }
+      return str1[i] == '\0' && str2[j] == '\0';
+    }
+    break;
     default:
     break;
   }

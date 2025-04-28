@@ -3,6 +3,7 @@
 #include "cudautils.cuh"
 #include "arrowutils.h"
 #include "db_types.h"
+#include <unordered_map>
 #include <iostream>
 
 DBI32Type* d_supplier__s_suppkey;
@@ -10,6 +11,7 @@ DBStringType* d_supplier__s_name;
 DBStringType* d_supplier__s_address;
 DBStringType* d_supplier__s_city;
 DBStringType* d_supplier__s_nation;
+DBI16Type* d_supplier__s_nation_encoded;
 DBStringType* d_supplier__s_region;
 DBStringType* d_supplier__s_phone;
 size_t supplier_size;
@@ -18,6 +20,8 @@ DBStringType* d_part__p_name;
 DBStringType* d_part__p_mfgr;
 DBStringType* d_part__p_category;
 DBStringType* d_part__p_brand1;
+DBI16Type* d_part__p_brand1_encoded;
+std::unordered_map<std::string, DBI16Type> d_part__p_brand1_map;
 DBStringType* d_part__p_color;
 DBStringType* d_part__p_type;
 DBI32Type* d_part__p_size;
@@ -64,6 +68,7 @@ DBStringType* d_customer__c_name;
 DBStringType* d_customer__c_address;
 DBStringType* d_customer__c_city;
 DBStringType* d_customer__c_nation;
+DBI16Type* d_customer__c_nation_encoded;
 DBStringType* d_customer__c_region;
 DBStringType* d_customer__c_phone;
 DBStringType* d_customer__c_mktsegment;
@@ -177,6 +182,10 @@ void initSsbDb(std::string dbDir) {
     d_supplier__s_phone = allocateAndTransferStrings(s_phone, supplier_size);
     free(s_phone);
 
+    DBStringEncodedType* s_nation_enc = readStringEncodedColumn<1>(supplier_table, "s_nation");
+    d_supplier__s_nation_encoded = allocateAndTransfer<DBI16Type>(s_nation_enc->buffer, supplier_size);
+    free(s_nation_enc->buffer);
+    free(s_nation_enc);
     // date 
     auto date_table = getArrowTable(dbDir, "date");
     date_size = date_table->num_rows();
@@ -237,10 +246,60 @@ void initSsbDb(std::string dbDir) {
     DBI32Type* d_weekdayfl = readIntegerColumn<DBI32Type, 1>(date_table, "d_weekdayfl");
     d_date__d_weekdayfl = allocateAndTransfer<DBI32Type>(d_weekdayfl, date_size); 
     free(d_weekdayfl);
+
+    // part
+    auto part_table = getArrowTable(dbDir, "part");
+    part_size = part_table->num_rows();
+
+    #ifdef PRINTSCHEMA
+    PrintColumnTypes(part_table);
+    #endif
+    DBStringType* p_category = readFixedSizeBinaryToString<7>(part_table, "p_category");
+    d_part__p_category = allocateAndTransferStrings(p_category, part_size);
+    free(p_category);
+
+    DBI32Type* p_partkey = readIntegerColumn<DBI32Type, 1>(part_table, "p_partkey");
+    d_part__p_partkey = allocateAndTransfer<DBI32Type>(p_partkey, part_size); 
+    free(p_partkey);    
+
+    DBStringEncodedType* p_brand1 = readStringEncodedColumn<1>(part_table, "p_brand1");
+    d_part__p_brand1_encoded = allocateAndTransfer<DBI16Type>(p_brand1->buffer, part_size);
+    d_part__p_brand1_map = p_brand1->dict;
+    free(p_brand1->buffer);
+    free(p_brand1);
+    
+    DBStringType* p_brand1_s = readStringColumn<1>(part_table, "p_brand1");
+    d_part__p_brand1 = allocateAndTransferStrings(p_brand1_s, part_size);
+    free(p_brand1_s);
+
+    // customer
+    auto customer_table = getArrowTable(dbDir, "customer");
+    customer_size = customer_table->num_rows();
+
+    #ifdef PRINTSCHEMA
+    PrintColumnTypes(customer_table);
+    #endif
+    DBI32Type* c_custkey = readIntegerColumn<DBI32Type, 1>(customer_table, "c_custkey");
+    d_customer__c_custkey = allocateAndTransfer<DBI32Type>(c_custkey, customer_size);
+    free(c_custkey);
+
+    DBStringType* c_nation = readStringColumn<1>(customer_table, "c_nation");
+    d_customer__c_nation = allocateAndTransferStrings(c_nation, customer_size);
+    free(c_nation);
+
+    DBStringEncodedType* c_nation_enc = readStringEncodedColumn<1>(customer_table, "c_nation");
+    d_customer__c_nation_encoded = allocateAndTransfer<DBI16Type>(c_nation_enc->buffer, customer_size);
+    free(c_nation_enc->buffer);
+    free(c_nation_enc);
+
+    DBStringType* c_region = readStringColumn<1>(customer_table, "c_region");
+    d_customer__c_region = allocateAndTransferStrings(c_region, customer_size);
+    free(c_region);
+
     #ifdef TIMER
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    std::clog << "Reading and transferring data time for lineitem table: " << duration.count() / 1000. << " milliseconds." << std::endl;
+    std::clog << "Reading and transferring data time for all tables: " << duration.count() / 1000. << " milliseconds." << std::endl;
     #endif
 
     #ifdef GPUMEMINFO

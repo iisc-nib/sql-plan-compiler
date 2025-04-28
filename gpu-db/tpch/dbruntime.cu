@@ -114,7 +114,12 @@ int main(int argc, const char **argv)
                 DBI32Type *,
                 DBStringType *,
                 DBStringType *,
-                size_t)>(dlsym(lib, "control"));
+                size_t,
+                DBI16Type*,
+                std::unordered_map<DBI16Type, std::string>&,
+                std::unordered_map<DBI16Type, std::string>&,
+                std::unordered_map<DBI16Type, std::string>&
+            )>(dlsym(lib, "control"));
             auto start = std::chrono::high_resolution_clock::now();
             control(
                 d_nation__n_nationkey,
@@ -185,7 +190,11 @@ int main(int argc, const char **argv)
                 d_region__r_regionkey,
                 d_region__r_name,
                 d_region__r_comment,
-                region_size);
+                region_size,
+                d_nation__n_name_encoded,
+                nation__n_name_map,
+                nation__n_name_map,
+                nation__n_name_map);
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop-start);
             std::clog << "Query execution time: " << duration.count() / 1000. << "milliseconds.\n";

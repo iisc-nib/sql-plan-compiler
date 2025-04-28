@@ -54,7 +54,61 @@ std::shared_ptr<arrow::Table> getArrowTable(std::string dbDir, std::string parqu
   return res;
 }
 
+template<int t=0>
+DBStringEncodedType* readStringEncodedColumn(std::shared_ptr<arrow::Table>& table, const std::string& column) {
+  DBStringEncodedType* res = new DBStringEncodedType();
+  res->buffer = (DBI16Type*)malloc(sizeof(DBI16Type) * table->num_rows());
+  auto arrowCol = table->GetColumnByName(column);
+  auto idx = 0ull;
+  for (auto chunk:arrowCol->chunks()) {
+    if (t == 0) {
+      auto strArr = std::static_pointer_cast<arrow::LargeStringArray>(chunk);
+      for (auto i=0ull; i<strArr->length(); i++)
+      {
+        std::string s = strArr->GetString(i);
+        res->dict[s] = 1;
+      }
+    } else {
+      auto strArr = std::static_pointer_cast<arrow::StringArray>(chunk);
+      for (auto i=0ull; i<strArr->length(); i++)
+      {
+        std::string s = strArr->GetString(i);
+        res->dict[s] = 1;
+      }
+    }
+  }
+  DBI16Type i = 0;
+  for (auto& it : res->dict) {
+    it.second = i;
+    i++;
+  } 
+  for (auto& it: res->dict) {
+    res->rev_dict[it.second] = it.first;
+  }
 
+  // std::cout << "Size of dict: " << res->dict.size() << std::endl;
+  // for (auto it: res->dict) {
+  //   std::cout << it.first << ": " << (int)it.second << std::endl;
+  // }
+  for (auto chunk:arrowCol->chunks()) {
+    if (t == 0) {
+      auto strArr = std::static_pointer_cast<arrow::LargeStringArray>(chunk);
+      for (auto i=0ull; i<strArr->length(); i++)
+      {
+        std::string s = strArr->GetString(i);
+        res->buffer[idx++] = res->dict[s];
+      }
+    } else {
+      auto strArr = std::static_pointer_cast<arrow::StringArray>(chunk);
+      for (auto i=0ull; i<strArr->length(); i++)
+      {
+        std::string s = strArr->GetString(i);
+        res->buffer[idx++] = res->dict[s];
+      }
+    }
+  }
+  return res;
+}
 
 template<int t=0>
 DBStringType* readStringColumn(std::shared_ptr<arrow::Table>& table, const std::string& column) {
@@ -114,21 +168,26 @@ DBStringType* readStringColumn(std::shared_ptr<arrow::Table>& table, const std::
 }
 
 //TODO(avinash)
-// template<int t=1>
-// DBStringType* readFixedSizeBinaryToString(std::shared_ptr<arrow::Table>& table, const std::string &column) {
-//   auto res = (DBCharType*)malloc(sizeof(DBCharType) * table->num_rows());
-//   auto arrowCol = table->GetColumnByName(column);
-//   auto idx = 0ull;
-//   for (auto chunk:arrowCol->chunks()) {
-//     auto strArr = std::static_pointer_cast<arrow::FixedSizeBinaryArray>(chunk);
-//     for (auto i=0ull; i<strArr->length(); i++)
-//     {
-//       // std::cout << strArr->GetValue(i)[0] << std::endl;
-//       res[idx++] = strArr->GetValue(i)[0];
-//     }
-//   }
-//   return res;
-// }
+template<int t=1>
+DBStringType* readFixedSizeBinaryToString(std::shared_ptr<arrow::Table>& table, const std::string &column) {
+  auto res = (DBStringType*)malloc(sizeof(DBStringType) * table->num_rows());
+  char* CStringBuffer = (char*)malloc(sizeof(char) * table->num_rows() * (t + 1));
+  memset(CStringBuffer, '\0', sizeof(char) * table->num_rows() * (t + 1));
+  auto arrowCol = table->GetColumnByName(column);
+  auto idx = 0ull;
+  for (auto chunk:arrowCol->chunks()) {
+    auto strArr = std::static_pointer_cast<arrow::FixedSizeBinaryArray>(chunk);
+    for (auto i=0ull; i<strArr->length(); i++)
+    {
+      res[idx] = CStringBuffer + idx * (t + 1);
+      for (int j=0; j<t; j++) {
+        CStringBuffer[idx * (t + 1) + j] = strArr->GetValue(i)[j];
+      }
+      idx++;
+    }
+  }
+  return res;
+}
 DBCharType* readFixedSizeBinary(std::shared_ptr<arrow::Table>& table, const std::string &column) {
   auto res = (DBCharType*)malloc(sizeof(DBCharType) * table->num_rows());
   auto arrowCol = table->GetColumnByName(column);

@@ -108,7 +108,10 @@ size_t,
 DBI32Type*,
 DBStringType*,
 DBStringType*,
-size_t
+size_t,
+DBI16Type*,
+DBI16Type*,
+DBI16Type*
                )>(dlsym(lib, "control"));
             auto start = std::chrono::high_resolution_clock::now();
             control(
@@ -178,7 +181,10 @@ size_t
  d_region__r_regionkey,
  d_region__r_name,
  d_region__r_comment,
- region_size
+ region_size,
+ d_part__p_brand1_encoded,
+ d_customer__c_nation_encoded,
+d_supplier__s_nation_encoded
                 );
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop-start);

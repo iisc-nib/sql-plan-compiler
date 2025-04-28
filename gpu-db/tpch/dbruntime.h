@@ -4,9 +4,12 @@
 #include "arrowutils.h"
 #include "db_types.h"
 #include <iostream>
+#include <map>
 
 DBI32Type* d_nation__n_nationkey;
 DBStringType* d_nation__n_name;
+DBI16Type* d_nation__n_name_encoded;
+std::unordered_map<DBI16Type, std::string> nation__n_name_map;
 DBI32Type* d_nation__n_regionkey;
 DBStringType* d_nation__n_comment;
 size_t nation_size;
@@ -277,6 +280,17 @@ void initTpchDb(std::string dbDir) {
     DBStringType* n_name = readStringColumn<1>(nation_table, "n_name");
     d_nation__n_name = allocateAndTransferStrings(n_name, nation_size);
     free(n_name);
+
+    DBStringEncodedType* n_name_enc = readStringEncodedColumn<1>(nation_table, "n_name");
+    for (auto it: n_name_enc->rev_dict) {
+        nation__n_name_map[it.first] = it.second;    
+    }
+    for (auto it: nation__n_name_map) {
+        std::cout << it.first << ": " << it.second << std::endl;
+    }
+    d_nation__n_name_encoded = allocateAndTransfer<DBI16Type>(n_name_enc->buffer, nation_size);
+    free(n_name_enc->buffer);
+    free(n_name_enc);
 
     DBI32Type* n_regionkey = readIntegerColumn<DBI32Type, 1>(nation_table, "n_regionkey");
     d_nation__n_regionkey = allocateAndTransfer<DBI32Type>(n_regionkey, nation_size);
