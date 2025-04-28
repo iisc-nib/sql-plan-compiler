@@ -54,6 +54,27 @@ std::shared_ptr<arrow::Table> getArrowTable(std::string dbDir, std::string parqu
   return res;
 }
 
+DBStringEncodedType* stringTypeToEncoded(DBStringType* col, size_t len) {
+  DBStringEncodedType* res = new DBStringEncodedType();
+  res->buffer = (DBI16Type*)malloc(sizeof(DBI16Type) * len);
+  for (auto i=0ull; i<len; i++) {
+    std::string s = col[i];
+    res->dict[s] = 1;
+  }
+  DBI16Type i = 0;
+  for (auto& it: res->dict) {
+    it.second = i; i++;
+  }
+  for (auto& it: res->dict) {
+    res->rev_dict[it.second] = it.first;
+  }
+  for (auto i=0ull; i<len; i++) {
+    std::string s = col[i];
+    res->buffer[i] = res->dict[s];
+  }
+  return res;
+}
+
 template<int t=0>
 DBStringEncodedType* readStringEncodedColumn(std::shared_ptr<arrow::Table>& table, const std::string& column) {
   DBStringEncodedType* res = new DBStringEncodedType();

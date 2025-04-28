@@ -114,6 +114,8 @@ DBI16Type*,
 DBI16Type*,
 DBI16Type*,
 DBI16Type*,
+DBI16Type*,
+std::unordered_map<DBI16Type, std::string>&,
 std::unordered_map<DBI16Type, std::string>&,
 std::unordered_map<DBI16Type, std::string>&,
 std::unordered_map<DBI16Type, std::string>&,
@@ -194,11 +196,13 @@ std::unordered_map<DBI16Type, std::string>&
  d_customer__c_city_encoded,
  d_supplier__s_city_encoded,
  d_customer__c_nation_encoded,
+ d_part__p_category_encoded,
  part__p_brand1_map,
  supplier__s_nation_map,
  customer__c_city_map,
  supplier__s_city_map,
- customer__c_nation_map
+ customer__c_nation_map,
+ part__p_category_map
                 );
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop-start);

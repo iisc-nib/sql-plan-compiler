@@ -6,7 +6,7 @@
 #include "cudautils.cuh"
 #include "db_types.h"
 #include "dbruntime.h"
-__global__ void count_5925c600d700(uint64_t* COUNT5925c60020c0, DBStringType* part__p_brand1, size_t part_size) {
+__global__ void count_62ef1f6cd760(uint64_t* COUNT62ef1f6bd1a0, DBStringType* part__p_brand1, size_t part_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= part_size) return;
 auto reg_part__p_brand1 = part__p_brand1[tid];
@@ -16,10 +16,10 @@ if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 //Materialize count
-atomicAdd((int*)COUNT5925c60020c0, 1);
+atomicAdd((int*)COUNT62ef1f6bd1a0, 1);
 }
 template<typename HASHTABLE_INSERT>
-__global__ void main_5925c600d700(uint64_t* BUF_5925c60020c0, uint64_t* BUF_IDX_5925c60020c0, HASHTABLE_INSERT HT_5925c60020c0, DBStringType* part__p_brand1, DBI32Type* part__p_partkey, size_t part_size) {
+__global__ void main_62ef1f6cd760(uint64_t* BUF_62ef1f6bd1a0, uint64_t* BUF_IDX_62ef1f6bd1a0, HASHTABLE_INSERT HT_62ef1f6bd1a0, DBStringType* part__p_brand1, DBI32Type* part__p_partkey, size_t part_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= part_size) return;
 auto reg_part__p_brand1 = part__p_brand1[tid];
@@ -28,16 +28,16 @@ if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
-uint64_t KEY_5925c60020c0 = 0;
+uint64_t KEY_62ef1f6bd1a0 = 0;
 auto reg_part__p_partkey = part__p_partkey[tid];
 
-KEY_5925c60020c0 |= reg_part__p_partkey;
+KEY_62ef1f6bd1a0 |= reg_part__p_partkey;
 // Insert hash table kernel;
-auto buf_idx_5925c60020c0 = atomicAdd((int*)BUF_IDX_5925c60020c0, 1);
-HT_5925c60020c0.insert(cuco::pair{KEY_5925c60020c0, buf_idx_5925c60020c0});
-BUF_5925c60020c0[buf_idx_5925c60020c0 * 1 + 0] = tid;
+auto buf_idx_62ef1f6bd1a0 = atomicAdd((int*)BUF_IDX_62ef1f6bd1a0, 1);
+HT_62ef1f6bd1a0.insert(cuco::pair{KEY_62ef1f6bd1a0, buf_idx_62ef1f6bd1a0});
+BUF_62ef1f6bd1a0[buf_idx_62ef1f6bd1a0 * 1 + 0] = tid;
 }
-__global__ void count_5925c600fa50(uint64_t* COUNT5925c60044b0, DBStringType* supplier__s_region, size_t supplier_size) {
+__global__ void count_62ef1f6d0060(uint64_t* COUNT62ef1f6c33b0, DBStringType* supplier__s_region, size_t supplier_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= supplier_size) return;
 auto reg_supplier__s_region = supplier__s_region[tid];
@@ -47,10 +47,10 @@ if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 //Materialize count
-atomicAdd((int*)COUNT5925c60044b0, 1);
+atomicAdd((int*)COUNT62ef1f6c33b0, 1);
 }
 template<typename HASHTABLE_INSERT>
-__global__ void main_5925c600fa50(uint64_t* BUF_5925c60044b0, uint64_t* BUF_IDX_5925c60044b0, HASHTABLE_INSERT HT_5925c60044b0, DBStringType* supplier__s_region, DBI32Type* supplier__s_suppkey, size_t supplier_size) {
+__global__ void main_62ef1f6d0060(uint64_t* BUF_62ef1f6c33b0, uint64_t* BUF_IDX_62ef1f6c33b0, HASHTABLE_INSERT HT_62ef1f6c33b0, DBStringType* supplier__s_region, DBI32Type* supplier__s_suppkey, size_t supplier_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= supplier_size) return;
 auto reg_supplier__s_region = supplier__s_region[tid];
@@ -59,40 +59,40 @@ if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
-uint64_t KEY_5925c60044b0 = 0;
+uint64_t KEY_62ef1f6c33b0 = 0;
 auto reg_supplier__s_suppkey = supplier__s_suppkey[tid];
 
-KEY_5925c60044b0 |= reg_supplier__s_suppkey;
+KEY_62ef1f6c33b0 |= reg_supplier__s_suppkey;
 // Insert hash table kernel;
-auto buf_idx_5925c60044b0 = atomicAdd((int*)BUF_IDX_5925c60044b0, 1);
-HT_5925c60044b0.insert(cuco::pair{KEY_5925c60044b0, buf_idx_5925c60044b0});
-BUF_5925c60044b0[buf_idx_5925c60044b0 * 1 + 0] = tid;
+auto buf_idx_62ef1f6c33b0 = atomicAdd((int*)BUF_IDX_62ef1f6c33b0, 1);
+HT_62ef1f6c33b0.insert(cuco::pair{KEY_62ef1f6c33b0, buf_idx_62ef1f6c33b0});
+BUF_62ef1f6c33b0[buf_idx_62ef1f6c33b0 * 1 + 0] = tid;
 }
-__global__ void count_5925c5fe87b0(uint64_t* COUNT5925c6003320, size_t date_size) {
+__global__ void count_62ef1f6a6e50(uint64_t* COUNT62ef1f6be220, size_t date_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= date_size) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 //Materialize count
-atomicAdd((int*)COUNT5925c6003320, 1);
+atomicAdd((int*)COUNT62ef1f6be220, 1);
 }
 template<typename HASHTABLE_INSERT>
-__global__ void main_5925c5fe87b0(uint64_t* BUF_5925c6003320, uint64_t* BUF_IDX_5925c6003320, HASHTABLE_INSERT HT_5925c6003320, DBI32Type* date__d_datekey, size_t date_size) {
+__global__ void main_62ef1f6a6e50(uint64_t* BUF_62ef1f6be220, uint64_t* BUF_IDX_62ef1f6be220, HASHTABLE_INSERT HT_62ef1f6be220, DBI32Type* date__d_datekey, size_t date_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= date_size) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
-uint64_t KEY_5925c6003320 = 0;
+uint64_t KEY_62ef1f6be220 = 0;
 auto reg_date__d_datekey = date__d_datekey[tid];
 
-KEY_5925c6003320 |= reg_date__d_datekey;
+KEY_62ef1f6be220 |= reg_date__d_datekey;
 // Insert hash table kernel;
-auto buf_idx_5925c6003320 = atomicAdd((int*)BUF_IDX_5925c6003320, 1);
-HT_5925c6003320.insert(cuco::pair{KEY_5925c6003320, buf_idx_5925c6003320});
-BUF_5925c6003320[buf_idx_5925c6003320 * 1 + 0] = tid;
+auto buf_idx_62ef1f6be220 = atomicAdd((int*)BUF_IDX_62ef1f6be220, 1);
+HT_62ef1f6be220.insert(cuco::pair{KEY_62ef1f6be220, buf_idx_62ef1f6be220});
+BUF_62ef1f6be220[buf_idx_62ef1f6be220 * 1 + 0] = tid;
 }
 template<typename HASHTABLE_INSERT, typename HASHTABLE_PROBE>
-__global__ void count_5925c5fe81e0(uint64_t* BUF_5925c60020c0, uint64_t* BUF_5925c6003320, uint64_t* BUF_5925c60044b0, HASHTABLE_INSERT HT_5925c5fb90e0, HASHTABLE_PROBE HT_5925c60020c0, HASHTABLE_PROBE HT_5925c6003320, HASHTABLE_PROBE HT_5925c60044b0, DBI32Type* date__d_year, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_partkey, DBI32Type* lineorder__lo_suppkey, size_t lineorder_size, DBI16Type* part__p_brand1_encoded) {
+__global__ void count_62ef1f6a6880(uint64_t* BUF_62ef1f6bd1a0, uint64_t* BUF_62ef1f6be220, uint64_t* BUF_62ef1f6c33b0, HASHTABLE_INSERT HT_62ef1f676ea0, HASHTABLE_PROBE HT_62ef1f6bd1a0, HASHTABLE_PROBE HT_62ef1f6be220, HASHTABLE_PROBE HT_62ef1f6c33b0, DBI32Type* date__d_year, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_partkey, DBI32Type* lineorder__lo_suppkey, size_t lineorder_size, DBI16Type* part__p_brand1_encoded) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineorder_size) return;
 if (!(!(false))) return;
@@ -101,48 +101,48 @@ if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
-uint64_t KEY_5925c60020c0 = 0;
+uint64_t KEY_62ef1f6bd1a0 = 0;
 auto reg_lineorder__lo_partkey = lineorder__lo_partkey[tid];
 
-KEY_5925c60020c0 |= reg_lineorder__lo_partkey;
+KEY_62ef1f6bd1a0 |= reg_lineorder__lo_partkey;
 //Probe Hash table
-HT_5925c60020c0.for_each(KEY_5925c60020c0, [&] __device__ (auto const SLOT_5925c60020c0) {
+HT_62ef1f6bd1a0.for_each(KEY_62ef1f6bd1a0, [&] __device__ (auto const SLOT_62ef1f6bd1a0) {
 
-auto const [slot_first5925c60020c0, slot_second5925c60020c0] = SLOT_5925c60020c0;
+auto const [slot_first62ef1f6bd1a0, slot_second62ef1f6bd1a0] = SLOT_62ef1f6bd1a0;
 if (!(true)) return;
-uint64_t KEY_5925c60044b0 = 0;
+uint64_t KEY_62ef1f6c33b0 = 0;
 auto reg_lineorder__lo_suppkey = lineorder__lo_suppkey[tid];
 
-KEY_5925c60044b0 |= reg_lineorder__lo_suppkey;
+KEY_62ef1f6c33b0 |= reg_lineorder__lo_suppkey;
 //Probe Hash table
-HT_5925c60044b0.for_each(KEY_5925c60044b0, [&] __device__ (auto const SLOT_5925c60044b0) {
+HT_62ef1f6c33b0.for_each(KEY_62ef1f6c33b0, [&] __device__ (auto const SLOT_62ef1f6c33b0) {
 
-auto const [slot_first5925c60044b0, slot_second5925c60044b0] = SLOT_5925c60044b0;
+auto const [slot_first62ef1f6c33b0, slot_second62ef1f6c33b0] = SLOT_62ef1f6c33b0;
 if (!(true)) return;
-uint64_t KEY_5925c6003320 = 0;
+uint64_t KEY_62ef1f6be220 = 0;
 auto reg_lineorder__lo_orderdate = lineorder__lo_orderdate[tid];
 
-KEY_5925c6003320 |= reg_lineorder__lo_orderdate;
+KEY_62ef1f6be220 |= reg_lineorder__lo_orderdate;
 //Probe Hash table
-HT_5925c6003320.for_each(KEY_5925c6003320, [&] __device__ (auto const SLOT_5925c6003320) {
+HT_62ef1f6be220.for_each(KEY_62ef1f6be220, [&] __device__ (auto const SLOT_62ef1f6be220) {
 
-auto const [slot_first5925c6003320, slot_second5925c6003320] = SLOT_5925c6003320;
+auto const [slot_first62ef1f6be220, slot_second62ef1f6be220] = SLOT_62ef1f6be220;
 if (!(true)) return;
-uint64_t KEY_5925c5fb90e0 = 0;
-auto reg_date__d_year = date__d_year[BUF_5925c6003320[slot_second5925c6003320 * 1 + 0]];
+uint64_t KEY_62ef1f676ea0 = 0;
+auto reg_date__d_year = date__d_year[BUF_62ef1f6be220[slot_second62ef1f6be220 * 1 + 0]];
 
-KEY_5925c5fb90e0 |= reg_date__d_year;
-auto reg_part__p_brand1_encoded = part__p_brand1_encoded[BUF_5925c60020c0[slot_second5925c60020c0 * 1 + 0]];
-KEY_5925c5fb90e0 <<= 16;
-KEY_5925c5fb90e0 |= reg_part__p_brand1_encoded;
+KEY_62ef1f676ea0 |= reg_date__d_year;
+auto reg_part__p_brand1_encoded = part__p_brand1_encoded[BUF_62ef1f6bd1a0[slot_second62ef1f6bd1a0 * 1 + 0]];
+KEY_62ef1f676ea0 <<= 16;
+KEY_62ef1f676ea0 |= reg_part__p_brand1_encoded;
 //Create aggregation hash table
-HT_5925c5fb90e0.insert(cuco::pair{KEY_5925c5fb90e0, 1});
+HT_62ef1f676ea0.insert(cuco::pair{KEY_62ef1f676ea0, 1});
 });
 });
 });
 }
 template<typename HASHTABLE_FIND, typename HASHTABLE_PROBE>
-__global__ void main_5925c5fe81e0(uint64_t* BUF_5925c60020c0, uint64_t* BUF_5925c6003320, uint64_t* BUF_5925c60044b0, HASHTABLE_FIND HT_5925c5fb90e0, HASHTABLE_PROBE HT_5925c60020c0, HASHTABLE_PROBE HT_5925c6003320, HASHTABLE_PROBE HT_5925c60044b0, DBI32Type* KEY_5925c5fb90e0date__d_year, DBI16Type* KEY_5925c5fb90e0part__p_brand1_encoded, DBDecimalType* aggr0__tmp_attr0, DBI32Type* date__d_year, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_partkey, DBDecimalType* lineorder__lo_revenue, DBI32Type* lineorder__lo_suppkey, size_t lineorder_size, DBI16Type* part__p_brand1_encoded) {
+__global__ void main_62ef1f6a6880(uint64_t* BUF_62ef1f6bd1a0, uint64_t* BUF_62ef1f6be220, uint64_t* BUF_62ef1f6c33b0, HASHTABLE_FIND HT_62ef1f676ea0, HASHTABLE_PROBE HT_62ef1f6bd1a0, HASHTABLE_PROBE HT_62ef1f6be220, HASHTABLE_PROBE HT_62ef1f6c33b0, DBI32Type* KEY_62ef1f676ea0date__d_year, DBI16Type* KEY_62ef1f676ea0part__p_brand1_encoded, DBDecimalType* aggr0__tmp_attr0, DBI32Type* date__d_year, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_partkey, DBDecimalType* lineorder__lo_revenue, DBI32Type* lineorder__lo_suppkey, size_t lineorder_size, DBI16Type* part__p_brand1_encoded) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineorder_size) return;
 if (!(!(false))) return;
@@ -151,177 +151,177 @@ if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
-uint64_t KEY_5925c60020c0 = 0;
+uint64_t KEY_62ef1f6bd1a0 = 0;
 auto reg_lineorder__lo_partkey = lineorder__lo_partkey[tid];
 
-KEY_5925c60020c0 |= reg_lineorder__lo_partkey;
+KEY_62ef1f6bd1a0 |= reg_lineorder__lo_partkey;
 //Probe Hash table
-HT_5925c60020c0.for_each(KEY_5925c60020c0, [&] __device__ (auto const SLOT_5925c60020c0) {
-auto const [slot_first5925c60020c0, slot_second5925c60020c0] = SLOT_5925c60020c0;
+HT_62ef1f6bd1a0.for_each(KEY_62ef1f6bd1a0, [&] __device__ (auto const SLOT_62ef1f6bd1a0) {
+auto const [slot_first62ef1f6bd1a0, slot_second62ef1f6bd1a0] = SLOT_62ef1f6bd1a0;
 if (!(true)) return;
-uint64_t KEY_5925c60044b0 = 0;
+uint64_t KEY_62ef1f6c33b0 = 0;
 auto reg_lineorder__lo_suppkey = lineorder__lo_suppkey[tid];
 
-KEY_5925c60044b0 |= reg_lineorder__lo_suppkey;
+KEY_62ef1f6c33b0 |= reg_lineorder__lo_suppkey;
 //Probe Hash table
-HT_5925c60044b0.for_each(KEY_5925c60044b0, [&] __device__ (auto const SLOT_5925c60044b0) {
-auto const [slot_first5925c60044b0, slot_second5925c60044b0] = SLOT_5925c60044b0;
+HT_62ef1f6c33b0.for_each(KEY_62ef1f6c33b0, [&] __device__ (auto const SLOT_62ef1f6c33b0) {
+auto const [slot_first62ef1f6c33b0, slot_second62ef1f6c33b0] = SLOT_62ef1f6c33b0;
 if (!(true)) return;
-uint64_t KEY_5925c6003320 = 0;
+uint64_t KEY_62ef1f6be220 = 0;
 auto reg_lineorder__lo_orderdate = lineorder__lo_orderdate[tid];
 
-KEY_5925c6003320 |= reg_lineorder__lo_orderdate;
+KEY_62ef1f6be220 |= reg_lineorder__lo_orderdate;
 //Probe Hash table
-HT_5925c6003320.for_each(KEY_5925c6003320, [&] __device__ (auto const SLOT_5925c6003320) {
-auto const [slot_first5925c6003320, slot_second5925c6003320] = SLOT_5925c6003320;
+HT_62ef1f6be220.for_each(KEY_62ef1f6be220, [&] __device__ (auto const SLOT_62ef1f6be220) {
+auto const [slot_first62ef1f6be220, slot_second62ef1f6be220] = SLOT_62ef1f6be220;
 if (!(true)) return;
-uint64_t KEY_5925c5fb90e0 = 0;
-auto reg_date__d_year = date__d_year[BUF_5925c6003320[slot_second5925c6003320 * 1 + 0]];
+uint64_t KEY_62ef1f676ea0 = 0;
+auto reg_date__d_year = date__d_year[BUF_62ef1f6be220[slot_second62ef1f6be220 * 1 + 0]];
 
-KEY_5925c5fb90e0 |= reg_date__d_year;
-auto reg_part__p_brand1_encoded = part__p_brand1_encoded[BUF_5925c60020c0[slot_second5925c60020c0 * 1 + 0]];
-KEY_5925c5fb90e0 <<= 16;
-KEY_5925c5fb90e0 |= reg_part__p_brand1_encoded;
+KEY_62ef1f676ea0 |= reg_date__d_year;
+auto reg_part__p_brand1_encoded = part__p_brand1_encoded[BUF_62ef1f6bd1a0[slot_second62ef1f6bd1a0 * 1 + 0]];
+KEY_62ef1f676ea0 <<= 16;
+KEY_62ef1f676ea0 |= reg_part__p_brand1_encoded;
 //Aggregate in hashtable
-auto buf_idx_5925c5fb90e0 = HT_5925c5fb90e0.find(KEY_5925c5fb90e0)->second;
+auto buf_idx_62ef1f676ea0 = HT_62ef1f676ea0.find(KEY_62ef1f676ea0)->second;
 auto reg_lineorder__lo_revenue = lineorder__lo_revenue[tid];
-aggregate_sum(&aggr0__tmp_attr0[buf_idx_5925c5fb90e0], reg_lineorder__lo_revenue);
-KEY_5925c5fb90e0date__d_year[buf_idx_5925c5fb90e0] = reg_date__d_year;
-KEY_5925c5fb90e0part__p_brand1_encoded[buf_idx_5925c5fb90e0] = reg_part__p_brand1_encoded;
+aggregate_sum(&aggr0__tmp_attr0[buf_idx_62ef1f676ea0], reg_lineorder__lo_revenue);
+KEY_62ef1f676ea0date__d_year[buf_idx_62ef1f676ea0] = reg_date__d_year;
+KEY_62ef1f676ea0part__p_brand1_encoded[buf_idx_62ef1f676ea0] = reg_part__p_brand1_encoded;
 });
 });
 });
 }
-__global__ void count_5925c601ea70(size_t COUNT5925c5fb90e0, uint64_t* COUNT5925c5fcb800) {
+__global__ void count_62ef1f6df5e0(size_t COUNT62ef1f676ea0, uint64_t* COUNT62ef1f689ea0) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
-if (tid >= COUNT5925c5fb90e0) return;
+if (tid >= COUNT62ef1f676ea0) return;
 //Materialize count
-atomicAdd((int*)COUNT5925c5fcb800, 1);
+atomicAdd((int*)COUNT62ef1f689ea0, 1);
 }
-__global__ void main_5925c601ea70(size_t COUNT5925c5fb90e0, DBDecimalType* MAT5925c5fcb800aggr0__tmp_attr0, DBI32Type* MAT5925c5fcb800date__d_year, DBI16Type* MAT5925c5fcb800part__p_brand1_encoded, uint64_t* MAT_IDX5925c5fcb800, DBDecimalType* aggr0__tmp_attr0, DBI32Type* date__d_year, DBI16Type* part__p_brand1_encoded) {
+__global__ void main_62ef1f6df5e0(size_t COUNT62ef1f676ea0, DBDecimalType* MAT62ef1f689ea0aggr0__tmp_attr0, DBI32Type* MAT62ef1f689ea0date__d_year, DBI16Type* MAT62ef1f689ea0part__p_brand1_encoded, uint64_t* MAT_IDX62ef1f689ea0, DBDecimalType* aggr0__tmp_attr0, DBI32Type* date__d_year, DBI16Type* part__p_brand1_encoded) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
-if (tid >= COUNT5925c5fb90e0) return;
+if (tid >= COUNT62ef1f676ea0) return;
 //Materialize buffers
-auto mat_idx5925c5fcb800 = atomicAdd((int*)MAT_IDX5925c5fcb800, 1);
+auto mat_idx62ef1f689ea0 = atomicAdd((int*)MAT_IDX62ef1f689ea0, 1);
 auto reg_aggr0__tmp_attr0 = aggr0__tmp_attr0[tid];
-MAT5925c5fcb800aggr0__tmp_attr0[mat_idx5925c5fcb800] = reg_aggr0__tmp_attr0;
+MAT62ef1f689ea0aggr0__tmp_attr0[mat_idx62ef1f689ea0] = reg_aggr0__tmp_attr0;
 auto reg_date__d_year = date__d_year[tid];
-MAT5925c5fcb800date__d_year[mat_idx5925c5fcb800] = reg_date__d_year;
+MAT62ef1f689ea0date__d_year[mat_idx62ef1f689ea0] = reg_date__d_year;
 auto reg_part__p_brand1_encoded = part__p_brand1_encoded[tid];
-MAT5925c5fcb800part__p_brand1_encoded[mat_idx5925c5fcb800] = reg_part__p_brand1_encoded;
+MAT62ef1f689ea0part__p_brand1_encoded[mat_idx62ef1f689ea0] = reg_part__p_brand1_encoded;
 }
-extern "C" void control (DBI32Type* d_supplier__s_suppkey, DBStringType* d_supplier__s_name, DBStringType* d_supplier__s_address, DBStringType* d_supplier__s_city, DBStringType* d_supplier__s_nation, DBStringType* d_supplier__s_region, DBStringType* d_supplier__s_phone, size_t supplier_size, DBI32Type* d_part__p_partkey, DBStringType* d_part__p_name, DBStringType* d_part__p_mfgr, DBStringType* d_part__p_category, DBStringType* d_part__p_brand1, DBStringType* d_part__p_color, DBStringType* d_part__p_type, DBI32Type* d_part__p_size, DBStringType* d_part__p_container, size_t part_size, DBI32Type* d_lineorder__lo_orderkey, DBI32Type* d_lineorder__lo_linenumber, DBI32Type* d_lineorder__lo_custkey, DBI32Type* d_lineorder__lo_partkey, DBI32Type* d_lineorder__lo_suppkey, DBDateType* d_lineorder__lo_orderdate, DBDateType* d_lineorder__lo_commitdate, DBStringType* d_lineorder__lo_orderpriority, DBCharType* d_lineorder__lo_shippriority, DBI32Type* d_lineorder__lo_quantity, DBDecimalType* d_lineorder__lo_extendedprice, DBDecimalType* d_lineorder__lo_ordtotalprice, DBDecimalType* d_lineorder__lo_revenue, DBDecimalType* d_lineorder__lo_supplycost, DBI32Type* d_lineorder__lo_discount, DBI32Type* d_lineorder__lo_tax, DBStringType* d_lineorder__lo_shipmode, size_t lineorder_size, DBI32Type* d_date__d_datekey, DBStringType* d_date__d_date, DBStringType* d_date__d_dayofweek, DBStringType* d_date__d_month, DBI32Type* d_date__d_year, DBI32Type* d_date__d_yearmonthnum, DBStringType* d_date__d_yearmonth, DBI32Type* d_date__d_daynuminweek, DBI32Type* d_date__d_daynuminmonth, DBI32Type* d_date__d_daynuminyear, DBI32Type* d_date__d_monthnuminyear, DBI32Type* d_date__d_weeknuminyear, DBStringType* d_date__d_sellingseason, DBI32Type* d_date__d_lastdayinweekfl, DBI32Type* d_date__d_lastdayinmonthfl, DBI32Type* d_date__d_holidayfl, DBI32Type* d_date__d_weekdayfl, size_t date_size, DBI32Type* d_customer__c_custkey, DBStringType* d_customer__c_name, DBStringType* d_customer__c_address, DBStringType* d_customer__c_city, DBStringType* d_customer__c_nation, DBStringType* d_customer__c_region, DBStringType* d_customer__c_phone, DBStringType* d_customer__c_mktsegment, size_t customer_size, DBI32Type* d_region__r_regionkey, DBStringType* d_region__r_name, DBStringType* d_region__r_comment, size_t region_size, DBI16Type* d_part__p_brand1_encoded, DBI16Type* d_supplier__s_nation_encoded, DBI16Type* d_customer__c_city_encoded, DBI16Type* d_supplier__s_city_encoded, DBI16Type* d_customer__c_nation_encoded, std::unordered_map<DBI16Type, std::string>& part__p_brand1_map, std::unordered_map<DBI16Type, std::string>& supplier__s_nation_map, std::unordered_map<DBI16Type, std::string>& customer__c_city_map, std::unordered_map<DBI16Type, std::string>& supplier__s_city_map, std::unordered_map<DBI16Type, std::string>& customer__c_nation_map) {
+extern "C" void control (DBI32Type* d_supplier__s_suppkey, DBStringType* d_supplier__s_name, DBStringType* d_supplier__s_address, DBStringType* d_supplier__s_city, DBStringType* d_supplier__s_nation, DBStringType* d_supplier__s_region, DBStringType* d_supplier__s_phone, size_t supplier_size, DBI32Type* d_part__p_partkey, DBStringType* d_part__p_name, DBStringType* d_part__p_mfgr, DBStringType* d_part__p_category, DBStringType* d_part__p_brand1, DBStringType* d_part__p_color, DBStringType* d_part__p_type, DBI32Type* d_part__p_size, DBStringType* d_part__p_container, size_t part_size, DBI32Type* d_lineorder__lo_orderkey, DBI32Type* d_lineorder__lo_linenumber, DBI32Type* d_lineorder__lo_custkey, DBI32Type* d_lineorder__lo_partkey, DBI32Type* d_lineorder__lo_suppkey, DBDateType* d_lineorder__lo_orderdate, DBDateType* d_lineorder__lo_commitdate, DBStringType* d_lineorder__lo_orderpriority, DBCharType* d_lineorder__lo_shippriority, DBI32Type* d_lineorder__lo_quantity, DBDecimalType* d_lineorder__lo_extendedprice, DBDecimalType* d_lineorder__lo_ordtotalprice, DBDecimalType* d_lineorder__lo_revenue, DBDecimalType* d_lineorder__lo_supplycost, DBI32Type* d_lineorder__lo_discount, DBI32Type* d_lineorder__lo_tax, DBStringType* d_lineorder__lo_shipmode, size_t lineorder_size, DBI32Type* d_date__d_datekey, DBStringType* d_date__d_date, DBStringType* d_date__d_dayofweek, DBStringType* d_date__d_month, DBI32Type* d_date__d_year, DBI32Type* d_date__d_yearmonthnum, DBStringType* d_date__d_yearmonth, DBI32Type* d_date__d_daynuminweek, DBI32Type* d_date__d_daynuminmonth, DBI32Type* d_date__d_daynuminyear, DBI32Type* d_date__d_monthnuminyear, DBI32Type* d_date__d_weeknuminyear, DBStringType* d_date__d_sellingseason, DBI32Type* d_date__d_lastdayinweekfl, DBI32Type* d_date__d_lastdayinmonthfl, DBI32Type* d_date__d_holidayfl, DBI32Type* d_date__d_weekdayfl, size_t date_size, DBI32Type* d_customer__c_custkey, DBStringType* d_customer__c_name, DBStringType* d_customer__c_address, DBStringType* d_customer__c_city, DBStringType* d_customer__c_nation, DBStringType* d_customer__c_region, DBStringType* d_customer__c_phone, DBStringType* d_customer__c_mktsegment, size_t customer_size, DBI32Type* d_region__r_regionkey, DBStringType* d_region__r_name, DBStringType* d_region__r_comment, size_t region_size, DBI16Type* d_part__p_brand1_encoded, DBI16Type* d_supplier__s_nation_encoded, DBI16Type* d_customer__c_city_encoded, DBI16Type* d_supplier__s_city_encoded, DBI16Type* d_customer__c_nation_encoded, DBI16Type* d_part__p_category_encoded, std::unordered_map<DBI16Type, std::string>& part__p_brand1_map, std::unordered_map<DBI16Type, std::string>& supplier__s_nation_map, std::unordered_map<DBI16Type, std::string>& customer__c_city_map, std::unordered_map<DBI16Type, std::string>& supplier__s_city_map, std::unordered_map<DBI16Type, std::string>& customer__c_nation_map, std::unordered_map<DBI16Type, std::string>& part__p_category_map) {
 //Materialize count
-uint64_t* d_COUNT5925c60020c0;
-cudaMalloc(&d_COUNT5925c60020c0, sizeof(uint64_t));
-cudaMemset(d_COUNT5925c60020c0, 0, sizeof(uint64_t));
-count_5925c600d700<<<std::ceil((float)part_size/32.), 32>>>(d_COUNT5925c60020c0, d_part__p_brand1, part_size);
-uint64_t COUNT5925c60020c0;
-cudaMemcpy(&COUNT5925c60020c0, d_COUNT5925c60020c0, sizeof(uint64_t), cudaMemcpyDeviceToHost);
+uint64_t* d_COUNT62ef1f6bd1a0;
+cudaMalloc(&d_COUNT62ef1f6bd1a0, sizeof(uint64_t));
+cudaMemset(d_COUNT62ef1f6bd1a0, 0, sizeof(uint64_t));
+count_62ef1f6cd760<<<std::ceil((float)part_size/32.), 32>>>(d_COUNT62ef1f6bd1a0, d_part__p_brand1, part_size);
+uint64_t COUNT62ef1f6bd1a0;
+cudaMemcpy(&COUNT62ef1f6bd1a0, d_COUNT62ef1f6bd1a0, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 // Insert hash table control;
-uint64_t* d_BUF_IDX_5925c60020c0;
-cudaMalloc(&d_BUF_IDX_5925c60020c0, sizeof(uint64_t));
-cudaMemset(d_BUF_IDX_5925c60020c0, 0, sizeof(uint64_t));
-uint64_t* d_BUF_5925c60020c0;
-cudaMalloc(&d_BUF_5925c60020c0, sizeof(uint64_t) * COUNT5925c60020c0 * 1);
-auto d_HT_5925c60020c0 = cuco::experimental::static_multimap{ (int)COUNT5925c60020c0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-main_5925c600d700<<<std::ceil((float)part_size/32.), 32>>>(d_BUF_5925c60020c0, d_BUF_IDX_5925c60020c0, d_HT_5925c60020c0.ref(cuco::insert), d_part__p_brand1, d_part__p_partkey, part_size);
+uint64_t* d_BUF_IDX_62ef1f6bd1a0;
+cudaMalloc(&d_BUF_IDX_62ef1f6bd1a0, sizeof(uint64_t));
+cudaMemset(d_BUF_IDX_62ef1f6bd1a0, 0, sizeof(uint64_t));
+uint64_t* d_BUF_62ef1f6bd1a0;
+cudaMalloc(&d_BUF_62ef1f6bd1a0, sizeof(uint64_t) * COUNT62ef1f6bd1a0 * 1);
+auto d_HT_62ef1f6bd1a0 = cuco::experimental::static_multimap{ (int)COUNT62ef1f6bd1a0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+main_62ef1f6cd760<<<std::ceil((float)part_size/32.), 32>>>(d_BUF_62ef1f6bd1a0, d_BUF_IDX_62ef1f6bd1a0, d_HT_62ef1f6bd1a0.ref(cuco::insert), d_part__p_brand1, d_part__p_partkey, part_size);
 //Materialize count
-uint64_t* d_COUNT5925c60044b0;
-cudaMalloc(&d_COUNT5925c60044b0, sizeof(uint64_t));
-cudaMemset(d_COUNT5925c60044b0, 0, sizeof(uint64_t));
-count_5925c600fa50<<<std::ceil((float)supplier_size/32.), 32>>>(d_COUNT5925c60044b0, d_supplier__s_region, supplier_size);
-uint64_t COUNT5925c60044b0;
-cudaMemcpy(&COUNT5925c60044b0, d_COUNT5925c60044b0, sizeof(uint64_t), cudaMemcpyDeviceToHost);
+uint64_t* d_COUNT62ef1f6c33b0;
+cudaMalloc(&d_COUNT62ef1f6c33b0, sizeof(uint64_t));
+cudaMemset(d_COUNT62ef1f6c33b0, 0, sizeof(uint64_t));
+count_62ef1f6d0060<<<std::ceil((float)supplier_size/32.), 32>>>(d_COUNT62ef1f6c33b0, d_supplier__s_region, supplier_size);
+uint64_t COUNT62ef1f6c33b0;
+cudaMemcpy(&COUNT62ef1f6c33b0, d_COUNT62ef1f6c33b0, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 // Insert hash table control;
-uint64_t* d_BUF_IDX_5925c60044b0;
-cudaMalloc(&d_BUF_IDX_5925c60044b0, sizeof(uint64_t));
-cudaMemset(d_BUF_IDX_5925c60044b0, 0, sizeof(uint64_t));
-uint64_t* d_BUF_5925c60044b0;
-cudaMalloc(&d_BUF_5925c60044b0, sizeof(uint64_t) * COUNT5925c60044b0 * 1);
-auto d_HT_5925c60044b0 = cuco::experimental::static_multimap{ (int)COUNT5925c60044b0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-main_5925c600fa50<<<std::ceil((float)supplier_size/32.), 32>>>(d_BUF_5925c60044b0, d_BUF_IDX_5925c60044b0, d_HT_5925c60044b0.ref(cuco::insert), d_supplier__s_region, d_supplier__s_suppkey, supplier_size);
+uint64_t* d_BUF_IDX_62ef1f6c33b0;
+cudaMalloc(&d_BUF_IDX_62ef1f6c33b0, sizeof(uint64_t));
+cudaMemset(d_BUF_IDX_62ef1f6c33b0, 0, sizeof(uint64_t));
+uint64_t* d_BUF_62ef1f6c33b0;
+cudaMalloc(&d_BUF_62ef1f6c33b0, sizeof(uint64_t) * COUNT62ef1f6c33b0 * 1);
+auto d_HT_62ef1f6c33b0 = cuco::experimental::static_multimap{ (int)COUNT62ef1f6c33b0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+main_62ef1f6d0060<<<std::ceil((float)supplier_size/32.), 32>>>(d_BUF_62ef1f6c33b0, d_BUF_IDX_62ef1f6c33b0, d_HT_62ef1f6c33b0.ref(cuco::insert), d_supplier__s_region, d_supplier__s_suppkey, supplier_size);
 //Materialize count
-uint64_t* d_COUNT5925c6003320;
-cudaMalloc(&d_COUNT5925c6003320, sizeof(uint64_t));
-cudaMemset(d_COUNT5925c6003320, 0, sizeof(uint64_t));
-count_5925c5fe87b0<<<std::ceil((float)date_size/32.), 32>>>(d_COUNT5925c6003320, date_size);
-uint64_t COUNT5925c6003320;
-cudaMemcpy(&COUNT5925c6003320, d_COUNT5925c6003320, sizeof(uint64_t), cudaMemcpyDeviceToHost);
+uint64_t* d_COUNT62ef1f6be220;
+cudaMalloc(&d_COUNT62ef1f6be220, sizeof(uint64_t));
+cudaMemset(d_COUNT62ef1f6be220, 0, sizeof(uint64_t));
+count_62ef1f6a6e50<<<std::ceil((float)date_size/32.), 32>>>(d_COUNT62ef1f6be220, date_size);
+uint64_t COUNT62ef1f6be220;
+cudaMemcpy(&COUNT62ef1f6be220, d_COUNT62ef1f6be220, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 // Insert hash table control;
-uint64_t* d_BUF_IDX_5925c6003320;
-cudaMalloc(&d_BUF_IDX_5925c6003320, sizeof(uint64_t));
-cudaMemset(d_BUF_IDX_5925c6003320, 0, sizeof(uint64_t));
-uint64_t* d_BUF_5925c6003320;
-cudaMalloc(&d_BUF_5925c6003320, sizeof(uint64_t) * COUNT5925c6003320 * 1);
-auto d_HT_5925c6003320 = cuco::experimental::static_multimap{ (int)COUNT5925c6003320*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-main_5925c5fe87b0<<<std::ceil((float)date_size/32.), 32>>>(d_BUF_5925c6003320, d_BUF_IDX_5925c6003320, d_HT_5925c6003320.ref(cuco::insert), d_date__d_datekey, date_size);
+uint64_t* d_BUF_IDX_62ef1f6be220;
+cudaMalloc(&d_BUF_IDX_62ef1f6be220, sizeof(uint64_t));
+cudaMemset(d_BUF_IDX_62ef1f6be220, 0, sizeof(uint64_t));
+uint64_t* d_BUF_62ef1f6be220;
+cudaMalloc(&d_BUF_62ef1f6be220, sizeof(uint64_t) * COUNT62ef1f6be220 * 1);
+auto d_HT_62ef1f6be220 = cuco::experimental::static_multimap{ (int)COUNT62ef1f6be220*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+main_62ef1f6a6e50<<<std::ceil((float)date_size/32.), 32>>>(d_BUF_62ef1f6be220, d_BUF_IDX_62ef1f6be220, d_HT_62ef1f6be220.ref(cuco::insert), d_date__d_datekey, date_size);
 //Create aggregation hash table
-auto d_HT_5925c5fb90e0 = cuco::static_map{ (int)3846*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-count_5925c5fe81e0<<<std::ceil((float)lineorder_size/32.), 32>>>(d_BUF_5925c60020c0, d_BUF_5925c6003320, d_BUF_5925c60044b0, d_HT_5925c5fb90e0.ref(cuco::insert), d_HT_5925c60020c0.ref(cuco::for_each), d_HT_5925c6003320.ref(cuco::for_each), d_HT_5925c60044b0.ref(cuco::for_each), d_date__d_year, d_lineorder__lo_orderdate, d_lineorder__lo_partkey, d_lineorder__lo_suppkey, lineorder_size, d_part__p_brand1_encoded);
-size_t COUNT5925c5fb90e0 = d_HT_5925c5fb90e0.size();
-thrust::device_vector<int64_t> keys_5925c5fb90e0(COUNT5925c5fb90e0), vals_5925c5fb90e0(COUNT5925c5fb90e0);
-d_HT_5925c5fb90e0.retrieve_all(keys_5925c5fb90e0.begin(), vals_5925c5fb90e0.begin());
-d_HT_5925c5fb90e0.clear();
-int64_t* raw_keys5925c5fb90e0 = thrust::raw_pointer_cast(keys_5925c5fb90e0.data());
-insertKeys<<<std::ceil((float)COUNT5925c5fb90e0/32.), 32>>>(raw_keys5925c5fb90e0, d_HT_5925c5fb90e0.ref(cuco::insert), COUNT5925c5fb90e0);
+auto d_HT_62ef1f676ea0 = cuco::static_map{ (int)3846*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+count_62ef1f6a6880<<<std::ceil((float)lineorder_size/32.), 32>>>(d_BUF_62ef1f6bd1a0, d_BUF_62ef1f6be220, d_BUF_62ef1f6c33b0, d_HT_62ef1f676ea0.ref(cuco::insert), d_HT_62ef1f6bd1a0.ref(cuco::for_each), d_HT_62ef1f6be220.ref(cuco::for_each), d_HT_62ef1f6c33b0.ref(cuco::for_each), d_date__d_year, d_lineorder__lo_orderdate, d_lineorder__lo_partkey, d_lineorder__lo_suppkey, lineorder_size, d_part__p_brand1_encoded);
+size_t COUNT62ef1f676ea0 = d_HT_62ef1f676ea0.size();
+thrust::device_vector<int64_t> keys_62ef1f676ea0(COUNT62ef1f676ea0), vals_62ef1f676ea0(COUNT62ef1f676ea0);
+d_HT_62ef1f676ea0.retrieve_all(keys_62ef1f676ea0.begin(), vals_62ef1f676ea0.begin());
+d_HT_62ef1f676ea0.clear();
+int64_t* raw_keys62ef1f676ea0 = thrust::raw_pointer_cast(keys_62ef1f676ea0.data());
+insertKeys<<<std::ceil((float)COUNT62ef1f676ea0/32.), 32>>>(raw_keys62ef1f676ea0, d_HT_62ef1f676ea0.ref(cuco::insert), COUNT62ef1f676ea0);
 //Aggregate in hashtable
 DBDecimalType* d_aggr0__tmp_attr0;
-cudaMalloc(&d_aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT5925c5fb90e0);
-cudaMemset(d_aggr0__tmp_attr0, 0, sizeof(DBDecimalType) * COUNT5925c5fb90e0);
-DBI32Type* d_KEY_5925c5fb90e0date__d_year;
-cudaMalloc(&d_KEY_5925c5fb90e0date__d_year, sizeof(DBI32Type) * COUNT5925c5fb90e0);
-cudaMemset(d_KEY_5925c5fb90e0date__d_year, 0, sizeof(DBI32Type) * COUNT5925c5fb90e0);
-DBI16Type* d_KEY_5925c5fb90e0part__p_brand1_encoded;
-cudaMalloc(&d_KEY_5925c5fb90e0part__p_brand1_encoded, sizeof(DBI16Type) * COUNT5925c5fb90e0);
-cudaMemset(d_KEY_5925c5fb90e0part__p_brand1_encoded, 0, sizeof(DBI16Type) * COUNT5925c5fb90e0);
-main_5925c5fe81e0<<<std::ceil((float)lineorder_size/32.), 32>>>(d_BUF_5925c60020c0, d_BUF_5925c6003320, d_BUF_5925c60044b0, d_HT_5925c5fb90e0.ref(cuco::find), d_HT_5925c60020c0.ref(cuco::for_each), d_HT_5925c6003320.ref(cuco::for_each), d_HT_5925c60044b0.ref(cuco::for_each), d_KEY_5925c5fb90e0date__d_year, d_KEY_5925c5fb90e0part__p_brand1_encoded, d_aggr0__tmp_attr0, d_date__d_year, d_lineorder__lo_orderdate, d_lineorder__lo_partkey, d_lineorder__lo_revenue, d_lineorder__lo_suppkey, lineorder_size, d_part__p_brand1_encoded);
+cudaMalloc(&d_aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT62ef1f676ea0);
+cudaMemset(d_aggr0__tmp_attr0, 0, sizeof(DBDecimalType) * COUNT62ef1f676ea0);
+DBI32Type* d_KEY_62ef1f676ea0date__d_year;
+cudaMalloc(&d_KEY_62ef1f676ea0date__d_year, sizeof(DBI32Type) * COUNT62ef1f676ea0);
+cudaMemset(d_KEY_62ef1f676ea0date__d_year, 0, sizeof(DBI32Type) * COUNT62ef1f676ea0);
+DBI16Type* d_KEY_62ef1f676ea0part__p_brand1_encoded;
+cudaMalloc(&d_KEY_62ef1f676ea0part__p_brand1_encoded, sizeof(DBI16Type) * COUNT62ef1f676ea0);
+cudaMemset(d_KEY_62ef1f676ea0part__p_brand1_encoded, 0, sizeof(DBI16Type) * COUNT62ef1f676ea0);
+main_62ef1f6a6880<<<std::ceil((float)lineorder_size/32.), 32>>>(d_BUF_62ef1f6bd1a0, d_BUF_62ef1f6be220, d_BUF_62ef1f6c33b0, d_HT_62ef1f676ea0.ref(cuco::find), d_HT_62ef1f6bd1a0.ref(cuco::for_each), d_HT_62ef1f6be220.ref(cuco::for_each), d_HT_62ef1f6c33b0.ref(cuco::for_each), d_KEY_62ef1f676ea0date__d_year, d_KEY_62ef1f676ea0part__p_brand1_encoded, d_aggr0__tmp_attr0, d_date__d_year, d_lineorder__lo_orderdate, d_lineorder__lo_partkey, d_lineorder__lo_revenue, d_lineorder__lo_suppkey, lineorder_size, d_part__p_brand1_encoded);
 //Materialize count
-uint64_t* d_COUNT5925c5fcb800;
-cudaMalloc(&d_COUNT5925c5fcb800, sizeof(uint64_t));
-cudaMemset(d_COUNT5925c5fcb800, 0, sizeof(uint64_t));
-count_5925c601ea70<<<std::ceil((float)COUNT5925c5fb90e0/32.), 32>>>(COUNT5925c5fb90e0, d_COUNT5925c5fcb800);
-uint64_t COUNT5925c5fcb800;
-cudaMemcpy(&COUNT5925c5fcb800, d_COUNT5925c5fcb800, sizeof(uint64_t), cudaMemcpyDeviceToHost);
+uint64_t* d_COUNT62ef1f689ea0;
+cudaMalloc(&d_COUNT62ef1f689ea0, sizeof(uint64_t));
+cudaMemset(d_COUNT62ef1f689ea0, 0, sizeof(uint64_t));
+count_62ef1f6df5e0<<<std::ceil((float)COUNT62ef1f676ea0/32.), 32>>>(COUNT62ef1f676ea0, d_COUNT62ef1f689ea0);
+uint64_t COUNT62ef1f689ea0;
+cudaMemcpy(&COUNT62ef1f689ea0, d_COUNT62ef1f689ea0, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 //Materialize buffers
-uint64_t* d_MAT_IDX5925c5fcb800;
-cudaMalloc(&d_MAT_IDX5925c5fcb800, sizeof(uint64_t));
-cudaMemset(d_MAT_IDX5925c5fcb800, 0, sizeof(uint64_t));
-auto MAT5925c5fcb800aggr0__tmp_attr0 = (DBDecimalType*)malloc(sizeof(DBDecimalType) * COUNT5925c5fcb800);
-DBDecimalType* d_MAT5925c5fcb800aggr0__tmp_attr0;
-cudaMalloc(&d_MAT5925c5fcb800aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT5925c5fcb800);
-auto MAT5925c5fcb800date__d_year = (DBI32Type*)malloc(sizeof(DBI32Type) * COUNT5925c5fcb800);
-DBI32Type* d_MAT5925c5fcb800date__d_year;
-cudaMalloc(&d_MAT5925c5fcb800date__d_year, sizeof(DBI32Type) * COUNT5925c5fcb800);
-auto MAT5925c5fcb800part__p_brand1_encoded = (DBI16Type*)malloc(sizeof(DBI16Type) * COUNT5925c5fcb800);
-DBI16Type* d_MAT5925c5fcb800part__p_brand1_encoded;
-cudaMalloc(&d_MAT5925c5fcb800part__p_brand1_encoded, sizeof(DBI16Type) * COUNT5925c5fcb800);
-main_5925c601ea70<<<std::ceil((float)COUNT5925c5fb90e0/32.), 32>>>(COUNT5925c5fb90e0, d_MAT5925c5fcb800aggr0__tmp_attr0, d_MAT5925c5fcb800date__d_year, d_MAT5925c5fcb800part__p_brand1_encoded, d_MAT_IDX5925c5fcb800, d_aggr0__tmp_attr0, d_KEY_5925c5fb90e0date__d_year, d_KEY_5925c5fb90e0part__p_brand1_encoded);
-cudaMemcpy(MAT5925c5fcb800aggr0__tmp_attr0, d_MAT5925c5fcb800aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT5925c5fcb800, cudaMemcpyDeviceToHost);
-cudaMemcpy(MAT5925c5fcb800date__d_year, d_MAT5925c5fcb800date__d_year, sizeof(DBI32Type) * COUNT5925c5fcb800, cudaMemcpyDeviceToHost);
-cudaMemcpy(MAT5925c5fcb800part__p_brand1_encoded, d_MAT5925c5fcb800part__p_brand1_encoded, sizeof(DBI16Type) * COUNT5925c5fcb800, cudaMemcpyDeviceToHost);
-for (auto i=0ull; i < COUNT5925c5fcb800; i++) { std::cout << MAT5925c5fcb800aggr0__tmp_attr0[i] << "\t";
-std::cout << MAT5925c5fcb800date__d_year[i] << "\t";
-std::cout << part__p_brand1_map[MAT5925c5fcb800part__p_brand1_encoded[i]] << "\t";
+uint64_t* d_MAT_IDX62ef1f689ea0;
+cudaMalloc(&d_MAT_IDX62ef1f689ea0, sizeof(uint64_t));
+cudaMemset(d_MAT_IDX62ef1f689ea0, 0, sizeof(uint64_t));
+auto MAT62ef1f689ea0aggr0__tmp_attr0 = (DBDecimalType*)malloc(sizeof(DBDecimalType) * COUNT62ef1f689ea0);
+DBDecimalType* d_MAT62ef1f689ea0aggr0__tmp_attr0;
+cudaMalloc(&d_MAT62ef1f689ea0aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT62ef1f689ea0);
+auto MAT62ef1f689ea0date__d_year = (DBI32Type*)malloc(sizeof(DBI32Type) * COUNT62ef1f689ea0);
+DBI32Type* d_MAT62ef1f689ea0date__d_year;
+cudaMalloc(&d_MAT62ef1f689ea0date__d_year, sizeof(DBI32Type) * COUNT62ef1f689ea0);
+auto MAT62ef1f689ea0part__p_brand1_encoded = (DBI16Type*)malloc(sizeof(DBI16Type) * COUNT62ef1f689ea0);
+DBI16Type* d_MAT62ef1f689ea0part__p_brand1_encoded;
+cudaMalloc(&d_MAT62ef1f689ea0part__p_brand1_encoded, sizeof(DBI16Type) * COUNT62ef1f689ea0);
+main_62ef1f6df5e0<<<std::ceil((float)COUNT62ef1f676ea0/32.), 32>>>(COUNT62ef1f676ea0, d_MAT62ef1f689ea0aggr0__tmp_attr0, d_MAT62ef1f689ea0date__d_year, d_MAT62ef1f689ea0part__p_brand1_encoded, d_MAT_IDX62ef1f689ea0, d_aggr0__tmp_attr0, d_KEY_62ef1f676ea0date__d_year, d_KEY_62ef1f676ea0part__p_brand1_encoded);
+cudaMemcpy(MAT62ef1f689ea0aggr0__tmp_attr0, d_MAT62ef1f689ea0aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT62ef1f689ea0, cudaMemcpyDeviceToHost);
+cudaMemcpy(MAT62ef1f689ea0date__d_year, d_MAT62ef1f689ea0date__d_year, sizeof(DBI32Type) * COUNT62ef1f689ea0, cudaMemcpyDeviceToHost);
+cudaMemcpy(MAT62ef1f689ea0part__p_brand1_encoded, d_MAT62ef1f689ea0part__p_brand1_encoded, sizeof(DBI16Type) * COUNT62ef1f689ea0, cudaMemcpyDeviceToHost);
+for (auto i=0ull; i < COUNT62ef1f689ea0; i++) { std::cout << MAT62ef1f689ea0aggr0__tmp_attr0[i] << "\t";
+std::cout << MAT62ef1f689ea0date__d_year[i] << "\t";
+std::cout << part__p_brand1_map[MAT62ef1f689ea0part__p_brand1_encoded[i]] << "\t";
 std::cout << std::endl; }
-cudaFree(d_BUF_5925c60020c0);
-cudaFree(d_BUF_IDX_5925c60020c0);
-cudaFree(d_COUNT5925c60020c0);
-cudaFree(d_BUF_5925c60044b0);
-cudaFree(d_BUF_IDX_5925c60044b0);
-cudaFree(d_COUNT5925c60044b0);
-cudaFree(d_BUF_5925c6003320);
-cudaFree(d_BUF_IDX_5925c6003320);
-cudaFree(d_COUNT5925c6003320);
-cudaFree(d_KEY_5925c5fb90e0date__d_year);
-cudaFree(d_KEY_5925c5fb90e0part__p_brand1_encoded);
+cudaFree(d_BUF_62ef1f6bd1a0);
+cudaFree(d_BUF_IDX_62ef1f6bd1a0);
+cudaFree(d_COUNT62ef1f6bd1a0);
+cudaFree(d_BUF_62ef1f6c33b0);
+cudaFree(d_BUF_IDX_62ef1f6c33b0);
+cudaFree(d_COUNT62ef1f6c33b0);
+cudaFree(d_BUF_62ef1f6be220);
+cudaFree(d_BUF_IDX_62ef1f6be220);
+cudaFree(d_COUNT62ef1f6be220);
+cudaFree(d_KEY_62ef1f676ea0date__d_year);
+cudaFree(d_KEY_62ef1f676ea0part__p_brand1_encoded);
 cudaFree(d_aggr0__tmp_attr0);
-cudaFree(d_COUNT5925c5fcb800);
-cudaFree(d_MAT5925c5fcb800aggr0__tmp_attr0);
-cudaFree(d_MAT5925c5fcb800date__d_year);
-cudaFree(d_MAT5925c5fcb800part__p_brand1_encoded);
-cudaFree(d_MAT_IDX5925c5fcb800);
-free(MAT5925c5fcb800aggr0__tmp_attr0);
-free(MAT5925c5fcb800date__d_year);
-free(MAT5925c5fcb800part__p_brand1_encoded);
+cudaFree(d_COUNT62ef1f689ea0);
+cudaFree(d_MAT62ef1f689ea0aggr0__tmp_attr0);
+cudaFree(d_MAT62ef1f689ea0date__d_year);
+cudaFree(d_MAT62ef1f689ea0part__p_brand1_encoded);
+cudaFree(d_MAT_IDX62ef1f689ea0);
+free(MAT62ef1f689ea0aggr0__tmp_attr0);
+free(MAT62ef1f689ea0date__d_year);
+free(MAT62ef1f689ea0part__p_brand1_encoded);
 }
