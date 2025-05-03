@@ -71,7 +71,20 @@ __global__ void insertKeys(int64_t* keys, HT ht, size_t size) {
 
   ht.insert(cuco::pair{keys[tid], tid});
 }
-
+template<typename HASHTABLE_INSERT>
+__device__ int64_t get_aggregation_slot(int64_t key, HASHTABLE_INSERT HT_0, int* idx) {
+  auto [slot, is_new_key] = HT_0.insert_and_find(cuco::pair{key, -2});
+  // are there any concurrency issues in below code? please answer in comments
+  auto ref = cuda::atomic_ref<int64_t, cuda::thread_scope_device>{slot->second};
+  if (is_new_key) {
+      ref.store(atomicAdd(idx, 1), cuda::memory_order_relaxed);
+  } else {
+      while(ref.load(cuda::memory_order_relaxed) == -2) {
+          // spin
+      }
+  }
+  return ref.load(cuda::memory_order_relaxed);
+}
 // TODO(avinash): right now only implemented the extract year 
 __device__ static inline DBI64Type ExtractFromDate(const char* attr, DBDateType date) {
   DBI64Type result = 1970;
