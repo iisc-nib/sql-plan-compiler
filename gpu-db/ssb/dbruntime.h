@@ -279,7 +279,7 @@ void initSsbDb(std::string dbDir)
     DBStringType *p_category = readFixedSizeBinaryToString<7>(part_table, "p_category");
     d_part__p_category = allocateAndTransferStrings(p_category, part_size);
     DBStringEncodedType *p_category_enc = stringTypeToEncoded(p_category, part_size);
-    d_part__p_category_encoded = p_category_enc->buffer;
+    d_part__p_category_encoded = allocateAndTransfer<DBI16Type>(p_category_enc->buffer, part_size);
     part__p_category_map = p_category_enc->rev_dict;
     free(p_category);
 
