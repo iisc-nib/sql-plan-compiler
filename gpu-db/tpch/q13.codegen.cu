@@ -114,7 +114,7 @@ extern "C" void control (DBI32Type * d_nation__n_nationkey, DBStringType * d_nat
 uint64_t* d_COUNT0;
 cudaMalloc(&d_COUNT0, sizeof(uint64_t));
 cudaMemset(d_COUNT0, 0, sizeof(uint64_t));
-count_1<<<std::ceil((float)customer_size/32.), 32>>>(d_COUNT0, customer_size);
+count_1<<<std::ceil((float)customer_size/128.), 128>>>(d_COUNT0, customer_size);
 uint64_t COUNT0;
 cudaMemcpy(&COUNT0, d_COUNT0, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 // Insert hash table control;
@@ -124,16 +124,16 @@ cudaMemset(d_BUF_IDX_0, 0, sizeof(uint64_t));
 uint64_t* d_BUF_0;
 cudaMalloc(&d_BUF_0, sizeof(uint64_t) * COUNT0 * 1);
 auto d_HT_0 = cuco::experimental::static_multimap{ (int)COUNT0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-main_1<<<std::ceil((float)customer_size/32.), 32>>>(d_BUF_0, d_BUF_IDX_0, d_HT_0.ref(cuco::insert), d_customer__c_custkey, customer_size);
+main_1<<<std::ceil((float)customer_size/128.), 128>>>(d_BUF_0, d_BUF_IDX_0, d_HT_0.ref(cuco::insert), d_customer__c_custkey, customer_size);
 //Create aggregation hash table
 auto d_HT_2 = cuco::static_map{ (int)1500000*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-count_3<<<std::ceil((float)orders_size/32.), 32>>>(d_BUF_0, d_HT_0.ref(cuco::for_each), d_HT_2.ref(cuco::insert), d_customer__c_custkey, d_orders__o_custkey, orders_size);
+count_3<<<std::ceil((float)orders_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::for_each), d_HT_2.ref(cuco::insert), d_customer__c_custkey, d_orders__o_custkey, orders_size);
 size_t COUNT2 = d_HT_2.size();
 thrust::device_vector<int64_t> keys_2(COUNT2), vals_2(COUNT2);
 d_HT_2.retrieve_all(keys_2.begin(), vals_2.begin());
 d_HT_2.clear();
 int64_t* raw_keys2 = thrust::raw_pointer_cast(keys_2.data());
-insertKeys<<<std::ceil((float)COUNT2/32.), 32>>>(raw_keys2, d_HT_2.ref(cuco::insert), COUNT2);
+insertKeys<<<std::ceil((float)COUNT2/128.), 128>>>(raw_keys2, d_HT_2.ref(cuco::insert), COUNT2);
 //Aggregate in hashtable
 DBI64Type* d_aggr0__tmp_attr0;
 cudaMalloc(&d_aggr0__tmp_attr0, sizeof(DBI64Type) * COUNT2);
@@ -141,16 +141,16 @@ cudaMemset(d_aggr0__tmp_attr0, 0, sizeof(DBI64Type) * COUNT2);
 DBI32Type* d_KEY_2customer__c_custkey;
 cudaMalloc(&d_KEY_2customer__c_custkey, sizeof(DBI32Type) * COUNT2);
 cudaMemset(d_KEY_2customer__c_custkey, 0, sizeof(DBI32Type) * COUNT2);
-main_3<<<std::ceil((float)orders_size/32.), 32>>>(d_BUF_0, d_HT_0.ref(cuco::for_each), d_HT_2.ref(cuco::find), d_KEY_2customer__c_custkey, d_aggr0__tmp_attr0, d_customer__c_custkey, d_orders__o_custkey, d_orders__o_orderkey, orders_size);
+main_3<<<std::ceil((float)orders_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::for_each), d_HT_2.ref(cuco::find), d_KEY_2customer__c_custkey, d_aggr0__tmp_attr0, d_customer__c_custkey, d_orders__o_custkey, d_orders__o_orderkey, orders_size);
 //Create aggregation hash table
 auto d_HT_4 = cuco::static_map{ (int)1500000*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-count_5<<<std::ceil((float)COUNT2/32.), 32>>>(COUNT2, d_HT_4.ref(cuco::insert), d_aggr0__tmp_attr0);
+count_5<<<std::ceil((float)COUNT2/128.), 128>>>(COUNT2, d_HT_4.ref(cuco::insert), d_aggr0__tmp_attr0);
 size_t COUNT4 = d_HT_4.size();
 thrust::device_vector<int64_t> keys_4(COUNT4), vals_4(COUNT4);
 d_HT_4.retrieve_all(keys_4.begin(), vals_4.begin());
 d_HT_4.clear();
 int64_t* raw_keys4 = thrust::raw_pointer_cast(keys_4.data());
-insertKeys<<<std::ceil((float)COUNT4/32.), 32>>>(raw_keys4, d_HT_4.ref(cuco::insert), COUNT4);
+insertKeys<<<std::ceil((float)COUNT4/128.), 128>>>(raw_keys4, d_HT_4.ref(cuco::insert), COUNT4);
 //Aggregate in hashtable
 DBI64Type* d_aggr1__tmp_attr1;
 cudaMalloc(&d_aggr1__tmp_attr1, sizeof(DBI64Type) * COUNT4);
@@ -158,12 +158,12 @@ cudaMemset(d_aggr1__tmp_attr1, 0, sizeof(DBI64Type) * COUNT4);
 DBI64Type* d_KEY_4aggr0__tmp_attr0;
 cudaMalloc(&d_KEY_4aggr0__tmp_attr0, sizeof(DBI64Type) * COUNT4);
 cudaMemset(d_KEY_4aggr0__tmp_attr0, 0, sizeof(DBI64Type) * COUNT4);
-main_5<<<std::ceil((float)COUNT2/32.), 32>>>(COUNT2, d_HT_4.ref(cuco::find), d_KEY_4aggr0__tmp_attr0, d_aggr0__tmp_attr0, d_aggr1__tmp_attr1);
+main_5<<<std::ceil((float)COUNT2/128.), 128>>>(COUNT2, d_HT_4.ref(cuco::find), d_KEY_4aggr0__tmp_attr0, d_aggr0__tmp_attr0, d_aggr1__tmp_attr1);
 //Materialize count
 uint64_t* d_COUNT6;
 cudaMalloc(&d_COUNT6, sizeof(uint64_t));
 cudaMemset(d_COUNT6, 0, sizeof(uint64_t));
-count_7<<<std::ceil((float)COUNT4/32.), 32>>>(COUNT4, d_COUNT6);
+count_7<<<std::ceil((float)COUNT4/128.), 128>>>(COUNT4, d_COUNT6);
 uint64_t COUNT6;
 cudaMemcpy(&COUNT6, d_COUNT6, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 //Materialize buffers
@@ -176,7 +176,7 @@ cudaMalloc(&d_MAT6aggr0__tmp_attr0, sizeof(DBI64Type) * COUNT6);
 auto MAT6aggr1__tmp_attr1 = (DBI64Type*)malloc(sizeof(DBI64Type) * COUNT6);
 DBI64Type* d_MAT6aggr1__tmp_attr1;
 cudaMalloc(&d_MAT6aggr1__tmp_attr1, sizeof(DBI64Type) * COUNT6);
-main_7<<<std::ceil((float)COUNT4/32.), 32>>>(COUNT4, d_MAT6aggr0__tmp_attr0, d_MAT6aggr1__tmp_attr1, d_MAT_IDX6, d_KEY_4aggr0__tmp_attr0, d_aggr1__tmp_attr1);
+main_7<<<std::ceil((float)COUNT4/128.), 128>>>(COUNT4, d_MAT6aggr0__tmp_attr0, d_MAT6aggr1__tmp_attr1, d_MAT_IDX6, d_KEY_4aggr0__tmp_attr0, d_aggr1__tmp_attr1);
 cudaMemcpy(MAT6aggr0__tmp_attr0, d_MAT6aggr0__tmp_attr0, sizeof(DBI64Type) * COUNT6, cudaMemcpyDeviceToHost);
 cudaMemcpy(MAT6aggr1__tmp_attr1, d_MAT6aggr1__tmp_attr1, sizeof(DBI64Type) * COUNT6, cudaMemcpyDeviceToHost);
 for (auto i=0ull; i < COUNT6; i++) { std::cout << "" << MAT6aggr0__tmp_attr0[i];
