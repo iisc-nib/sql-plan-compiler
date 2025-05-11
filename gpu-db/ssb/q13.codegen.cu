@@ -10,8 +10,8 @@ __global__ void count_1(uint64_t* COUNT0, DBI32Type* date__d_weeknuminyear, DBI3
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= date_size) return;
 auto reg_date__d_weeknuminyear = date__d_weeknuminyear[tid];
-if (!(evaluatePredicate(reg_date__d_weeknuminyear, 6, Predicate::eq))) return;
 auto reg_date__d_year = date__d_year[tid];
+if (!(evaluatePredicate(reg_date__d_weeknuminyear, 6, Predicate::eq))) return;
 if (!(evaluatePredicate(reg_date__d_year, 1994, Predicate::eq))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
@@ -27,8 +27,9 @@ __global__ void main_1(uint64_t* BUF_0, uint64_t* BUF_IDX_0, HASHTABLE_INSERT HT
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= date_size) return;
 auto reg_date__d_weeknuminyear = date__d_weeknuminyear[tid];
-if (!(evaluatePredicate(reg_date__d_weeknuminyear, 6, Predicate::eq))) return;
 auto reg_date__d_year = date__d_year[tid];
+auto reg_date__d_datekey = date__d_datekey[tid];
+if (!(evaluatePredicate(reg_date__d_weeknuminyear, 6, Predicate::eq))) return;
 if (!(evaluatePredicate(reg_date__d_year, 1994, Predicate::eq))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
@@ -37,7 +38,6 @@ if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 uint64_t KEY_0 = 0;
-auto reg_date__d_datekey = date__d_datekey[tid];
 
 KEY_0 |= reg_date__d_datekey;
 // Insert hash table kernel;
@@ -50,8 +50,9 @@ __global__ void count_3(uint64_t* BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_INSERT 
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineorder_size) return;
 auto reg_lineorder__lo_discount = lineorder__lo_discount[tid];
-if (!(evaluatePredicate(reg_lineorder__lo_discount, 5, Predicate::gte) && evaluatePredicate(reg_lineorder__lo_discount, 7, Predicate::lte))) return;
 auto reg_lineorder__lo_quantity = lineorder__lo_quantity[tid];
+auto reg_lineorder__lo_orderdate = lineorder__lo_orderdate[tid];
+if (!(evaluatePredicate(reg_lineorder__lo_discount, 5, Predicate::gte) && evaluatePredicate(reg_lineorder__lo_discount, 7, Predicate::lte))) return;
 if (!(evaluatePredicate(reg_lineorder__lo_quantity, 26, Predicate::gte) && evaluatePredicate(reg_lineorder__lo_quantity, 35, Predicate::lte))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
@@ -60,7 +61,6 @@ if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 uint64_t KEY_0 = 0;
-auto reg_lineorder__lo_orderdate = lineorder__lo_orderdate[tid];
 
 KEY_0 |= reg_lineorder__lo_orderdate;
 //Probe Hash table
@@ -78,8 +78,10 @@ __global__ void main_3(uint64_t* BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_FIND HT_
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineorder_size) return;
 auto reg_lineorder__lo_discount = lineorder__lo_discount[tid];
-if (!(evaluatePredicate(reg_lineorder__lo_discount, 5, Predicate::gte) && evaluatePredicate(reg_lineorder__lo_discount, 7, Predicate::lte))) return;
 auto reg_lineorder__lo_quantity = lineorder__lo_quantity[tid];
+auto reg_lineorder__lo_orderdate = lineorder__lo_orderdate[tid];
+auto reg_lineorder__lo_extendedprice = lineorder__lo_extendedprice[tid];
+if (!(evaluatePredicate(reg_lineorder__lo_discount, 5, Predicate::gte) && evaluatePredicate(reg_lineorder__lo_discount, 7, Predicate::lte))) return;
 if (!(evaluatePredicate(reg_lineorder__lo_quantity, 26, Predicate::gte) && evaluatePredicate(reg_lineorder__lo_quantity, 35, Predicate::lte))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
@@ -88,7 +90,6 @@ if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 uint64_t KEY_0 = 0;
-auto reg_lineorder__lo_orderdate = lineorder__lo_orderdate[tid];
 
 KEY_0 |= reg_lineorder__lo_orderdate;
 //Probe Hash table
@@ -98,7 +99,6 @@ if (!(true)) return;
 uint64_t KEY_2 = 0;
 //Aggregate in hashtable
 auto buf_idx_2 = HT_2.find(KEY_2)->second;
-auto reg_lineorder__lo_extendedprice = lineorder__lo_extendedprice[tid];
 auto reg_map0__tmp_attr1 = (reg_lineorder__lo_extendedprice) * ((DBDecimalType)(reg_lineorder__lo_discount));
 aggregate_sum(&aggr0__tmp_attr0[buf_idx_2], reg_map0__tmp_attr1);
 });
@@ -112,9 +112,9 @@ atomicAdd((int*)COUNT4, 1);
 __global__ void main_5(size_t COUNT2, DBDecimalType* MAT4aggr0__tmp_attr0, uint64_t* MAT_IDX4, DBDecimalType* aggr0__tmp_attr0) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= COUNT2) return;
+auto reg_aggr0__tmp_attr0 = aggr0__tmp_attr0[tid];
 //Materialize buffers
 auto mat_idx4 = atomicAdd((int*)MAT_IDX4, 1);
-auto reg_aggr0__tmp_attr0 = aggr0__tmp_attr0[tid];
 MAT4aggr0__tmp_attr0[mat_idx4] = reg_aggr0__tmp_attr0;
 }
 extern "C" void control (DBI32Type* d_supplier__s_suppkey, DBStringType* d_supplier__s_name, DBStringType* d_supplier__s_address, DBStringType* d_supplier__s_city, DBStringType* d_supplier__s_nation, DBStringType* d_supplier__s_region, DBStringType* d_supplier__s_phone, size_t supplier_size, DBI32Type* d_part__p_partkey, DBStringType* d_part__p_name, DBStringType* d_part__p_mfgr, DBStringType* d_part__p_category, DBStringType* d_part__p_brand1, DBStringType* d_part__p_color, DBStringType* d_part__p_type, DBI32Type* d_part__p_size, DBStringType* d_part__p_container, size_t part_size, DBI32Type* d_lineorder__lo_orderkey, DBI32Type* d_lineorder__lo_linenumber, DBI32Type* d_lineorder__lo_custkey, DBI32Type* d_lineorder__lo_partkey, DBI32Type* d_lineorder__lo_suppkey, DBDateType* d_lineorder__lo_orderdate, DBDateType* d_lineorder__lo_commitdate, DBStringType* d_lineorder__lo_orderpriority, DBCharType* d_lineorder__lo_shippriority, DBI32Type* d_lineorder__lo_quantity, DBDecimalType* d_lineorder__lo_extendedprice, DBDecimalType* d_lineorder__lo_ordtotalprice, DBDecimalType* d_lineorder__lo_revenue, DBDecimalType* d_lineorder__lo_supplycost, DBI32Type* d_lineorder__lo_discount, DBI32Type* d_lineorder__lo_tax, DBStringType* d_lineorder__lo_shipmode, size_t lineorder_size, DBI32Type* d_date__d_datekey, DBStringType* d_date__d_date, DBStringType* d_date__d_dayofweek, DBStringType* d_date__d_month, DBI32Type* d_date__d_year, DBI32Type* d_date__d_yearmonthnum, DBStringType* d_date__d_yearmonth, DBI32Type* d_date__d_daynuminweek, DBI32Type* d_date__d_daynuminmonth, DBI32Type* d_date__d_daynuminyear, DBI32Type* d_date__d_monthnuminyear, DBI32Type* d_date__d_weeknuminyear, DBStringType* d_date__d_sellingseason, DBI32Type* d_date__d_lastdayinweekfl, DBI32Type* d_date__d_lastdayinmonthfl, DBI32Type* d_date__d_holidayfl, DBI32Type* d_date__d_weekdayfl, size_t date_size, DBI32Type* d_customer__c_custkey, DBStringType* d_customer__c_name, DBStringType* d_customer__c_address, DBStringType* d_customer__c_city, DBStringType* d_customer__c_nation, DBStringType* d_customer__c_region, DBStringType* d_customer__c_phone, DBStringType* d_customer__c_mktsegment, size_t customer_size, DBI32Type* d_region__r_regionkey, DBStringType* d_region__r_name, DBStringType* d_region__r_comment, size_t region_size, DBI16Type* d_part__p_brand1_encoded, DBI16Type* d_supplier__s_nation_encoded, DBI16Type* d_customer__c_city_encoded, DBI16Type* d_supplier__s_city_encoded, DBI16Type* d_customer__c_nation_encoded, DBI16Type* d_part__p_category_encoded, std::unordered_map<DBI16Type, std::string>& part__p_brand1_map, std::unordered_map<DBI16Type, std::string>& supplier__s_nation_map, std::unordered_map<DBI16Type, std::string>& customer__c_city_map, std::unordered_map<DBI16Type, std::string>& supplier__s_city_map, std::unordered_map<DBI16Type, std::string>& customer__c_nation_map, std::unordered_map<DBI16Type, std::string>& part__p_category_map) {

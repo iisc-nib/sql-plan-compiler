@@ -23,13 +23,13 @@ __global__ void main_1(uint64_t* BUF_0, uint64_t* BUF_IDX_0, HASHTABLE_INSERT HT
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= part_size) return;
 auto reg_part__p_category = part__p_category[tid];
+auto reg_part__p_partkey = part__p_partkey[tid];
 if (!(evaluatePredicate(reg_part__p_category, "MFGR#12", Predicate::eq))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 uint64_t KEY_0 = 0;
-auto reg_part__p_partkey = part__p_partkey[tid];
 
 KEY_0 |= reg_part__p_partkey;
 // Insert hash table kernel;
@@ -54,13 +54,13 @@ __global__ void main_3(uint64_t* BUF_2, uint64_t* BUF_IDX_2, HASHTABLE_INSERT HT
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= supplier_size) return;
 auto reg_supplier__s_region = supplier__s_region[tid];
+auto reg_supplier__s_suppkey = supplier__s_suppkey[tid];
 if (!(evaluatePredicate(reg_supplier__s_region, "AMERICA", Predicate::eq))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 uint64_t KEY_2 = 0;
-auto reg_supplier__s_suppkey = supplier__s_suppkey[tid];
 
 KEY_2 |= reg_supplier__s_suppkey;
 // Insert hash table kernel;
@@ -80,10 +80,10 @@ template<typename HASHTABLE_INSERT>
 __global__ void main_5(uint64_t* BUF_4, uint64_t* BUF_IDX_4, HASHTABLE_INSERT HT_4, DBI32Type* date__d_datekey, size_t date_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= date_size) return;
+auto reg_date__d_datekey = date__d_datekey[tid];
 if (!(!(false))) return;
 if (!(!(false))) return;
 uint64_t KEY_4 = 0;
-auto reg_date__d_datekey = date__d_datekey[tid];
 
 KEY_4 |= reg_date__d_datekey;
 // Insert hash table kernel;
@@ -95,6 +95,9 @@ template<typename HASHTABLE_PROBE, typename HASHTABLE_INSERT>
 __global__ void count_7(uint64_t* BUF_0, uint64_t* BUF_2, uint64_t* BUF_4, HASHTABLE_PROBE HT_0, HASHTABLE_PROBE HT_2, HASHTABLE_PROBE HT_4, HASHTABLE_INSERT HT_6, DBI32Type* date__d_year, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_partkey, DBI32Type* lineorder__lo_suppkey, size_t lineorder_size, DBI16Type* part__p_brand1_encoded) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineorder_size) return;
+auto reg_lineorder__lo_partkey = lineorder__lo_partkey[tid];
+auto reg_lineorder__lo_suppkey = lineorder__lo_suppkey[tid];
+auto reg_lineorder__lo_orderdate = lineorder__lo_orderdate[tid];
 if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
@@ -102,7 +105,6 @@ if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 uint64_t KEY_0 = 0;
-auto reg_lineorder__lo_partkey = lineorder__lo_partkey[tid];
 
 KEY_0 |= reg_lineorder__lo_partkey;
 //Probe Hash table
@@ -111,7 +113,6 @@ HT_0.for_each(KEY_0, [&] __device__ (auto const SLOT_0) {
 auto const [slot_first0, slot_second0] = SLOT_0;
 if (!(true)) return;
 uint64_t KEY_2 = 0;
-auto reg_lineorder__lo_suppkey = lineorder__lo_suppkey[tid];
 
 KEY_2 |= reg_lineorder__lo_suppkey;
 //Probe Hash table
@@ -120,7 +121,6 @@ HT_2.for_each(KEY_2, [&] __device__ (auto const SLOT_2) {
 auto const [slot_first2, slot_second2] = SLOT_2;
 if (!(true)) return;
 uint64_t KEY_4 = 0;
-auto reg_lineorder__lo_orderdate = lineorder__lo_orderdate[tid];
 
 KEY_4 |= reg_lineorder__lo_orderdate;
 //Probe Hash table
@@ -145,6 +145,10 @@ template<typename HASHTABLE_PROBE, typename HASHTABLE_FIND>
 __global__ void main_7(uint64_t* BUF_0, uint64_t* BUF_2, uint64_t* BUF_4, HASHTABLE_PROBE HT_0, HASHTABLE_PROBE HT_2, HASHTABLE_PROBE HT_4, HASHTABLE_FIND HT_6, DBI32Type* KEY_6date__d_year, DBI16Type* KEY_6part__p_brand1_encoded, DBDecimalType* aggr0__tmp_attr0, DBI32Type* date__d_year, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_partkey, DBDecimalType* lineorder__lo_revenue, DBI32Type* lineorder__lo_suppkey, size_t lineorder_size, DBI16Type* part__p_brand1_encoded) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineorder_size) return;
+auto reg_lineorder__lo_partkey = lineorder__lo_partkey[tid];
+auto reg_lineorder__lo_suppkey = lineorder__lo_suppkey[tid];
+auto reg_lineorder__lo_orderdate = lineorder__lo_orderdate[tid];
+auto reg_lineorder__lo_revenue = lineorder__lo_revenue[tid];
 if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
@@ -152,7 +156,6 @@ if (!(!(false))) return;
 if (!(!(false))) return;
 if (!(!(false))) return;
 uint64_t KEY_0 = 0;
-auto reg_lineorder__lo_partkey = lineorder__lo_partkey[tid];
 
 KEY_0 |= reg_lineorder__lo_partkey;
 //Probe Hash table
@@ -160,7 +163,6 @@ HT_0.for_each(KEY_0, [&] __device__ (auto const SLOT_0) {
 auto const [slot_first0, slot_second0] = SLOT_0;
 if (!(true)) return;
 uint64_t KEY_2 = 0;
-auto reg_lineorder__lo_suppkey = lineorder__lo_suppkey[tid];
 
 KEY_2 |= reg_lineorder__lo_suppkey;
 //Probe Hash table
@@ -168,7 +170,6 @@ HT_2.for_each(KEY_2, [&] __device__ (auto const SLOT_2) {
 auto const [slot_first2, slot_second2] = SLOT_2;
 if (!(true)) return;
 uint64_t KEY_4 = 0;
-auto reg_lineorder__lo_orderdate = lineorder__lo_orderdate[tid];
 
 KEY_4 |= reg_lineorder__lo_orderdate;
 //Probe Hash table
@@ -184,7 +185,6 @@ KEY_6 <<= 16;
 KEY_6 |= reg_part__p_brand1_encoded;
 //Aggregate in hashtable
 auto buf_idx_6 = HT_6.find(KEY_6)->second;
-auto reg_lineorder__lo_revenue = lineorder__lo_revenue[tid];
 aggregate_sum(&aggr0__tmp_attr0[buf_idx_6], reg_lineorder__lo_revenue);
 KEY_6date__d_year[buf_idx_6] = reg_date__d_year;
 KEY_6part__p_brand1_encoded[buf_idx_6] = reg_part__p_brand1_encoded;
@@ -201,13 +201,13 @@ atomicAdd((int*)COUNT8, 1);
 __global__ void main_9(size_t COUNT6, DBDecimalType* MAT8aggr0__tmp_attr0, DBI32Type* MAT8date__d_year, DBI16Type* MAT8part__p_brand1_encoded, uint64_t* MAT_IDX8, DBDecimalType* aggr0__tmp_attr0, DBI32Type* date__d_year, DBI16Type* part__p_brand1_encoded) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= COUNT6) return;
+auto reg_aggr0__tmp_attr0 = aggr0__tmp_attr0[tid];
+auto reg_date__d_year = date__d_year[tid];
+auto reg_part__p_brand1_encoded = part__p_brand1_encoded[tid];
 //Materialize buffers
 auto mat_idx8 = atomicAdd((int*)MAT_IDX8, 1);
-auto reg_aggr0__tmp_attr0 = aggr0__tmp_attr0[tid];
 MAT8aggr0__tmp_attr0[mat_idx8] = reg_aggr0__tmp_attr0;
-auto reg_date__d_year = date__d_year[tid];
 MAT8date__d_year[mat_idx8] = reg_date__d_year;
-auto reg_part__p_brand1_encoded = part__p_brand1_encoded[tid];
 MAT8part__p_brand1_encoded[mat_idx8] = reg_part__p_brand1_encoded;
 }
 extern "C" void control (DBI32Type* d_supplier__s_suppkey, DBStringType* d_supplier__s_name, DBStringType* d_supplier__s_address, DBStringType* d_supplier__s_city, DBStringType* d_supplier__s_nation, DBStringType* d_supplier__s_region, DBStringType* d_supplier__s_phone, size_t supplier_size, DBI32Type* d_part__p_partkey, DBStringType* d_part__p_name, DBStringType* d_part__p_mfgr, DBStringType* d_part__p_category, DBStringType* d_part__p_brand1, DBStringType* d_part__p_color, DBStringType* d_part__p_type, DBI32Type* d_part__p_size, DBStringType* d_part__p_container, size_t part_size, DBI32Type* d_lineorder__lo_orderkey, DBI32Type* d_lineorder__lo_linenumber, DBI32Type* d_lineorder__lo_custkey, DBI32Type* d_lineorder__lo_partkey, DBI32Type* d_lineorder__lo_suppkey, DBDateType* d_lineorder__lo_orderdate, DBDateType* d_lineorder__lo_commitdate, DBStringType* d_lineorder__lo_orderpriority, DBCharType* d_lineorder__lo_shippriority, DBI32Type* d_lineorder__lo_quantity, DBDecimalType* d_lineorder__lo_extendedprice, DBDecimalType* d_lineorder__lo_ordtotalprice, DBDecimalType* d_lineorder__lo_revenue, DBDecimalType* d_lineorder__lo_supplycost, DBI32Type* d_lineorder__lo_discount, DBI32Type* d_lineorder__lo_tax, DBStringType* d_lineorder__lo_shipmode, size_t lineorder_size, DBI32Type* d_date__d_datekey, DBStringType* d_date__d_date, DBStringType* d_date__d_dayofweek, DBStringType* d_date__d_month, DBI32Type* d_date__d_year, DBI32Type* d_date__d_yearmonthnum, DBStringType* d_date__d_yearmonth, DBI32Type* d_date__d_daynuminweek, DBI32Type* d_date__d_daynuminmonth, DBI32Type* d_date__d_daynuminyear, DBI32Type* d_date__d_monthnuminyear, DBI32Type* d_date__d_weeknuminyear, DBStringType* d_date__d_sellingseason, DBI32Type* d_date__d_lastdayinweekfl, DBI32Type* d_date__d_lastdayinmonthfl, DBI32Type* d_date__d_holidayfl, DBI32Type* d_date__d_weekdayfl, size_t date_size, DBI32Type* d_customer__c_custkey, DBStringType* d_customer__c_name, DBStringType* d_customer__c_address, DBStringType* d_customer__c_city, DBStringType* d_customer__c_nation, DBStringType* d_customer__c_region, DBStringType* d_customer__c_phone, DBStringType* d_customer__c_mktsegment, size_t customer_size, DBI32Type* d_region__r_regionkey, DBStringType* d_region__r_name, DBStringType* d_region__r_comment, size_t region_size, DBI16Type* d_part__p_brand1_encoded, DBI16Type* d_supplier__s_nation_encoded, DBI16Type* d_customer__c_city_encoded, DBI16Type* d_supplier__s_city_encoded, DBI16Type* d_customer__c_nation_encoded, DBI16Type* d_part__p_category_encoded, std::unordered_map<DBI16Type, std::string>& part__p_brand1_map, std::unordered_map<DBI16Type, std::string>& supplier__s_nation_map, std::unordered_map<DBI16Type, std::string>& customer__c_city_map, std::unordered_map<DBI16Type, std::string>& supplier__s_city_map, std::unordered_map<DBI16Type, std::string>& customer__c_nation_map, std::unordered_map<DBI16Type, std::string>& part__p_category_map) {
@@ -257,7 +257,7 @@ cudaMalloc(&d_BUF_4, sizeof(uint64_t) * COUNT4 * 1);
 auto d_HT_4 = cuco::experimental::static_multimap{ (int)COUNT4*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 main_5<<<std::ceil((float)date_size/128.), 128>>>(d_BUF_4, d_BUF_IDX_4, d_HT_4.ref(cuco::insert), d_date__d_datekey, date_size);
 //Create aggregation hash table
-auto d_HT_6 = cuco::static_map{ (int)52974*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+auto d_HT_6 = cuco::static_map{ (int)44819*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 count_7<<<std::ceil((float)lineorder_size/128.), 128>>>(d_BUF_0, d_BUF_2, d_BUF_4, d_HT_0.ref(cuco::for_each), d_HT_2.ref(cuco::for_each), d_HT_4.ref(cuco::for_each), d_HT_6.ref(cuco::insert), d_date__d_year, d_lineorder__lo_orderdate, d_lineorder__lo_partkey, d_lineorder__lo_suppkey, lineorder_size, d_part__p_brand1_encoded);
 size_t COUNT6 = d_HT_6.size();
 thrust::device_vector<int64_t> keys_6(COUNT6), vals_6(COUNT6);
