@@ -38,13 +38,11 @@ auto reg_nation__n_regionkey = nation__n_regionkey[tid];
 
 KEY_0 |= reg_nation__n_regionkey;
 //Probe Hash table
-HT_0.for_each(KEY_0, [&] __device__ (auto const SLOT_0) {
-
-auto const [slot_first0, slot_second0] = SLOT_0;
+auto SLOT_0 = HT_0.find(KEY_0);
+if (SLOT_0 == HT_0.end()) return;
 if (!(true)) return;
 //Materialize count
 atomicAdd((int*)COUNT2, 1);
-});
 }
 template<typename HASHTABLE_PROBE, typename HASHTABLE_INSERT>
 __global__ void main_3(uint64_t* BUF_0, uint64_t* BUF_2, uint64_t* BUF_IDX_2, HASHTABLE_PROBE HT_0, HASHTABLE_INSERT HT_2, DBI32Type* nation__n_nationkey, DBI32Type* nation__n_regionkey, size_t nation_size) {
@@ -55,8 +53,8 @@ auto reg_nation__n_regionkey = nation__n_regionkey[tid];
 
 KEY_0 |= reg_nation__n_regionkey;
 //Probe Hash table
-HT_0.for_each(KEY_0, [&] __device__ (auto const SLOT_0) {
-auto const [slot_first0, slot_second0] = SLOT_0;
+auto SLOT_0 = HT_0.find(KEY_0);
+if (SLOT_0 == HT_0.end()) return;
 if (!(true)) return;
 uint64_t KEY_2 = 0;
 auto reg_nation__n_nationkey = nation__n_nationkey[tid];
@@ -65,9 +63,8 @@ KEY_2 |= reg_nation__n_nationkey;
 // Insert hash table kernel;
 auto buf_idx_2 = atomicAdd((int*)BUF_IDX_2, 1);
 HT_2.insert(cuco::pair{KEY_2, buf_idx_2});
-BUF_2[buf_idx_2 * 2 + 0] = BUF_0[slot_second0 * 1 + 0];
+BUF_2[buf_idx_2 * 2 + 0] = BUF_0[SLOT_0->second * 1 + 0];
 BUF_2[buf_idx_2 * 2 + 1] = tid;
-});
 }
 template<typename HASHTABLE_PROBE>
 __global__ void count_5(uint64_t* BUF_2, uint64_t* COUNT4, HASHTABLE_PROBE HT_2, DBI32Type* customer__c_nationkey, size_t customer_size) {
@@ -78,13 +75,11 @@ auto reg_customer__c_nationkey = customer__c_nationkey[tid];
 
 KEY_2 |= reg_customer__c_nationkey;
 //Probe Hash table
-HT_2.for_each(KEY_2, [&] __device__ (auto const SLOT_2) {
-
-auto const [slot_first2, slot_second2] = SLOT_2;
+auto SLOT_2 = HT_2.find(KEY_2);
+if (SLOT_2 == HT_2.end()) return;
 if (!(true)) return;
 //Materialize count
 atomicAdd((int*)COUNT4, 1);
-});
 }
 template<typename HASHTABLE_PROBE, typename HASHTABLE_INSERT>
 __global__ void main_5(uint64_t* BUF_2, uint64_t* BUF_4, uint64_t* BUF_IDX_4, HASHTABLE_PROBE HT_2, HASHTABLE_INSERT HT_4, DBI32Type* customer__c_custkey, DBI32Type* customer__c_nationkey, size_t customer_size) {
@@ -95,8 +90,8 @@ auto reg_customer__c_nationkey = customer__c_nationkey[tid];
 
 KEY_2 |= reg_customer__c_nationkey;
 //Probe Hash table
-HT_2.for_each(KEY_2, [&] __device__ (auto const SLOT_2) {
-auto const [slot_first2, slot_second2] = SLOT_2;
+auto SLOT_2 = HT_2.find(KEY_2);
+if (SLOT_2 == HT_2.end()) return;
 if (!(true)) return;
 uint64_t KEY_4 = 0;
 auto reg_customer__c_custkey = customer__c_custkey[tid];
@@ -106,9 +101,8 @@ KEY_4 |= reg_customer__c_custkey;
 auto buf_idx_4 = atomicAdd((int*)BUF_IDX_4, 1);
 HT_4.insert(cuco::pair{KEY_4, buf_idx_4});
 BUF_4[buf_idx_4 * 3 + 0] = tid;
-BUF_4[buf_idx_4 * 3 + 1] = BUF_2[slot_second2 * 2 + 0];
-BUF_4[buf_idx_4 * 3 + 2] = BUF_2[slot_second2 * 2 + 1];
-});
+BUF_4[buf_idx_4 * 3 + 1] = BUF_2[SLOT_2->second * 2 + 0];
+BUF_4[buf_idx_4 * 3 + 2] = BUF_2[SLOT_2->second * 2 + 1];
 }
 template<typename HASHTABLE_PROBE>
 __global__ void count_7(uint64_t* BUF_4, uint64_t* COUNT6, HASHTABLE_PROBE HT_4, DBI32Type* orders__o_custkey, DBDateType* orders__o_orderdate, size_t orders_size) {
@@ -121,13 +115,11 @@ auto reg_orders__o_custkey = orders__o_custkey[tid];
 
 KEY_4 |= reg_orders__o_custkey;
 //Probe Hash table
-HT_4.for_each(KEY_4, [&] __device__ (auto const SLOT_4) {
-
-auto const [slot_first4, slot_second4] = SLOT_4;
+auto SLOT_4 = HT_4.find(KEY_4);
+if (SLOT_4 == HT_4.end()) return;
 if (!(true)) return;
 //Materialize count
 atomicAdd((int*)COUNT6, 1);
-});
 }
 template<typename HASHTABLE_PROBE, typename HASHTABLE_INSERT>
 __global__ void main_7(uint64_t* BUF_4, uint64_t* BUF_6, uint64_t* BUF_IDX_6, HASHTABLE_PROBE HT_4, HASHTABLE_INSERT HT_6, DBI32Type* orders__o_custkey, DBDateType* orders__o_orderdate, DBI32Type* orders__o_orderkey, size_t orders_size) {
@@ -140,8 +132,8 @@ auto reg_orders__o_custkey = orders__o_custkey[tid];
 
 KEY_4 |= reg_orders__o_custkey;
 //Probe Hash table
-HT_4.for_each(KEY_4, [&] __device__ (auto const SLOT_4) {
-auto const [slot_first4, slot_second4] = SLOT_4;
+auto SLOT_4 = HT_4.find(KEY_4);
+if (SLOT_4 == HT_4.end()) return;
 if (!(true)) return;
 uint64_t KEY_6 = 0;
 auto reg_orders__o_orderkey = orders__o_orderkey[tid];
@@ -150,11 +142,10 @@ KEY_6 |= reg_orders__o_orderkey;
 // Insert hash table kernel;
 auto buf_idx_6 = atomicAdd((int*)BUF_IDX_6, 1);
 HT_6.insert(cuco::pair{KEY_6, buf_idx_6});
-BUF_6[buf_idx_6 * 4 + 0] = BUF_4[slot_second4 * 3 + 0];
+BUF_6[buf_idx_6 * 4 + 0] = BUF_4[SLOT_4->second * 3 + 0];
 BUF_6[buf_idx_6 * 4 + 1] = tid;
-BUF_6[buf_idx_6 * 4 + 2] = BUF_4[slot_second4 * 3 + 1];
-BUF_6[buf_idx_6 * 4 + 3] = BUF_4[slot_second4 * 3 + 2];
-});
+BUF_6[buf_idx_6 * 4 + 2] = BUF_4[SLOT_4->second * 3 + 1];
+BUF_6[buf_idx_6 * 4 + 3] = BUF_4[SLOT_4->second * 3 + 2];
 }
 __global__ void count_9(uint64_t* COUNT8, size_t supplier_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -167,12 +158,12 @@ __global__ void main_9(uint64_t* BUF_8, uint64_t* BUF_IDX_8, HASHTABLE_INSERT HT
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= supplier_size) return;
 uint64_t KEY_8 = 0;
-auto reg_supplier__s_nationkey = supplier__s_nationkey[tid];
-
-KEY_8 |= reg_supplier__s_nationkey;
 auto reg_supplier__s_suppkey = supplier__s_suppkey[tid];
-KEY_8 <<= 32;
+
 KEY_8 |= reg_supplier__s_suppkey;
+auto reg_supplier__s_nationkey = supplier__s_nationkey[tid];
+KEY_8 <<= 32;
+KEY_8 |= reg_supplier__s_nationkey;
 // Insert hash table kernel;
 auto buf_idx_8 = atomicAdd((int*)BUF_IDX_8, 1);
 HT_8.insert(cuco::pair{KEY_8, buf_idx_8});
@@ -187,30 +178,26 @@ auto reg_lineitem__l_orderkey = lineitem__l_orderkey[tid];
 
 KEY_6 |= reg_lineitem__l_orderkey;
 //Probe Hash table
-HT_6.for_each(KEY_6, [&] __device__ (auto const SLOT_6) {
-
-auto const [slot_first6, slot_second6] = SLOT_6;
+auto SLOT_6 = HT_6.find(KEY_6);
+if (SLOT_6 == HT_6.end()) return;
 if (!(true)) return;
 uint64_t KEY_8 = 0;
-auto reg_customer__c_nationkey = customer__c_nationkey[BUF_6[slot_second6 * 4 + 0]];
-
-KEY_8 |= reg_customer__c_nationkey;
 auto reg_lineitem__l_suppkey = lineitem__l_suppkey[tid];
-KEY_8 <<= 32;
-KEY_8 |= reg_lineitem__l_suppkey;
-//Probe Hash table
-HT_8.for_each(KEY_8, [&] __device__ (auto const SLOT_8) {
 
-auto const [slot_first8, slot_second8] = SLOT_8;
+KEY_8 |= reg_lineitem__l_suppkey;
+auto reg_customer__c_nationkey = customer__c_nationkey[BUF_6[SLOT_6->second * 4 + 0]];
+KEY_8 <<= 32;
+KEY_8 |= reg_customer__c_nationkey;
+//Probe Hash table
+auto SLOT_8 = HT_8.find(KEY_8);
+if (SLOT_8 == HT_8.end()) return;
 if (!(true)) return;
 uint64_t KEY_10 = 0;
-auto reg_nation__n_name_encoded = nation__n_name_encoded[BUF_6[slot_second6 * 4 + 3]];
+auto reg_nation__n_name_encoded = nation__n_name_encoded[BUF_6[SLOT_6->second * 4 + 3]];
 
 KEY_10 |= reg_nation__n_name_encoded;
 //Create aggregation hash table
 HT_10.insert(cuco::pair{KEY_10, 1});
-});
-});
 }
 template<typename HASHTABLE_FIND, typename HASHTABLE_PROBE>
 __global__ void main_11(uint64_t* BUF_6, uint64_t* BUF_8, HASHTABLE_FIND HT_10, HASHTABLE_PROBE HT_6, HASHTABLE_PROBE HT_8, DBI16Type* KEY_10nation__n_name_encoded, DBDecimalType* aggr0__tmp_attr0, DBI32Type* customer__c_nationkey, DBDecimalType* lineitem__l_discount, DBDecimalType* lineitem__l_extendedprice, DBI32Type* lineitem__l_orderkey, DBI32Type* lineitem__l_suppkey, size_t lineitem_size, DBI16Type* nation__n_name_encoded) {
@@ -221,22 +208,22 @@ auto reg_lineitem__l_orderkey = lineitem__l_orderkey[tid];
 
 KEY_6 |= reg_lineitem__l_orderkey;
 //Probe Hash table
-HT_6.for_each(KEY_6, [&] __device__ (auto const SLOT_6) {
-auto const [slot_first6, slot_second6] = SLOT_6;
+auto SLOT_6 = HT_6.find(KEY_6);
+if (SLOT_6 == HT_6.end()) return;
 if (!(true)) return;
 uint64_t KEY_8 = 0;
-auto reg_customer__c_nationkey = customer__c_nationkey[BUF_6[slot_second6 * 4 + 0]];
-
-KEY_8 |= reg_customer__c_nationkey;
 auto reg_lineitem__l_suppkey = lineitem__l_suppkey[tid];
-KEY_8 <<= 32;
+
 KEY_8 |= reg_lineitem__l_suppkey;
+auto reg_customer__c_nationkey = customer__c_nationkey[BUF_6[SLOT_6->second * 4 + 0]];
+KEY_8 <<= 32;
+KEY_8 |= reg_customer__c_nationkey;
 //Probe Hash table
-HT_8.for_each(KEY_8, [&] __device__ (auto const SLOT_8) {
-auto const [slot_first8, slot_second8] = SLOT_8;
+auto SLOT_8 = HT_8.find(KEY_8);
+if (SLOT_8 == HT_8.end()) return;
 if (!(true)) return;
 uint64_t KEY_10 = 0;
-auto reg_nation__n_name_encoded = nation__n_name_encoded[BUF_6[slot_second6 * 4 + 3]];
+auto reg_nation__n_name_encoded = nation__n_name_encoded[BUF_6[SLOT_6->second * 4 + 3]];
 
 KEY_10 |= reg_nation__n_name_encoded;
 //Aggregate in hashtable
@@ -246,8 +233,6 @@ auto reg_lineitem__l_extendedprice = lineitem__l_extendedprice[tid];
 auto reg_map0__tmp_attr1 = (reg_lineitem__l_extendedprice) * ((1) - (reg_lineitem__l_discount));
 aggregate_sum(&aggr0__tmp_attr0[buf_idx_10], reg_map0__tmp_attr1);
 KEY_10nation__n_name_encoded[buf_idx_10] = reg_nation__n_name_encoded;
-});
-});
 }
 __global__ void count_13(size_t COUNT10, uint64_t* COUNT12) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -279,13 +264,13 @@ cudaMalloc(&d_BUF_IDX_0, sizeof(uint64_t));
 cudaMemset(d_BUF_IDX_0, 0, sizeof(uint64_t));
 uint64_t* d_BUF_0;
 cudaMalloc(&d_BUF_0, sizeof(uint64_t) * COUNT0 * 1);
-auto d_HT_0 = cuco::experimental::static_multimap{ (int)COUNT0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+auto d_HT_0 = cuco::static_map{ (int)COUNT0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 main_1<<<std::ceil((float)region_size/128.), 128>>>(d_BUF_0, d_BUF_IDX_0, d_HT_0.ref(cuco::insert), d_region__r_name, d_region__r_regionkey, region_size);
 //Materialize count
 uint64_t* d_COUNT2;
 cudaMalloc(&d_COUNT2, sizeof(uint64_t));
 cudaMemset(d_COUNT2, 0, sizeof(uint64_t));
-count_3<<<std::ceil((float)nation_size/128.), 128>>>(d_BUF_0, d_COUNT2, d_HT_0.ref(cuco::for_each), d_nation__n_regionkey, nation_size);
+count_3<<<std::ceil((float)nation_size/128.), 128>>>(d_BUF_0, d_COUNT2, d_HT_0.ref(cuco::find), d_nation__n_regionkey, nation_size);
 uint64_t COUNT2;
 cudaMemcpy(&COUNT2, d_COUNT2, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 // Insert hash table control;
@@ -294,13 +279,13 @@ cudaMalloc(&d_BUF_IDX_2, sizeof(uint64_t));
 cudaMemset(d_BUF_IDX_2, 0, sizeof(uint64_t));
 uint64_t* d_BUF_2;
 cudaMalloc(&d_BUF_2, sizeof(uint64_t) * COUNT2 * 2);
-auto d_HT_2 = cuco::experimental::static_multimap{ (int)COUNT2*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-main_3<<<std::ceil((float)nation_size/128.), 128>>>(d_BUF_0, d_BUF_2, d_BUF_IDX_2, d_HT_0.ref(cuco::for_each), d_HT_2.ref(cuco::insert), d_nation__n_nationkey, d_nation__n_regionkey, nation_size);
+auto d_HT_2 = cuco::static_map{ (int)COUNT2*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+main_3<<<std::ceil((float)nation_size/128.), 128>>>(d_BUF_0, d_BUF_2, d_BUF_IDX_2, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::insert), d_nation__n_nationkey, d_nation__n_regionkey, nation_size);
 //Materialize count
 uint64_t* d_COUNT4;
 cudaMalloc(&d_COUNT4, sizeof(uint64_t));
 cudaMemset(d_COUNT4, 0, sizeof(uint64_t));
-count_5<<<std::ceil((float)customer_size/128.), 128>>>(d_BUF_2, d_COUNT4, d_HT_2.ref(cuco::for_each), d_customer__c_nationkey, customer_size);
+count_5<<<std::ceil((float)customer_size/128.), 128>>>(d_BUF_2, d_COUNT4, d_HT_2.ref(cuco::find), d_customer__c_nationkey, customer_size);
 uint64_t COUNT4;
 cudaMemcpy(&COUNT4, d_COUNT4, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 // Insert hash table control;
@@ -309,13 +294,13 @@ cudaMalloc(&d_BUF_IDX_4, sizeof(uint64_t));
 cudaMemset(d_BUF_IDX_4, 0, sizeof(uint64_t));
 uint64_t* d_BUF_4;
 cudaMalloc(&d_BUF_4, sizeof(uint64_t) * COUNT4 * 3);
-auto d_HT_4 = cuco::experimental::static_multimap{ (int)COUNT4*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-main_5<<<std::ceil((float)customer_size/128.), 128>>>(d_BUF_2, d_BUF_4, d_BUF_IDX_4, d_HT_2.ref(cuco::for_each), d_HT_4.ref(cuco::insert), d_customer__c_custkey, d_customer__c_nationkey, customer_size);
+auto d_HT_4 = cuco::static_map{ (int)COUNT4*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+main_5<<<std::ceil((float)customer_size/128.), 128>>>(d_BUF_2, d_BUF_4, d_BUF_IDX_4, d_HT_2.ref(cuco::find), d_HT_4.ref(cuco::insert), d_customer__c_custkey, d_customer__c_nationkey, customer_size);
 //Materialize count
 uint64_t* d_COUNT6;
 cudaMalloc(&d_COUNT6, sizeof(uint64_t));
 cudaMemset(d_COUNT6, 0, sizeof(uint64_t));
-count_7<<<std::ceil((float)orders_size/128.), 128>>>(d_BUF_4, d_COUNT6, d_HT_4.ref(cuco::for_each), d_orders__o_custkey, d_orders__o_orderdate, orders_size);
+count_7<<<std::ceil((float)orders_size/128.), 128>>>(d_BUF_4, d_COUNT6, d_HT_4.ref(cuco::find), d_orders__o_custkey, d_orders__o_orderdate, orders_size);
 uint64_t COUNT6;
 cudaMemcpy(&COUNT6, d_COUNT6, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 // Insert hash table control;
@@ -324,8 +309,8 @@ cudaMalloc(&d_BUF_IDX_6, sizeof(uint64_t));
 cudaMemset(d_BUF_IDX_6, 0, sizeof(uint64_t));
 uint64_t* d_BUF_6;
 cudaMalloc(&d_BUF_6, sizeof(uint64_t) * COUNT6 * 4);
-auto d_HT_6 = cuco::experimental::static_multimap{ (int)COUNT6*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-main_7<<<std::ceil((float)orders_size/128.), 128>>>(d_BUF_4, d_BUF_6, d_BUF_IDX_6, d_HT_4.ref(cuco::for_each), d_HT_6.ref(cuco::insert), d_orders__o_custkey, d_orders__o_orderdate, d_orders__o_orderkey, orders_size);
+auto d_HT_6 = cuco::static_map{ (int)COUNT6*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+main_7<<<std::ceil((float)orders_size/128.), 128>>>(d_BUF_4, d_BUF_6, d_BUF_IDX_6, d_HT_4.ref(cuco::find), d_HT_6.ref(cuco::insert), d_orders__o_custkey, d_orders__o_orderdate, d_orders__o_orderkey, orders_size);
 //Materialize count
 uint64_t* d_COUNT8;
 cudaMalloc(&d_COUNT8, sizeof(uint64_t));
@@ -339,11 +324,11 @@ cudaMalloc(&d_BUF_IDX_8, sizeof(uint64_t));
 cudaMemset(d_BUF_IDX_8, 0, sizeof(uint64_t));
 uint64_t* d_BUF_8;
 cudaMalloc(&d_BUF_8, sizeof(uint64_t) * COUNT8 * 1);
-auto d_HT_8 = cuco::experimental::static_multimap{ (int)COUNT8*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+auto d_HT_8 = cuco::static_map{ (int)COUNT8*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 main_9<<<std::ceil((float)supplier_size/128.), 128>>>(d_BUF_8, d_BUF_IDX_8, d_HT_8.ref(cuco::insert), d_supplier__s_nationkey, d_supplier__s_suppkey, supplier_size);
 //Create aggregation hash table
 auto d_HT_10 = cuco::static_map{ (int)22857*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-count_11<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_6, d_BUF_8, d_HT_10.ref(cuco::insert), d_HT_6.ref(cuco::for_each), d_HT_8.ref(cuco::for_each), d_customer__c_nationkey, d_lineitem__l_orderkey, d_lineitem__l_suppkey, lineitem_size, d_nation__n_name_encoded);
+count_11<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_6, d_BUF_8, d_HT_10.ref(cuco::insert), d_HT_6.ref(cuco::find), d_HT_8.ref(cuco::find), d_customer__c_nationkey, d_lineitem__l_orderkey, d_lineitem__l_suppkey, lineitem_size, d_nation__n_name_encoded);
 size_t COUNT10 = d_HT_10.size();
 thrust::device_vector<int64_t> keys_10(COUNT10), vals_10(COUNT10);
 d_HT_10.retrieve_all(keys_10.begin(), vals_10.begin());
@@ -357,7 +342,7 @@ cudaMemset(d_aggr0__tmp_attr0, 0, sizeof(DBDecimalType) * COUNT10);
 DBI16Type* d_KEY_10nation__n_name_encoded;
 cudaMalloc(&d_KEY_10nation__n_name_encoded, sizeof(DBI16Type) * COUNT10);
 cudaMemset(d_KEY_10nation__n_name_encoded, 0, sizeof(DBI16Type) * COUNT10);
-main_11<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_6, d_BUF_8, d_HT_10.ref(cuco::find), d_HT_6.ref(cuco::for_each), d_HT_8.ref(cuco::for_each), d_KEY_10nation__n_name_encoded, d_aggr0__tmp_attr0, d_customer__c_nationkey, d_lineitem__l_discount, d_lineitem__l_extendedprice, d_lineitem__l_orderkey, d_lineitem__l_suppkey, lineitem_size, d_nation__n_name_encoded);
+main_11<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_6, d_BUF_8, d_HT_10.ref(cuco::find), d_HT_6.ref(cuco::find), d_HT_8.ref(cuco::find), d_KEY_10nation__n_name_encoded, d_aggr0__tmp_attr0, d_customer__c_nationkey, d_lineitem__l_discount, d_lineitem__l_extendedprice, d_lineitem__l_orderkey, d_lineitem__l_suppkey, lineitem_size, d_nation__n_name_encoded);
 //Materialize count
 uint64_t* d_COUNT12;
 cudaMalloc(&d_COUNT12, sizeof(uint64_t));

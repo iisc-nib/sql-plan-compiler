@@ -34,17 +34,15 @@ auto reg_orders__o_custkey = orders__o_custkey[tid];
 
 KEY_0 |= reg_orders__o_custkey;
 //Probe Hash table
-HT_0.for_each(KEY_0, [&] __device__ (auto const SLOT_0) {
-
-auto const [slot_first0, slot_second0] = SLOT_0;
+auto SLOT_0 = HT_0.find(KEY_0);
+if (SLOT_0 == HT_0.end()) return;
 if (!(true)) return;
 uint64_t KEY_2 = 0;
-auto reg_customer__c_custkey = customer__c_custkey[BUF_0[slot_second0 * 1 + 0]];
+auto reg_customer__c_custkey = customer__c_custkey[BUF_0[SLOT_0->second * 1 + 0]];
 
 KEY_2 |= reg_customer__c_custkey;
 //Create aggregation hash table
 HT_2.insert(cuco::pair{KEY_2, 1});
-});
 }
 template<typename HASHTABLE_PROBE, typename HASHTABLE_FIND>
 __global__ void main_3(uint64_t* BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_FIND HT_2, DBI32Type* KEY_2customer__c_custkey, DBI64Type* aggr0__tmp_attr0, DBI32Type* customer__c_custkey, DBI32Type* orders__o_custkey, DBI32Type* orders__o_orderkey, size_t orders_size) {
@@ -55,11 +53,11 @@ auto reg_orders__o_custkey = orders__o_custkey[tid];
 
 KEY_0 |= reg_orders__o_custkey;
 //Probe Hash table
-HT_0.for_each(KEY_0, [&] __device__ (auto const SLOT_0) {
-auto const [slot_first0, slot_second0] = SLOT_0;
+auto SLOT_0 = HT_0.find(KEY_0);
+if (SLOT_0 == HT_0.end()) return;
 if (!(true)) return;
 uint64_t KEY_2 = 0;
-auto reg_customer__c_custkey = customer__c_custkey[BUF_0[slot_second0 * 1 + 0]];
+auto reg_customer__c_custkey = customer__c_custkey[BUF_0[SLOT_0->second * 1 + 0]];
 
 KEY_2 |= reg_customer__c_custkey;
 //Aggregate in hashtable
@@ -67,7 +65,6 @@ auto buf_idx_2 = HT_2.find(KEY_2)->second;
 auto reg_orders__o_orderkey = orders__o_orderkey[tid];
 aggregate_sum(&aggr0__tmp_attr0[buf_idx_2], 1);
 KEY_2customer__c_custkey[buf_idx_2] = reg_customer__c_custkey;
-});
 }
 template<typename HASHTABLE_INSERT>
 __global__ void count_5(size_t COUNT2, HASHTABLE_INSERT HT_4, DBI64Type* aggr0__tmp_attr0) {
@@ -123,11 +120,11 @@ cudaMalloc(&d_BUF_IDX_0, sizeof(uint64_t));
 cudaMemset(d_BUF_IDX_0, 0, sizeof(uint64_t));
 uint64_t* d_BUF_0;
 cudaMalloc(&d_BUF_0, sizeof(uint64_t) * COUNT0 * 1);
-auto d_HT_0 = cuco::experimental::static_multimap{ (int)COUNT0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+auto d_HT_0 = cuco::static_map{ (int)COUNT0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 main_1<<<std::ceil((float)customer_size/128.), 128>>>(d_BUF_0, d_BUF_IDX_0, d_HT_0.ref(cuco::insert), d_customer__c_custkey, customer_size);
 //Create aggregation hash table
 auto d_HT_2 = cuco::static_map{ (int)1500000*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-count_3<<<std::ceil((float)orders_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::for_each), d_HT_2.ref(cuco::insert), d_customer__c_custkey, d_orders__o_custkey, orders_size);
+count_3<<<std::ceil((float)orders_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::insert), d_customer__c_custkey, d_orders__o_custkey, orders_size);
 size_t COUNT2 = d_HT_2.size();
 thrust::device_vector<int64_t> keys_2(COUNT2), vals_2(COUNT2);
 d_HT_2.retrieve_all(keys_2.begin(), vals_2.begin());
@@ -141,7 +138,7 @@ cudaMemset(d_aggr0__tmp_attr0, 0, sizeof(DBI64Type) * COUNT2);
 DBI32Type* d_KEY_2customer__c_custkey;
 cudaMalloc(&d_KEY_2customer__c_custkey, sizeof(DBI32Type) * COUNT2);
 cudaMemset(d_KEY_2customer__c_custkey, 0, sizeof(DBI32Type) * COUNT2);
-main_3<<<std::ceil((float)orders_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::for_each), d_HT_2.ref(cuco::find), d_KEY_2customer__c_custkey, d_aggr0__tmp_attr0, d_customer__c_custkey, d_orders__o_custkey, d_orders__o_orderkey, orders_size);
+main_3<<<std::ceil((float)orders_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::find), d_KEY_2customer__c_custkey, d_aggr0__tmp_attr0, d_customer__c_custkey, d_orders__o_custkey, d_orders__o_orderkey, orders_size);
 //Create aggregation hash table
 auto d_HT_4 = cuco::static_map{ (int)1500000*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 count_5<<<std::ceil((float)COUNT2/128.), 128>>>(COUNT2, d_HT_4.ref(cuco::insert), d_aggr0__tmp_attr0);
