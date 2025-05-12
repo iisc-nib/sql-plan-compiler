@@ -8,9 +8,10 @@
 #include "dbruntime.h"
 #define ITEMS_PER_THREAD 4
 #define TILE_SIZE 512
+#define TB TILE_SIZE/ITEMS_PER_THREAD
 __global__ void count_1(uint64_t* COUNT0, DBStringType* part__p_brand1, size_t part_size) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
-size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
+size_t tid = tile_offset + threadIdx.x;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 DBStringType reg_part__p_brand1[ITEMS_PER_THREAD];
@@ -53,7 +54,7 @@ atomicAdd((int*)COUNT0, 1);
 template<typename HASHTABLE_INSERT>
 __global__ void main_1(uint64_t* BUF_0, uint64_t* BUF_IDX_0, HASHTABLE_INSERT HT_0, DBStringType* part__p_brand1, DBI32Type* part__p_partkey, size_t part_size) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
-size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
+size_t tid = tile_offset + threadIdx.x;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 DBStringType reg_part__p_brand1[ITEMS_PER_THREAD];
@@ -109,7 +110,7 @@ BUF_0[(buf_idx_0) * 1 + 0] = ITEM*TB + tid;
 }
 __global__ void count_3(uint64_t* COUNT2, DBStringType* supplier__s_region, size_t supplier_size) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
-size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
+size_t tid = tile_offset + threadIdx.x;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 DBStringType reg_supplier__s_region[ITEMS_PER_THREAD];
@@ -152,7 +153,7 @@ atomicAdd((int*)COUNT2, 1);
 template<typename HASHTABLE_INSERT>
 __global__ void main_3(uint64_t* BUF_2, uint64_t* BUF_IDX_2, HASHTABLE_INSERT HT_2, DBStringType* supplier__s_region, DBI32Type* supplier__s_suppkey, size_t supplier_size) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
-size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
+size_t tid = tile_offset + threadIdx.x;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 DBStringType reg_supplier__s_region[ITEMS_PER_THREAD];
@@ -209,7 +210,7 @@ BUF_2[(buf_idx_2) * 1 + 0] = ITEM*TB + tid;
 template<typename HASHTABLE_PROBE>
 __global__ void count_5(uint64_t* BUF_0, uint64_t* BUF_2, uint64_t* COUNT4, HASHTABLE_PROBE HT_0, HASHTABLE_PROBE HT_2, DBI32Type* lineorder__lo_partkey, DBI32Type* lineorder__lo_suppkey, size_t lineorder_size) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
-size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
+size_t tid = tile_offset + threadIdx.x;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 #pragma unroll
@@ -302,7 +303,7 @@ atomicAdd((int*)COUNT4, 1);
 template<typename HASHTABLE_PROBE, typename HASHTABLE_INSERT>
 __global__ void main_5(uint64_t* BUF_0, uint64_t* BUF_2, uint64_t* BUF_4, uint64_t* BUF_IDX_4, HASHTABLE_PROBE HT_0, HASHTABLE_PROBE HT_2, HASHTABLE_INSERT HT_4, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_partkey, DBI32Type* lineorder__lo_suppkey, size_t lineorder_size) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
-size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
+size_t tid = tile_offset + threadIdx.x;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 #pragma unroll
@@ -411,7 +412,7 @@ BUF_4[(buf_idx_4) * 3 + 2] = BUF_2[slot_second2[ITEM] * 1 + 0];
 template<typename HASHTABLE_PROBE, typename HASHTABLE_INSERT>
 __global__ void count_7(uint64_t* BUF_4, HASHTABLE_PROBE HT_4, HASHTABLE_INSERT HT_6, DBI32Type* date__d_datekey, DBI32Type* date__d_year, size_t date_size, DBI16Type* part__p_brand1_encoded) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
-size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
+size_t tid = tile_offset + threadIdx.x;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 #pragma unroll
@@ -479,7 +480,7 @@ HT_6.insert(cuco::pair{KEY_6[ITEM], 1});
 template<typename HASHTABLE_PROBE, typename HASHTABLE_FIND>
 __global__ void main_7(uint64_t* BUF_4, HASHTABLE_PROBE HT_4, HASHTABLE_FIND HT_6, DBI32Type* KEY_6date__d_year, DBI16Type* KEY_6part__p_brand1_encoded, DBDecimalType* aggr0__tmp_attr0, DBI32Type* date__d_datekey, DBI32Type* date__d_year, size_t date_size, DBDecimalType* lineorder__lo_revenue, DBI16Type* part__p_brand1_encoded) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
-size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
+size_t tid = tile_offset + threadIdx.x;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 #pragma unroll
@@ -555,7 +556,7 @@ KEY_6part__p_brand1_encoded[buf_idx_6] = reg_part__p_brand1_encoded[ITEM];
 }
 __global__ void count_9(size_t COUNT6, uint64_t* COUNT8) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
-size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
+size_t tid = tile_offset + threadIdx.x;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 //Materialize count
@@ -567,7 +568,7 @@ atomicAdd((int*)COUNT8, 1);
 }
 __global__ void main_9(size_t COUNT6, DBDecimalType* MAT8aggr0__tmp_attr0, DBI32Type* MAT8date__d_year, DBI16Type* MAT8part__p_brand1_encoded, uint64_t* MAT_IDX8, DBDecimalType* aggr0__tmp_attr0, DBI32Type* date__d_year, DBI16Type* part__p_brand1_encoded) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
-size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
+size_t tid = tile_offset + threadIdx.x;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 //Materialize buffers
