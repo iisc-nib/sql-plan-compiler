@@ -8,30 +8,20 @@
 #include "dbruntime.h"
 #define ITEMS_PER_THREAD 4
 #define TILE_SIZE 512
-__global__ void count_1(uint64_t* COUNT0, DBStringType* customer__c_region, size_t customer_size) {
+__global__ void count_1(uint64_t* COUNT0, DBStringType* customer__c_city, size_t customer_size) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
 size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
-DBStringType reg_customer__c_region[ITEMS_PER_THREAD];
+DBStringType reg_customer__c_city[ITEMS_PER_THREAD];
 #pragma unroll
 for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < customer_size); ++ITEM) {
-reg_customer__c_region[ITEM] = customer__c_region[ITEM*TB + tid];
+reg_customer__c_city[ITEM] = customer__c_city[ITEM*TB + tid];
 }
 #pragma unroll
 for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < customer_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= evaluatePredicate(reg_customer__c_region[ITEM], "ASIA", Predicate::eq);
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < customer_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= !(false);
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < customer_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= !(false);
+selection_flags[ITEM] &= (evaluatePredicate(reg_customer__c_city[ITEM], "UNITED KI1", Predicate::eq)) || (evaluatePredicate(reg_customer__c_city[ITEM], "UNITED KI5", Predicate::eq));
 }
 #pragma unroll
 for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < customer_size); ++ITEM) {
@@ -51,30 +41,20 @@ atomicAdd((int*)COUNT0, 1);
 }
 }
 template<typename HASHTABLE_INSERT>
-__global__ void main_1(uint64_t* BUF_0, uint64_t* BUF_IDX_0, HASHTABLE_INSERT HT_0, DBI32Type* customer__c_custkey, DBStringType* customer__c_region, size_t customer_size) {
+__global__ void main_1(uint64_t* BUF_0, uint64_t* BUF_IDX_0, HASHTABLE_INSERT HT_0, DBStringType* customer__c_city, DBI32Type* customer__c_custkey, size_t customer_size) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
 size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
-DBStringType reg_customer__c_region[ITEMS_PER_THREAD];
+DBStringType reg_customer__c_city[ITEMS_PER_THREAD];
 #pragma unroll
 for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < customer_size); ++ITEM) {
-reg_customer__c_region[ITEM] = customer__c_region[ITEM*TB + tid];
+reg_customer__c_city[ITEM] = customer__c_city[ITEM*TB + tid];
 }
 #pragma unroll
 for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < customer_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= evaluatePredicate(reg_customer__c_region[ITEM], "ASIA", Predicate::eq);
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < customer_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= !(false);
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < customer_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= !(false);
+selection_flags[ITEM] &= (evaluatePredicate(reg_customer__c_city[ITEM], "UNITED KI1", Predicate::eq)) || (evaluatePredicate(reg_customer__c_city[ITEM], "UNITED KI5", Predicate::eq));
 }
 #pragma unroll
 for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < customer_size); ++ITEM) {
@@ -107,30 +87,20 @@ HT_0.insert(cuco::pair{KEY_0[ITEM], buf_idx_0});
 BUF_0[(buf_idx_0) * 1 + 0] = ITEM*TB + tid;
 }
 }
-__global__ void count_3(uint64_t* COUNT2, DBStringType* supplier__s_region, size_t supplier_size) {
+__global__ void count_3(uint64_t* COUNT2, DBStringType* supplier__s_city, size_t supplier_size) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
 size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
-DBStringType reg_supplier__s_region[ITEMS_PER_THREAD];
+DBStringType reg_supplier__s_city[ITEMS_PER_THREAD];
 #pragma unroll
 for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < supplier_size); ++ITEM) {
-reg_supplier__s_region[ITEM] = supplier__s_region[ITEM*TB + tid];
+reg_supplier__s_city[ITEM] = supplier__s_city[ITEM*TB + tid];
 }
 #pragma unroll
 for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < supplier_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= evaluatePredicate(reg_supplier__s_region[ITEM], "ASIA", Predicate::eq);
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < supplier_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= !(false);
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < supplier_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= !(false);
+selection_flags[ITEM] &= (evaluatePredicate(reg_supplier__s_city[ITEM], "UNITED KI1", Predicate::eq)) || (evaluatePredicate(reg_supplier__s_city[ITEM], "UNITED KI5", Predicate::eq));
 }
 #pragma unroll
 for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < supplier_size); ++ITEM) {
@@ -150,30 +120,20 @@ atomicAdd((int*)COUNT2, 1);
 }
 }
 template<typename HASHTABLE_INSERT>
-__global__ void main_3(uint64_t* BUF_2, uint64_t* BUF_IDX_2, HASHTABLE_INSERT HT_2, DBStringType* supplier__s_region, DBI32Type* supplier__s_suppkey, size_t supplier_size) {
+__global__ void main_3(uint64_t* BUF_2, uint64_t* BUF_IDX_2, HASHTABLE_INSERT HT_2, DBStringType* supplier__s_city, DBI32Type* supplier__s_suppkey, size_t supplier_size) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
 size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
-DBStringType reg_supplier__s_region[ITEMS_PER_THREAD];
+DBStringType reg_supplier__s_city[ITEMS_PER_THREAD];
 #pragma unroll
 for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < supplier_size); ++ITEM) {
-reg_supplier__s_region[ITEM] = supplier__s_region[ITEM*TB + tid];
+reg_supplier__s_city[ITEM] = supplier__s_city[ITEM*TB + tid];
 }
 #pragma unroll
 for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < supplier_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= evaluatePredicate(reg_supplier__s_region[ITEM], "ASIA", Predicate::eq);
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < supplier_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= !(false);
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < supplier_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= !(false);
+selection_flags[ITEM] &= (evaluatePredicate(reg_supplier__s_city[ITEM], "UNITED KI1", Predicate::eq)) || (evaluatePredicate(reg_supplier__s_city[ITEM], "UNITED KI5", Predicate::eq));
 }
 #pragma unroll
 for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < supplier_size); ++ITEM) {
@@ -206,50 +166,210 @@ HT_2.insert(cuco::pair{KEY_2[ITEM], buf_idx_2});
 BUF_2[(buf_idx_2) * 1 + 0] = ITEM*TB + tid;
 }
 }
-__global__ void count_5(uint64_t* COUNT4, DBI32Type* date__d_year, size_t date_size) {
+template<typename HASHTABLE_PROBE>
+__global__ void count_5(uint64_t* BUF_0, uint64_t* BUF_2, uint64_t* COUNT4, HASHTABLE_PROBE HT_0, HASHTABLE_PROBE HT_2, DBI32Type* lineorder__lo_custkey, DBI32Type* lineorder__lo_suppkey, size_t lineorder_size) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
 size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
-DBI32Type reg_date__d_year[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
-reg_date__d_year[ITEM] = date__d_year[ITEM*TB + tid];
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= evaluatePredicate(reg_date__d_year[ITEM], 1992, Predicate::gte) && evaluatePredicate(reg_date__d_year[ITEM], 1997, Predicate::lte);
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 selection_flags[ITEM] &= !(false);
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+selection_flags[ITEM] &= !(false);
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+selection_flags[ITEM] &= !(false);
+}
+uint64_t KEY_0[ITEMS_PER_THREAD];
+DBI32Type reg_lineorder__lo_custkey[ITEMS_PER_THREAD];
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+reg_lineorder__lo_custkey[ITEM] = lineorder__lo_custkey[ITEM*TB + tid];
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+KEY_0[ITEM] = 0;
+KEY_0[ITEM] |= reg_lineorder__lo_custkey[ITEM];
+}
+int64_t slot_second0[ITEMS_PER_THREAD];
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+auto SLOT_0 = HT_0.find(KEY_0[ITEM]);
+if (SLOT_0 == HT_0.end()) {selection_flags[ITEM] = 0; continue;}
+slot_second0[ITEM] = SLOT_0->second;
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+selection_flags[ITEM] &= true;
+}
+uint64_t KEY_2[ITEMS_PER_THREAD];
+DBI32Type reg_lineorder__lo_suppkey[ITEMS_PER_THREAD];
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+reg_lineorder__lo_suppkey[ITEM] = lineorder__lo_suppkey[ITEM*TB + tid];
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+KEY_2[ITEM] = 0;
+KEY_2[ITEM] |= reg_lineorder__lo_suppkey[ITEM];
+}
+int64_t slot_second2[ITEMS_PER_THREAD];
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+auto SLOT_2 = HT_2.find(KEY_2[ITEM]);
+if (SLOT_2 == HT_2.end()) {selection_flags[ITEM] = 0; continue;}
+slot_second2[ITEM] = SLOT_2->second;
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+selection_flags[ITEM] &= true;
 }
 //Materialize count
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 atomicAdd((int*)COUNT4, 1);
 }
 }
-template<typename HASHTABLE_INSERT>
-__global__ void main_5(uint64_t* BUF_4, uint64_t* BUF_IDX_4, HASHTABLE_INSERT HT_4, DBI32Type* date__d_datekey, DBI32Type* date__d_year, size_t date_size) {
+template<typename HASHTABLE_PROBE, typename HASHTABLE_INSERT>
+__global__ void main_5(uint64_t* BUF_0, uint64_t* BUF_2, uint64_t* BUF_4, uint64_t* BUF_IDX_4, HASHTABLE_PROBE HT_0, HASHTABLE_PROBE HT_2, HASHTABLE_INSERT HT_4, DBI32Type* lineorder__lo_custkey, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_suppkey, size_t lineorder_size) {
+size_t tile_offset = blockIdx.x * TILE_SIZE;
+size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
+int selection_flags[ITEMS_PER_THREAD];
+for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+selection_flags[ITEM] &= !(false);
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+selection_flags[ITEM] &= !(false);
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+selection_flags[ITEM] &= !(false);
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+selection_flags[ITEM] &= !(false);
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+selection_flags[ITEM] &= !(false);
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+selection_flags[ITEM] &= !(false);
+}
+uint64_t KEY_0[ITEMS_PER_THREAD];
+DBI32Type reg_lineorder__lo_custkey[ITEMS_PER_THREAD];
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+reg_lineorder__lo_custkey[ITEM] = lineorder__lo_custkey[ITEM*TB + tid];
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+KEY_0[ITEM] = 0;
+KEY_0[ITEM] |= reg_lineorder__lo_custkey[ITEM];
+}
+int64_t slot_second0[ITEMS_PER_THREAD];
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+auto SLOT_0 = HT_0.find(KEY_0[ITEM]);
+if (SLOT_0 == HT_0.end()) {selection_flags[ITEM] = 0; continue;}
+slot_second0[ITEM] = SLOT_0->second;
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+selection_flags[ITEM] &= true;
+}
+uint64_t KEY_2[ITEMS_PER_THREAD];
+DBI32Type reg_lineorder__lo_suppkey[ITEMS_PER_THREAD];
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+reg_lineorder__lo_suppkey[ITEM] = lineorder__lo_suppkey[ITEM*TB + tid];
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+KEY_2[ITEM] = 0;
+KEY_2[ITEM] |= reg_lineorder__lo_suppkey[ITEM];
+}
+int64_t slot_second2[ITEMS_PER_THREAD];
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+auto SLOT_2 = HT_2.find(KEY_2[ITEM]);
+if (SLOT_2 == HT_2.end()) {selection_flags[ITEM] = 0; continue;}
+slot_second2[ITEM] = SLOT_2->second;
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+selection_flags[ITEM] &= true;
+}
+uint64_t KEY_4[ITEMS_PER_THREAD];
+DBI32Type reg_lineorder__lo_orderdate[ITEMS_PER_THREAD];
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+reg_lineorder__lo_orderdate[ITEM] = lineorder__lo_orderdate[ITEM*TB + tid];
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+KEY_4[ITEM] = 0;
+KEY_4[ITEM] |= reg_lineorder__lo_orderdate[ITEM];
+}
+// Insert hash table kernel;
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+auto buf_idx_4 = atomicAdd((int*)BUF_IDX_4, 1);
+HT_4.insert(cuco::pair{KEY_4[ITEM], buf_idx_4});
+BUF_4[(buf_idx_4) * 3 + 0] = BUF_0[slot_second0[ITEM] * 1 + 0];
+BUF_4[(buf_idx_4) * 3 + 1] = ITEM*TB + tid;
+BUF_4[(buf_idx_4) * 3 + 2] = BUF_2[slot_second2[ITEM] * 1 + 0];
+}
+}
+template<typename HASHTABLE_PROBE, typename HASHTABLE_INSERT>
+__global__ void count_7(uint64_t* BUF_4, HASHTABLE_PROBE HT_4, HASHTABLE_INSERT HT_6, DBI16Type* customer__c_city_encoded, DBI32Type* date__d_datekey, DBI32Type* date__d_year, size_t date_size, DBI16Type* supplier__s_city_encoded) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
 size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
 int selection_flags[ITEMS_PER_THREAD];
@@ -296,315 +416,147 @@ if (!selection_flags[ITEM]) continue;
 KEY_4[ITEM] = 0;
 KEY_4[ITEM] |= reg_date__d_datekey[ITEM];
 }
-// Insert hash table kernel;
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-auto buf_idx_4 = atomicAdd((int*)BUF_IDX_4, 1);
-HT_4.insert(cuco::pair{KEY_4[ITEM], buf_idx_4});
-BUF_4[(buf_idx_4) * 1 + 0] = ITEM*TB + tid;
-}
-}
-template<typename HASHTABLE_PROBE, typename HASHTABLE_INSERT>
-__global__ void count_7(uint64_t* BUF_0, uint64_t* BUF_2, uint64_t* BUF_4, HASHTABLE_PROBE HT_0, HASHTABLE_PROBE HT_2, HASHTABLE_PROBE HT_4, HASHTABLE_INSERT HT_6, DBI16Type* customer__c_nation_encoded, DBI32Type* date__d_year, DBI32Type* lineorder__lo_custkey, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_suppkey, size_t lineorder_size, DBI16Type* supplier__s_nation_encoded) {
-size_t tile_offset = blockIdx.x * TILE_SIZE;
-size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
-int selection_flags[ITEMS_PER_THREAD];
-for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= !(false);
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= !(false);
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= !(false);
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= !(false);
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= !(false);
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= !(false);
-}
-uint64_t KEY_0[ITEMS_PER_THREAD];
-DBI32Type reg_lineorder__lo_custkey[ITEMS_PER_THREAD];
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-reg_lineorder__lo_custkey[ITEM] = lineorder__lo_custkey[ITEM*TB + tid];
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-KEY_0[ITEM] = 0;
-KEY_0[ITEM] |= reg_lineorder__lo_custkey[ITEM];
-}
-int64_t slot_second0[ITEMS_PER_THREAD];
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-auto SLOT_0 = HT_0.find(KEY_0[ITEM]);
-if (SLOT_0 == HT_0.end()) {selection_flags[ITEM] = 0; continue;}
-slot_second0[ITEM] = SLOT_0->second;
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= true;
-}
-uint64_t KEY_2[ITEMS_PER_THREAD];
-DBI32Type reg_lineorder__lo_suppkey[ITEMS_PER_THREAD];
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-reg_lineorder__lo_suppkey[ITEM] = lineorder__lo_suppkey[ITEM*TB + tid];
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-KEY_2[ITEM] = 0;
-KEY_2[ITEM] |= reg_lineorder__lo_suppkey[ITEM];
-}
-int64_t slot_second2[ITEMS_PER_THREAD];
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-auto SLOT_2 = HT_2.find(KEY_2[ITEM]);
-if (SLOT_2 == HT_2.end()) {selection_flags[ITEM] = 0; continue;}
-slot_second2[ITEM] = SLOT_2->second;
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= true;
-}
-uint64_t KEY_4[ITEMS_PER_THREAD];
-DBI32Type reg_lineorder__lo_orderdate[ITEMS_PER_THREAD];
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-reg_lineorder__lo_orderdate[ITEM] = lineorder__lo_orderdate[ITEM*TB + tid];
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-KEY_4[ITEM] = 0;
-KEY_4[ITEM] |= reg_lineorder__lo_orderdate[ITEM];
-}
 int64_t slot_second4[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 auto SLOT_4 = HT_4.find(KEY_4[ITEM]);
 if (SLOT_4 == HT_4.end()) {selection_flags[ITEM] = 0; continue;}
 slot_second4[ITEM] = SLOT_4->second;
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 selection_flags[ITEM] &= true;
 }
 uint64_t KEY_6[ITEMS_PER_THREAD];
-DBI16Type reg_customer__c_nation_encoded[ITEMS_PER_THREAD];
+DBI16Type reg_customer__c_city_encoded[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-reg_customer__c_nation_encoded[ITEM] = customer__c_nation_encoded[BUF_0[slot_second0[ITEM] * 1 + 0]];
+reg_customer__c_city_encoded[ITEM] = customer__c_city_encoded[BUF_4[slot_second4[ITEM] * 3 + 0]];
 }
-DBI16Type reg_supplier__s_nation_encoded[ITEMS_PER_THREAD];
+DBI16Type reg_supplier__s_city_encoded[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-reg_supplier__s_nation_encoded[ITEM] = supplier__s_nation_encoded[BUF_2[slot_second2[ITEM] * 1 + 0]];
-}
-DBI32Type reg_date__d_year[ITEMS_PER_THREAD];
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-reg_date__d_year[ITEM] = date__d_year[BUF_4[slot_second4[ITEM] * 1 + 0]];
+reg_supplier__s_city_encoded[ITEM] = supplier__s_city_encoded[BUF_4[slot_second4[ITEM] * 3 + 2]];
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 KEY_6[ITEM] = 0;
-KEY_6[ITEM] |= reg_customer__c_nation_encoded[ITEM];
+KEY_6[ITEM] |= reg_customer__c_city_encoded[ITEM];
 KEY_6[ITEM] <<= 16;
-KEY_6[ITEM] |= reg_supplier__s_nation_encoded[ITEM];
+KEY_6[ITEM] |= reg_supplier__s_city_encoded[ITEM];
 KEY_6[ITEM] <<= 32;
 KEY_6[ITEM] |= reg_date__d_year[ITEM];
 }
 //Create aggregation hash table
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 HT_6.insert(cuco::pair{KEY_6[ITEM], 1});
 }
 }
 template<typename HASHTABLE_PROBE, typename HASHTABLE_FIND>
-__global__ void main_7(uint64_t* BUF_0, uint64_t* BUF_2, uint64_t* BUF_4, HASHTABLE_PROBE HT_0, HASHTABLE_PROBE HT_2, HASHTABLE_PROBE HT_4, HASHTABLE_FIND HT_6, DBI16Type* KEY_6customer__c_nation_encoded, DBI32Type* KEY_6date__d_year, DBI16Type* KEY_6supplier__s_nation_encoded, DBDecimalType* aggr0__tmp_attr0, DBI16Type* customer__c_nation_encoded, DBI32Type* date__d_year, DBI32Type* lineorder__lo_custkey, DBI32Type* lineorder__lo_orderdate, DBDecimalType* lineorder__lo_revenue, DBI32Type* lineorder__lo_suppkey, size_t lineorder_size, DBI16Type* supplier__s_nation_encoded) {
+__global__ void main_7(uint64_t* BUF_4, HASHTABLE_PROBE HT_4, HASHTABLE_FIND HT_6, DBI16Type* KEY_6customer__c_city_encoded, DBI32Type* KEY_6date__d_year, DBI16Type* KEY_6supplier__s_city_encoded, DBDecimalType* aggr0__tmp_attr0, DBI16Type* customer__c_city_encoded, DBI32Type* date__d_datekey, DBI32Type* date__d_year, size_t date_size, DBDecimalType* lineorder__lo_revenue, DBI16Type* supplier__s_city_encoded) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
 size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
+DBI32Type reg_date__d_year[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
+reg_date__d_year[ITEM] = date__d_year[ITEM*TB + tid];
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+selection_flags[ITEM] &= evaluatePredicate(reg_date__d_year[ITEM], 1992, Predicate::gte) && evaluatePredicate(reg_date__d_year[ITEM], 1997, Predicate::lte);
+}
+#pragma unroll
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 selection_flags[ITEM] &= !(false);
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= !(false);
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= !(false);
-}
-uint64_t KEY_0[ITEMS_PER_THREAD];
-DBI32Type reg_lineorder__lo_custkey[ITEMS_PER_THREAD];
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-reg_lineorder__lo_custkey[ITEM] = lineorder__lo_custkey[ITEM*TB + tid];
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-KEY_0[ITEM] = 0;
-KEY_0[ITEM] |= reg_lineorder__lo_custkey[ITEM];
-}
-int64_t slot_second0[ITEMS_PER_THREAD];
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-auto SLOT_0 = HT_0.find(KEY_0[ITEM]);
-if (SLOT_0 == HT_0.end()) {selection_flags[ITEM] = 0; continue;}
-slot_second0[ITEM] = SLOT_0->second;
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= true;
-}
-uint64_t KEY_2[ITEMS_PER_THREAD];
-DBI32Type reg_lineorder__lo_suppkey[ITEMS_PER_THREAD];
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-reg_lineorder__lo_suppkey[ITEM] = lineorder__lo_suppkey[ITEM*TB + tid];
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-KEY_2[ITEM] = 0;
-KEY_2[ITEM] |= reg_lineorder__lo_suppkey[ITEM];
-}
-int64_t slot_second2[ITEMS_PER_THREAD];
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-auto SLOT_2 = HT_2.find(KEY_2[ITEM]);
-if (SLOT_2 == HT_2.end()) {selection_flags[ITEM] = 0; continue;}
-slot_second2[ITEM] = SLOT_2->second;
-}
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] &= true;
 }
 uint64_t KEY_4[ITEMS_PER_THREAD];
-DBI32Type reg_lineorder__lo_orderdate[ITEMS_PER_THREAD];
+DBI32Type reg_date__d_datekey[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-reg_lineorder__lo_orderdate[ITEM] = lineorder__lo_orderdate[ITEM*TB + tid];
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
+reg_date__d_datekey[ITEM] = date__d_datekey[ITEM*TB + tid];
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 KEY_4[ITEM] = 0;
-KEY_4[ITEM] |= reg_lineorder__lo_orderdate[ITEM];
+KEY_4[ITEM] |= reg_date__d_datekey[ITEM];
 }
 int64_t slot_second4[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 auto SLOT_4 = HT_4.find(KEY_4[ITEM]);
 if (SLOT_4 == HT_4.end()) {selection_flags[ITEM] = 0; continue;}
 slot_second4[ITEM] = SLOT_4->second;
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 selection_flags[ITEM] &= true;
 }
 uint64_t KEY_6[ITEMS_PER_THREAD];
-DBI16Type reg_customer__c_nation_encoded[ITEMS_PER_THREAD];
+DBI16Type reg_customer__c_city_encoded[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-reg_customer__c_nation_encoded[ITEM] = customer__c_nation_encoded[BUF_0[slot_second0[ITEM] * 1 + 0]];
+reg_customer__c_city_encoded[ITEM] = customer__c_city_encoded[BUF_4[slot_second4[ITEM] * 3 + 0]];
 }
-DBI16Type reg_supplier__s_nation_encoded[ITEMS_PER_THREAD];
+DBI16Type reg_supplier__s_city_encoded[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-reg_supplier__s_nation_encoded[ITEM] = supplier__s_nation_encoded[BUF_2[slot_second2[ITEM] * 1 + 0]];
-}
-DBI32Type reg_date__d_year[ITEMS_PER_THREAD];
-#pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-reg_date__d_year[ITEM] = date__d_year[BUF_4[slot_second4[ITEM] * 1 + 0]];
+reg_supplier__s_city_encoded[ITEM] = supplier__s_city_encoded[BUF_4[slot_second4[ITEM] * 3 + 2]];
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 KEY_6[ITEM] = 0;
-KEY_6[ITEM] |= reg_customer__c_nation_encoded[ITEM];
+KEY_6[ITEM] |= reg_customer__c_city_encoded[ITEM];
 KEY_6[ITEM] <<= 16;
-KEY_6[ITEM] |= reg_supplier__s_nation_encoded[ITEM];
+KEY_6[ITEM] |= reg_supplier__s_city_encoded[ITEM];
 KEY_6[ITEM] <<= 32;
 KEY_6[ITEM] |= reg_date__d_year[ITEM];
 }
 //Aggregate in hashtable
 DBDecimalType reg_lineorder__lo_revenue[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
-reg_lineorder__lo_revenue[ITEM] = lineorder__lo_revenue[ITEM*TB + tid];
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
+if (!selection_flags[ITEM]) continue;
+reg_lineorder__lo_revenue[ITEM] = lineorder__lo_revenue[BUF_4[slot_second4[ITEM] * 3 + 1]];
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 auto buf_idx_6 = HT_6.find(KEY_6[ITEM])->second;
 aggregate_sum(&aggr0__tmp_attr0[buf_idx_6], reg_lineorder__lo_revenue[ITEM]);
-KEY_6customer__c_nation_encoded[buf_idx_6] = reg_customer__c_nation_encoded[ITEM];
-KEY_6supplier__s_nation_encoded[buf_idx_6] = reg_supplier__s_nation_encoded[ITEM];
+KEY_6customer__c_city_encoded[buf_idx_6] = reg_customer__c_city_encoded[ITEM];
+KEY_6supplier__s_city_encoded[buf_idx_6] = reg_supplier__s_city_encoded[ITEM];
 KEY_6date__d_year[buf_idx_6] = reg_date__d_year[ITEM];
 }
 }
@@ -620,21 +572,21 @@ if (!selection_flags[ITEM]) continue;
 atomicAdd((int*)COUNT8, 1);
 }
 }
-__global__ void main_9(size_t COUNT6, DBDecimalType* MAT8aggr0__tmp_attr0, DBI16Type* MAT8customer__c_nation_encoded, DBI32Type* MAT8date__d_year, DBI16Type* MAT8supplier__s_nation_encoded, uint64_t* MAT_IDX8, DBDecimalType* aggr0__tmp_attr0, DBI16Type* customer__c_nation_encoded, DBI32Type* date__d_year, DBI16Type* supplier__s_nation_encoded) {
+__global__ void main_9(size_t COUNT6, DBDecimalType* MAT8aggr0__tmp_attr0, DBI16Type* MAT8customer__c_city_encoded, DBI32Type* MAT8date__d_year, DBI16Type* MAT8supplier__s_city_encoded, uint64_t* MAT_IDX8, DBDecimalType* aggr0__tmp_attr0, DBI16Type* customer__c_city_encoded, DBI32Type* date__d_year, DBI16Type* supplier__s_city_encoded) {
 size_t tile_offset = blockIdx.x * TILE_SIZE;
 size_t tid = tile_offset + threadIdx.x * ITEMS_PER_THREAD;
 int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 //Materialize buffers
-DBI16Type reg_customer__c_nation_encoded[ITEMS_PER_THREAD];
+DBI16Type reg_customer__c_city_encoded[ITEMS_PER_THREAD];
 #pragma unroll
 for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < COUNT6); ++ITEM) {
-reg_customer__c_nation_encoded[ITEM] = customer__c_nation_encoded[ITEM*TB + tid];
+reg_customer__c_city_encoded[ITEM] = customer__c_city_encoded[ITEM*TB + tid];
 }
-DBI16Type reg_supplier__s_nation_encoded[ITEMS_PER_THREAD];
+DBI16Type reg_supplier__s_city_encoded[ITEMS_PER_THREAD];
 #pragma unroll
 for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < COUNT6); ++ITEM) {
-reg_supplier__s_nation_encoded[ITEM] = supplier__s_nation_encoded[ITEM*TB + tid];
+reg_supplier__s_city_encoded[ITEM] = supplier__s_city_encoded[ITEM*TB + tid];
 }
 DBI32Type reg_date__d_year[ITEMS_PER_THREAD];
 #pragma unroll
@@ -650,8 +602,8 @@ reg_aggr0__tmp_attr0[ITEM] = aggr0__tmp_attr0[ITEM*TB + tid];
 for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < COUNT6); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 auto mat_idx8 = atomicAdd((int*)MAT_IDX8, 1);
-MAT8customer__c_nation_encoded[mat_idx8] = reg_customer__c_nation_encoded[ITEM];
-MAT8supplier__s_nation_encoded[mat_idx8] = reg_supplier__s_nation_encoded[ITEM];
+MAT8customer__c_city_encoded[mat_idx8] = reg_customer__c_city_encoded[ITEM];
+MAT8supplier__s_city_encoded[mat_idx8] = reg_supplier__s_city_encoded[ITEM];
 MAT8date__d_year[mat_idx8] = reg_date__d_year[ITEM];
 MAT8aggr0__tmp_attr0[mat_idx8] = reg_aggr0__tmp_attr0[ITEM];
 }
@@ -661,7 +613,7 @@ extern "C" void control (DBI32Type* d_supplier__s_suppkey, DBStringType* d_suppl
 uint64_t* d_COUNT0;
 cudaMalloc(&d_COUNT0, sizeof(uint64_t));
 cudaMemset(d_COUNT0, 0, sizeof(uint64_t));
-count_1<<<std::ceil((float)customer_size/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(d_COUNT0, d_customer__c_region, customer_size);
+count_1<<<std::ceil((float)customer_size/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(d_COUNT0, d_customer__c_city, customer_size);
 uint64_t COUNT0;
 cudaMemcpy(&COUNT0, d_COUNT0, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 // Insert hash table control;
@@ -671,12 +623,12 @@ cudaMemset(d_BUF_IDX_0, 0, sizeof(uint64_t));
 uint64_t* d_BUF_0;
 cudaMalloc(&d_BUF_0, sizeof(uint64_t) * COUNT0 * 1);
 auto d_HT_0 = cuco::static_map{ (int)COUNT0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-main_1<<<std::ceil((float)customer_size/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(d_BUF_0, d_BUF_IDX_0, d_HT_0.ref(cuco::insert), d_customer__c_custkey, d_customer__c_region, customer_size);
+main_1<<<std::ceil((float)customer_size/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(d_BUF_0, d_BUF_IDX_0, d_HT_0.ref(cuco::insert), d_customer__c_city, d_customer__c_custkey, customer_size);
 //Materialize count
 uint64_t* d_COUNT2;
 cudaMalloc(&d_COUNT2, sizeof(uint64_t));
 cudaMemset(d_COUNT2, 0, sizeof(uint64_t));
-count_3<<<std::ceil((float)supplier_size/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(d_COUNT2, d_supplier__s_region, supplier_size);
+count_3<<<std::ceil((float)supplier_size/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(d_COUNT2, d_supplier__s_city, supplier_size);
 uint64_t COUNT2;
 cudaMemcpy(&COUNT2, d_COUNT2, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 // Insert hash table control;
@@ -686,12 +638,12 @@ cudaMemset(d_BUF_IDX_2, 0, sizeof(uint64_t));
 uint64_t* d_BUF_2;
 cudaMalloc(&d_BUF_2, sizeof(uint64_t) * COUNT2 * 1);
 auto d_HT_2 = cuco::static_map{ (int)COUNT2*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-main_3<<<std::ceil((float)supplier_size/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(d_BUF_2, d_BUF_IDX_2, d_HT_2.ref(cuco::insert), d_supplier__s_region, d_supplier__s_suppkey, supplier_size);
+main_3<<<std::ceil((float)supplier_size/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(d_BUF_2, d_BUF_IDX_2, d_HT_2.ref(cuco::insert), d_supplier__s_city, d_supplier__s_suppkey, supplier_size);
 //Materialize count
 uint64_t* d_COUNT4;
 cudaMalloc(&d_COUNT4, sizeof(uint64_t));
 cudaMemset(d_COUNT4, 0, sizeof(uint64_t));
-count_5<<<std::ceil((float)date_size/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(d_COUNT4, d_date__d_year, date_size);
+count_5<<<std::ceil((float)lineorder_size/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(d_BUF_0, d_BUF_2, d_COUNT4, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::find), d_lineorder__lo_custkey, d_lineorder__lo_suppkey, lineorder_size);
 uint64_t COUNT4;
 cudaMemcpy(&COUNT4, d_COUNT4, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 // Insert hash table control;
@@ -699,12 +651,12 @@ uint64_t* d_BUF_IDX_4;
 cudaMalloc(&d_BUF_IDX_4, sizeof(uint64_t));
 cudaMemset(d_BUF_IDX_4, 0, sizeof(uint64_t));
 uint64_t* d_BUF_4;
-cudaMalloc(&d_BUF_4, sizeof(uint64_t) * COUNT4 * 1);
+cudaMalloc(&d_BUF_4, sizeof(uint64_t) * COUNT4 * 3);
 auto d_HT_4 = cuco::static_map{ (int)COUNT4*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-main_5<<<std::ceil((float)date_size/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(d_BUF_4, d_BUF_IDX_4, d_HT_4.ref(cuco::insert), d_date__d_datekey, d_date__d_year, date_size);
+main_5<<<std::ceil((float)lineorder_size/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(d_BUF_0, d_BUF_2, d_BUF_4, d_BUF_IDX_4, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::find), d_HT_4.ref(cuco::insert), d_lineorder__lo_custkey, d_lineorder__lo_orderdate, d_lineorder__lo_suppkey, lineorder_size);
 //Create aggregation hash table
-auto d_HT_6 = cuco::static_map{ (int)144285*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-count_7<<<std::ceil((float)lineorder_size/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(d_BUF_0, d_BUF_2, d_BUF_4, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::find), d_HT_4.ref(cuco::find), d_HT_6.ref(cuco::insert), d_customer__c_nation_encoded, d_date__d_year, d_lineorder__lo_custkey, d_lineorder__lo_orderdate, d_lineorder__lo_suppkey, lineorder_size, d_supplier__s_nation_encoded);
+auto d_HT_6 = cuco::static_map{ (int)132*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+count_7<<<std::ceil((float)date_size/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(d_BUF_4, d_HT_4.ref(cuco::find), d_HT_6.ref(cuco::insert), d_customer__c_city_encoded, d_date__d_datekey, d_date__d_year, date_size, d_supplier__s_city_encoded);
 size_t COUNT6 = d_HT_6.size();
 thrust::device_vector<int64_t> keys_6(COUNT6), vals_6(COUNT6);
 d_HT_6.retrieve_all(keys_6.begin(), vals_6.begin());
@@ -715,16 +667,16 @@ insertKeys<<<std::ceil((float)COUNT6/128.), 128>>>(raw_keys6, d_HT_6.ref(cuco::i
 DBDecimalType* d_aggr0__tmp_attr0;
 cudaMalloc(&d_aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT6);
 cudaMemset(d_aggr0__tmp_attr0, 0, sizeof(DBDecimalType) * COUNT6);
-DBI16Type* d_KEY_6customer__c_nation_encoded;
-cudaMalloc(&d_KEY_6customer__c_nation_encoded, sizeof(DBI16Type) * COUNT6);
-cudaMemset(d_KEY_6customer__c_nation_encoded, 0, sizeof(DBI16Type) * COUNT6);
-DBI16Type* d_KEY_6supplier__s_nation_encoded;
-cudaMalloc(&d_KEY_6supplier__s_nation_encoded, sizeof(DBI16Type) * COUNT6);
-cudaMemset(d_KEY_6supplier__s_nation_encoded, 0, sizeof(DBI16Type) * COUNT6);
+DBI16Type* d_KEY_6customer__c_city_encoded;
+cudaMalloc(&d_KEY_6customer__c_city_encoded, sizeof(DBI16Type) * COUNT6);
+cudaMemset(d_KEY_6customer__c_city_encoded, 0, sizeof(DBI16Type) * COUNT6);
+DBI16Type* d_KEY_6supplier__s_city_encoded;
+cudaMalloc(&d_KEY_6supplier__s_city_encoded, sizeof(DBI16Type) * COUNT6);
+cudaMemset(d_KEY_6supplier__s_city_encoded, 0, sizeof(DBI16Type) * COUNT6);
 DBI32Type* d_KEY_6date__d_year;
 cudaMalloc(&d_KEY_6date__d_year, sizeof(DBI32Type) * COUNT6);
 cudaMemset(d_KEY_6date__d_year, 0, sizeof(DBI32Type) * COUNT6);
-main_7<<<std::ceil((float)lineorder_size/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(d_BUF_0, d_BUF_2, d_BUF_4, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::find), d_HT_4.ref(cuco::find), d_HT_6.ref(cuco::find), d_KEY_6customer__c_nation_encoded, d_KEY_6date__d_year, d_KEY_6supplier__s_nation_encoded, d_aggr0__tmp_attr0, d_customer__c_nation_encoded, d_date__d_year, d_lineorder__lo_custkey, d_lineorder__lo_orderdate, d_lineorder__lo_revenue, d_lineorder__lo_suppkey, lineorder_size, d_supplier__s_nation_encoded);
+main_7<<<std::ceil((float)date_size/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(d_BUF_4, d_HT_4.ref(cuco::find), d_HT_6.ref(cuco::find), d_KEY_6customer__c_city_encoded, d_KEY_6date__d_year, d_KEY_6supplier__s_city_encoded, d_aggr0__tmp_attr0, d_customer__c_city_encoded, d_date__d_datekey, d_date__d_year, date_size, d_lineorder__lo_revenue, d_supplier__s_city_encoded);
 //Materialize count
 uint64_t* d_COUNT8;
 cudaMalloc(&d_COUNT8, sizeof(uint64_t));
@@ -736,25 +688,25 @@ cudaMemcpy(&COUNT8, d_COUNT8, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 uint64_t* d_MAT_IDX8;
 cudaMalloc(&d_MAT_IDX8, sizeof(uint64_t));
 cudaMemset(d_MAT_IDX8, 0, sizeof(uint64_t));
-auto MAT8customer__c_nation_encoded = (DBI16Type*)malloc(sizeof(DBI16Type) * COUNT8);
-DBI16Type* d_MAT8customer__c_nation_encoded;
-cudaMalloc(&d_MAT8customer__c_nation_encoded, sizeof(DBI16Type) * COUNT8);
-auto MAT8supplier__s_nation_encoded = (DBI16Type*)malloc(sizeof(DBI16Type) * COUNT8);
-DBI16Type* d_MAT8supplier__s_nation_encoded;
-cudaMalloc(&d_MAT8supplier__s_nation_encoded, sizeof(DBI16Type) * COUNT8);
+auto MAT8customer__c_city_encoded = (DBI16Type*)malloc(sizeof(DBI16Type) * COUNT8);
+DBI16Type* d_MAT8customer__c_city_encoded;
+cudaMalloc(&d_MAT8customer__c_city_encoded, sizeof(DBI16Type) * COUNT8);
+auto MAT8supplier__s_city_encoded = (DBI16Type*)malloc(sizeof(DBI16Type) * COUNT8);
+DBI16Type* d_MAT8supplier__s_city_encoded;
+cudaMalloc(&d_MAT8supplier__s_city_encoded, sizeof(DBI16Type) * COUNT8);
 auto MAT8date__d_year = (DBI32Type*)malloc(sizeof(DBI32Type) * COUNT8);
 DBI32Type* d_MAT8date__d_year;
 cudaMalloc(&d_MAT8date__d_year, sizeof(DBI32Type) * COUNT8);
 auto MAT8aggr0__tmp_attr0 = (DBDecimalType*)malloc(sizeof(DBDecimalType) * COUNT8);
 DBDecimalType* d_MAT8aggr0__tmp_attr0;
 cudaMalloc(&d_MAT8aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT8);
-main_9<<<std::ceil((float)COUNT6/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(COUNT6, d_MAT8aggr0__tmp_attr0, d_MAT8customer__c_nation_encoded, d_MAT8date__d_year, d_MAT8supplier__s_nation_encoded, d_MAT_IDX8, d_aggr0__tmp_attr0, d_KEY_6customer__c_nation_encoded, d_KEY_6date__d_year, d_KEY_6supplier__s_nation_encoded);
-cudaMemcpy(MAT8customer__c_nation_encoded, d_MAT8customer__c_nation_encoded, sizeof(DBI16Type) * COUNT8, cudaMemcpyDeviceToHost);
-cudaMemcpy(MAT8supplier__s_nation_encoded, d_MAT8supplier__s_nation_encoded, sizeof(DBI16Type) * COUNT8, cudaMemcpyDeviceToHost);
+main_9<<<std::ceil((float)COUNT6/(float)TILE_SIZE), TILE_SIZE/ITEMS_PER_THREAD>>>(COUNT6, d_MAT8aggr0__tmp_attr0, d_MAT8customer__c_city_encoded, d_MAT8date__d_year, d_MAT8supplier__s_city_encoded, d_MAT_IDX8, d_aggr0__tmp_attr0, d_KEY_6customer__c_city_encoded, d_KEY_6date__d_year, d_KEY_6supplier__s_city_encoded);
+cudaMemcpy(MAT8customer__c_city_encoded, d_MAT8customer__c_city_encoded, sizeof(DBI16Type) * COUNT8, cudaMemcpyDeviceToHost);
+cudaMemcpy(MAT8supplier__s_city_encoded, d_MAT8supplier__s_city_encoded, sizeof(DBI16Type) * COUNT8, cudaMemcpyDeviceToHost);
 cudaMemcpy(MAT8date__d_year, d_MAT8date__d_year, sizeof(DBI32Type) * COUNT8, cudaMemcpyDeviceToHost);
 cudaMemcpy(MAT8aggr0__tmp_attr0, d_MAT8aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT8, cudaMemcpyDeviceToHost);
-for (auto i=0ull; i < COUNT8; i++) { std::cout << "" << customer__c_nation_map[MAT8customer__c_nation_encoded[i]];
-std::cout << "," << supplier__s_nation_map[MAT8supplier__s_nation_encoded[i]];
+for (auto i=0ull; i < COUNT8; i++) { std::cout << "" << customer__c_city_map[MAT8customer__c_city_encoded[i]];
+std::cout << "," << supplier__s_city_map[MAT8supplier__s_city_encoded[i]];
 std::cout << "," << MAT8date__d_year[i];
 std::cout << "," << MAT8aggr0__tmp_attr0[i];
 std::cout << std::endl; }
@@ -767,18 +719,18 @@ cudaFree(d_COUNT2);
 cudaFree(d_BUF_4);
 cudaFree(d_BUF_IDX_4);
 cudaFree(d_COUNT4);
-cudaFree(d_KEY_6customer__c_nation_encoded);
+cudaFree(d_KEY_6customer__c_city_encoded);
 cudaFree(d_KEY_6date__d_year);
-cudaFree(d_KEY_6supplier__s_nation_encoded);
+cudaFree(d_KEY_6supplier__s_city_encoded);
 cudaFree(d_aggr0__tmp_attr0);
 cudaFree(d_COUNT8);
 cudaFree(d_MAT8aggr0__tmp_attr0);
-cudaFree(d_MAT8customer__c_nation_encoded);
+cudaFree(d_MAT8customer__c_city_encoded);
 cudaFree(d_MAT8date__d_year);
-cudaFree(d_MAT8supplier__s_nation_encoded);
+cudaFree(d_MAT8supplier__s_city_encoded);
 cudaFree(d_MAT_IDX8);
 free(MAT8aggr0__tmp_attr0);
-free(MAT8customer__c_nation_encoded);
+free(MAT8customer__c_city_encoded);
 free(MAT8date__d_year);
-free(MAT8supplier__s_nation_encoded);
+free(MAT8supplier__s_city_encoded);
 }

@@ -44,8 +44,8 @@ auto reg_lineorder__lo_orderdate = lineorder__lo_orderdate[tid];
 
 KEY_0 |= reg_lineorder__lo_orderdate;
 //Probe Hash table
-HT_0.for_each(KEY_0, [&] __device__ (auto const SLOT_0) {
-auto const [slot_first0, slot_second0] = SLOT_0;
+auto SLOT_0 = HT_0.find(KEY_0);
+if (SLOT_0 == HT_0.end()) return;
 if (!(true)) return;
 uint64_t KEY_2 = 0;
 //Aggregate in hashtable
@@ -53,7 +53,6 @@ auto buf_idx_2 = get_aggregation_slot(KEY_2, HT_2, SLOT_COUNT_2);
 auto reg_lineorder__lo_extendedprice = lineorder__lo_extendedprice[tid];
 auto reg_map0__tmp_attr1 = (reg_lineorder__lo_extendedprice) * ((DBDecimalType)(reg_lineorder__lo_discount));
 aggregate_sum(&aggr0__tmp_attr0[buf_idx_2], reg_map0__tmp_attr1);
-});
 }
 __global__ void main_5(size_t COUNT2, DBDecimalType* MAT4aggr0__tmp_attr0, uint64_t* MAT_IDX4, DBDecimalType* aggr0__tmp_attr0) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -71,7 +70,7 @@ cudaMalloc(&d_BUF_IDX_0, sizeof(uint64_t));
 cudaMemset(d_BUF_IDX_0, 0, sizeof(uint64_t));
 uint64_t* d_BUF_0;
 cudaMalloc(&d_BUF_0, sizeof(uint64_t) * COUNT0 * 1);
-auto d_HT_0 = cuco::experimental::static_multimap{ (int)COUNT0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+auto d_HT_0 = cuco::static_map{ (int)COUNT0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 main_1<<<std::ceil((float)date_size/128.), 128>>>(d_BUF_0, d_BUF_IDX_0, d_HT_0.ref(cuco::insert), d_date__d_datekey, d_date__d_year, date_size);
 cudaFree(d_BUF_IDX_0);
 size_t COUNT2 = 1;
@@ -83,7 +82,7 @@ cudaMemset(d_SLOT_COUNT_2, 0, sizeof(int));
 DBDecimalType* d_aggr0__tmp_attr0;
 cudaMalloc(&d_aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT2);
 cudaMemset(d_aggr0__tmp_attr0, 0, sizeof(DBDecimalType) * COUNT2);
-main_3<<<std::ceil((float)lineorder_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::for_each), d_HT_2.ref(cuco::insert_and_find), d_SLOT_COUNT_2, d_aggr0__tmp_attr0, d_lineorder__lo_discount, d_lineorder__lo_extendedprice, d_lineorder__lo_orderdate, d_lineorder__lo_quantity, lineorder_size);
+main_3<<<std::ceil((float)lineorder_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::insert_and_find), d_SLOT_COUNT_2, d_aggr0__tmp_attr0, d_lineorder__lo_discount, d_lineorder__lo_extendedprice, d_lineorder__lo_orderdate, d_lineorder__lo_quantity, lineorder_size);
 COUNT2 = d_HT_2.size();
 size_t COUNT4 = COUNT2;
 //Materialize buffers

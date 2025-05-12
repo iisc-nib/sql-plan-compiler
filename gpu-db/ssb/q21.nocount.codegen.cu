@@ -74,30 +74,30 @@ auto reg_lineorder__lo_partkey = lineorder__lo_partkey[tid];
 
 KEY_0 |= reg_lineorder__lo_partkey;
 //Probe Hash table
-HT_0.for_each(KEY_0, [&] __device__ (auto const SLOT_0) {
-auto const [slot_first0, slot_second0] = SLOT_0;
+auto SLOT_0 = HT_0.find(KEY_0);
+if (SLOT_0 == HT_0.end()) return;
 if (!(true)) return;
 uint64_t KEY_2 = 0;
 auto reg_lineorder__lo_suppkey = lineorder__lo_suppkey[tid];
 
 KEY_2 |= reg_lineorder__lo_suppkey;
 //Probe Hash table
-HT_2.for_each(KEY_2, [&] __device__ (auto const SLOT_2) {
-auto const [slot_first2, slot_second2] = SLOT_2;
+auto SLOT_2 = HT_2.find(KEY_2);
+if (SLOT_2 == HT_2.end()) return;
 if (!(true)) return;
 uint64_t KEY_4 = 0;
 auto reg_lineorder__lo_orderdate = lineorder__lo_orderdate[tid];
 
 KEY_4 |= reg_lineorder__lo_orderdate;
 //Probe Hash table
-HT_4.for_each(KEY_4, [&] __device__ (auto const SLOT_4) {
-auto const [slot_first4, slot_second4] = SLOT_4;
+auto SLOT_4 = HT_4.find(KEY_4);
+if (SLOT_4 == HT_4.end()) return;
 if (!(true)) return;
 uint64_t KEY_6 = 0;
-auto reg_date__d_year = date__d_year[BUF_4[slot_second4 * 1 + 0]];
+auto reg_date__d_year = date__d_year[BUF_4[SLOT_4->second * 1 + 0]];
 
 KEY_6 |= reg_date__d_year;
-auto reg_part__p_brand1_encoded = part__p_brand1_encoded[BUF_0[slot_second0 * 1 + 0]];
+auto reg_part__p_brand1_encoded = part__p_brand1_encoded[BUF_0[SLOT_0->second * 1 + 0]];
 KEY_6 <<= 16;
 KEY_6 |= reg_part__p_brand1_encoded;
 //Aggregate in hashtable
@@ -106,9 +106,6 @@ auto reg_lineorder__lo_revenue = lineorder__lo_revenue[tid];
 aggregate_sum(&aggr0__tmp_attr0[buf_idx_6], reg_lineorder__lo_revenue);
 KEY_6date__d_year[buf_idx_6] = reg_date__d_year;
 KEY_6part__p_brand1_encoded[buf_idx_6] = reg_part__p_brand1_encoded;
-});
-});
-});
 }
 __global__ void main_9(size_t COUNT6, DBDecimalType* MAT8aggr0__tmp_attr0, DBI32Type* MAT8date__d_year, DBI16Type* MAT8part__p_brand1_encoded, uint64_t* MAT_IDX8, DBDecimalType* aggr0__tmp_attr0, DBI32Type* date__d_year, DBI16Type* part__p_brand1_encoded) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -130,7 +127,7 @@ cudaMalloc(&d_BUF_IDX_0, sizeof(uint64_t));
 cudaMemset(d_BUF_IDX_0, 0, sizeof(uint64_t));
 uint64_t* d_BUF_0;
 cudaMalloc(&d_BUF_0, sizeof(uint64_t) * COUNT0 * 1);
-auto d_HT_0 = cuco::experimental::static_multimap{ (int)COUNT0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+auto d_HT_0 = cuco::static_map{ (int)COUNT0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 main_1<<<std::ceil((float)part_size/128.), 128>>>(d_BUF_0, d_BUF_IDX_0, d_HT_0.ref(cuco::insert), d_part__p_category, d_part__p_partkey, part_size);
 cudaFree(d_BUF_IDX_0);
 size_t COUNT2 = supplier_size;
@@ -140,7 +137,7 @@ cudaMalloc(&d_BUF_IDX_2, sizeof(uint64_t));
 cudaMemset(d_BUF_IDX_2, 0, sizeof(uint64_t));
 uint64_t* d_BUF_2;
 cudaMalloc(&d_BUF_2, sizeof(uint64_t) * COUNT2 * 1);
-auto d_HT_2 = cuco::experimental::static_multimap{ (int)COUNT2*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+auto d_HT_2 = cuco::static_map{ (int)COUNT2*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 main_3<<<std::ceil((float)supplier_size/128.), 128>>>(d_BUF_2, d_BUF_IDX_2, d_HT_2.ref(cuco::insert), d_supplier__s_region, d_supplier__s_suppkey, supplier_size);
 cudaFree(d_BUF_IDX_2);
 size_t COUNT4 = date_size;
@@ -150,11 +147,11 @@ cudaMalloc(&d_BUF_IDX_4, sizeof(uint64_t));
 cudaMemset(d_BUF_IDX_4, 0, sizeof(uint64_t));
 uint64_t* d_BUF_4;
 cudaMalloc(&d_BUF_4, sizeof(uint64_t) * COUNT4 * 1);
-auto d_HT_4 = cuco::experimental::static_multimap{ (int)COUNT4*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+auto d_HT_4 = cuco::static_map{ (int)COUNT4*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 main_5<<<std::ceil((float)date_size/128.), 128>>>(d_BUF_4, d_BUF_IDX_4, d_HT_4.ref(cuco::insert), d_date__d_datekey, date_size);
 cudaFree(d_BUF_IDX_4);
-size_t COUNT6 = 52974;
-auto d_HT_6 = cuco::static_map{ (int)52974*2, cuco::empty_key{(int64_t)-1},         cuco::empty_value{(int64_t)-1},         thrust::equal_to<int64_t>{},         cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+size_t COUNT6 = 391755;
+auto d_HT_6 = cuco::static_map{ (int)391755*2, cuco::empty_key{(int64_t)-1},         cuco::empty_value{(int64_t)-1},         thrust::equal_to<int64_t>{},         cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 int* d_SLOT_COUNT_6;
 cudaMalloc(&d_SLOT_COUNT_6, sizeof(int));
 cudaMemset(d_SLOT_COUNT_6, 0, sizeof(int));
@@ -168,7 +165,7 @@ cudaMemset(d_KEY_6date__d_year, 0, sizeof(DBI32Type) * COUNT6);
 DBI16Type* d_KEY_6part__p_brand1_encoded;
 cudaMalloc(&d_KEY_6part__p_brand1_encoded, sizeof(DBI16Type) * COUNT6);
 cudaMemset(d_KEY_6part__p_brand1_encoded, 0, sizeof(DBI16Type) * COUNT6);
-main_7<<<std::ceil((float)lineorder_size/128.), 128>>>(d_BUF_0, d_BUF_2, d_BUF_4, d_HT_0.ref(cuco::for_each), d_HT_2.ref(cuco::for_each), d_HT_4.ref(cuco::for_each), d_HT_6.ref(cuco::insert_and_find), d_KEY_6date__d_year, d_KEY_6part__p_brand1_encoded, d_SLOT_COUNT_6, d_aggr0__tmp_attr0, d_date__d_year, d_lineorder__lo_orderdate, d_lineorder__lo_partkey, d_lineorder__lo_revenue, d_lineorder__lo_suppkey, lineorder_size, d_part__p_brand1_encoded);
+main_7<<<std::ceil((float)lineorder_size/128.), 128>>>(d_BUF_0, d_BUF_2, d_BUF_4, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::find), d_HT_4.ref(cuco::find), d_HT_6.ref(cuco::insert_and_find), d_KEY_6date__d_year, d_KEY_6part__p_brand1_encoded, d_SLOT_COUNT_6, d_aggr0__tmp_attr0, d_date__d_year, d_lineorder__lo_orderdate, d_lineorder__lo_partkey, d_lineorder__lo_revenue, d_lineorder__lo_suppkey, lineorder_size, d_part__p_brand1_encoded);
 COUNT6 = d_HT_6.size();
 size_t COUNT8 = COUNT6;
 //Materialize buffers

@@ -15,38 +15,37 @@ int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 DBI32Type reg_date__d_yearmonthnum[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < date_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-reg_date__d_yearmonthnum[ITEM] = date__d_yearmonthnum[tid + ITEM];
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
+reg_date__d_yearmonthnum[ITEM] = date__d_yearmonthnum[ITEM*TB + tid];
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = evaluatePredicate(reg_date__d_yearmonthnum[ITEM], 199401, Predicate::eq);
+selection_flags[ITEM] &= evaluatePredicate(reg_date__d_yearmonthnum[ITEM], 199401, Predicate::eq);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 //Materialize count
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 atomicAdd((int*)COUNT0, 1);
 }
@@ -59,55 +58,53 @@ int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 DBI32Type reg_date__d_yearmonthnum[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < date_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-reg_date__d_yearmonthnum[ITEM] = date__d_yearmonthnum[tid + ITEM];
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
+reg_date__d_yearmonthnum[ITEM] = date__d_yearmonthnum[ITEM*TB + tid];
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = evaluatePredicate(reg_date__d_yearmonthnum[ITEM], 199401, Predicate::eq);
+selection_flags[ITEM] &= evaluatePredicate(reg_date__d_yearmonthnum[ITEM], 199401, Predicate::eq);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 uint64_t KEY_0[ITEMS_PER_THREAD];
 DBI32Type reg_date__d_datekey[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < date_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-reg_date__d_datekey[ITEM] = date__d_datekey[tid + ITEM];
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
+reg_date__d_datekey[ITEM] = date__d_datekey[ITEM*TB + tid];
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 KEY_0[ITEM] = 0;
 KEY_0[ITEM] |= reg_date__d_datekey[ITEM];
 }
 // Insert hash table kernel;
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < date_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < date_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 auto buf_idx_0 = atomicAdd((int*)BUF_IDX_0, 1);
 HT_0.insert(cuco::pair{KEY_0[ITEM], buf_idx_0});
-BUF_0[(buf_idx_0) * 1 + 0] = tid + ITEM;
+BUF_0[(buf_idx_0) * 1 + 0] = ITEM*TB + tid;
 }
 }
 template<typename HASHTABLE_PROBE, typename HASHTABLE_INSERT>
@@ -118,91 +115,88 @@ int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 DBI32Type reg_lineorder__lo_discount[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-reg_lineorder__lo_discount[ITEM] = lineorder__lo_discount[tid + ITEM];
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+reg_lineorder__lo_discount[ITEM] = lineorder__lo_discount[ITEM*TB + tid];
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = evaluatePredicate(reg_lineorder__lo_discount[ITEM], 4, Predicate::gte) && evaluatePredicate(reg_lineorder__lo_discount[ITEM], 6, Predicate::lte);
+selection_flags[ITEM] &= evaluatePredicate(reg_lineorder__lo_discount[ITEM], 4, Predicate::gte) && evaluatePredicate(reg_lineorder__lo_discount[ITEM], 6, Predicate::lte);
 }
 DBI32Type reg_lineorder__lo_quantity[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-reg_lineorder__lo_quantity[ITEM] = lineorder__lo_quantity[tid + ITEM];
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+reg_lineorder__lo_quantity[ITEM] = lineorder__lo_quantity[ITEM*TB + tid];
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = evaluatePredicate(reg_lineorder__lo_quantity[ITEM], 26, Predicate::gte) && evaluatePredicate(reg_lineorder__lo_quantity[ITEM], 35, Predicate::lte);
+selection_flags[ITEM] &= evaluatePredicate(reg_lineorder__lo_quantity[ITEM], 26, Predicate::gte) && evaluatePredicate(reg_lineorder__lo_quantity[ITEM], 35, Predicate::lte);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 uint64_t KEY_0[ITEMS_PER_THREAD];
 DBI32Type reg_lineorder__lo_orderdate[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-reg_lineorder__lo_orderdate[ITEM] = lineorder__lo_orderdate[tid + ITEM];
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+reg_lineorder__lo_orderdate[ITEM] = lineorder__lo_orderdate[ITEM*TB + tid];
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 KEY_0[ITEM] = 0;
 KEY_0[ITEM] |= reg_lineorder__lo_orderdate[ITEM];
 }
 int64_t slot_second0[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 auto SLOT_0 = HT_0.find(KEY_0[ITEM]);
 if (SLOT_0 == HT_0.end()) {selection_flags[ITEM] = 0; continue;}
 slot_second0[ITEM] = SLOT_0->second;
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = true;
+selection_flags[ITEM] &= true;
 }
 uint64_t KEY_2[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 KEY_2[ITEM] = 0;
 }
 //Create aggregation hash table
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 HT_2.insert(cuco::pair{KEY_2[ITEM], 1});
 }
@@ -215,103 +209,99 @@ int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 DBI32Type reg_lineorder__lo_discount[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-reg_lineorder__lo_discount[ITEM] = lineorder__lo_discount[tid + ITEM];
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+reg_lineorder__lo_discount[ITEM] = lineorder__lo_discount[ITEM*TB + tid];
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = evaluatePredicate(reg_lineorder__lo_discount[ITEM], 4, Predicate::gte) && evaluatePredicate(reg_lineorder__lo_discount[ITEM], 6, Predicate::lte);
+selection_flags[ITEM] &= evaluatePredicate(reg_lineorder__lo_discount[ITEM], 4, Predicate::gte) && evaluatePredicate(reg_lineorder__lo_discount[ITEM], 6, Predicate::lte);
 }
 DBI32Type reg_lineorder__lo_quantity[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-reg_lineorder__lo_quantity[ITEM] = lineorder__lo_quantity[tid + ITEM];
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+reg_lineorder__lo_quantity[ITEM] = lineorder__lo_quantity[ITEM*TB + tid];
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = evaluatePredicate(reg_lineorder__lo_quantity[ITEM], 26, Predicate::gte) && evaluatePredicate(reg_lineorder__lo_quantity[ITEM], 35, Predicate::lte);
+selection_flags[ITEM] &= evaluatePredicate(reg_lineorder__lo_quantity[ITEM], 26, Predicate::gte) && evaluatePredicate(reg_lineorder__lo_quantity[ITEM], 35, Predicate::lte);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = !(false);
+selection_flags[ITEM] &= !(false);
 }
 uint64_t KEY_0[ITEMS_PER_THREAD];
 DBI32Type reg_lineorder__lo_orderdate[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-reg_lineorder__lo_orderdate[ITEM] = lineorder__lo_orderdate[tid + ITEM];
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+reg_lineorder__lo_orderdate[ITEM] = lineorder__lo_orderdate[ITEM*TB + tid];
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 KEY_0[ITEM] = 0;
 KEY_0[ITEM] |= reg_lineorder__lo_orderdate[ITEM];
 }
 int64_t slot_second0[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 auto SLOT_0 = HT_0.find(KEY_0[ITEM]);
 if (SLOT_0 == HT_0.end()) {selection_flags[ITEM] = 0; continue;}
 slot_second0[ITEM] = SLOT_0->second;
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
-selection_flags[ITEM] = true;
+selection_flags[ITEM] &= true;
 }
 uint64_t KEY_2[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 KEY_2[ITEM] = 0;
 }
 //Aggregate in hashtable
 DBDecimalType reg_lineorder__lo_extendedprice[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-reg_lineorder__lo_extendedprice[ITEM] = lineorder__lo_extendedprice[tid + ITEM];
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
+reg_lineorder__lo_extendedprice[ITEM] = lineorder__lo_extendedprice[ITEM*TB + tid];
 }
 DBDecimalType reg_map0__tmp_attr1[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 reg_map0__tmp_attr1[ITEM] = (reg_lineorder__lo_extendedprice[ITEM]) * ((DBDecimalType)(reg_lineorder__lo_discount[ITEM]));
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < lineorder_size); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < lineorder_size); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 auto buf_idx_2 = HT_2.find(KEY_2[ITEM])->second;
 aggregate_sum(&aggr0__tmp_attr0[buf_idx_2], reg_map0__tmp_attr1[ITEM]);
@@ -324,7 +314,7 @@ int selection_flags[ITEMS_PER_THREAD];
 for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 //Materialize count
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < COUNT2); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < COUNT2); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 atomicAdd((int*)COUNT4, 1);
 }
@@ -337,12 +327,11 @@ for (int i=0; i<ITEMS_PER_THREAD; i++) selection_flags[i] = 1;
 //Materialize buffers
 DBDecimalType reg_aggr0__tmp_attr0[ITEMS_PER_THREAD];
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < COUNT2); ++ITEM) {
-if (!selection_flags[ITEM]) continue;
-reg_aggr0__tmp_attr0[ITEM] = aggr0__tmp_attr0[tid + ITEM];
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < COUNT2); ++ITEM) {
+reg_aggr0__tmp_attr0[ITEM] = aggr0__tmp_attr0[ITEM*TB + tid];
 }
 #pragma unroll
-for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (tid + ITEM < COUNT2); ++ITEM) {
+for (int ITEM = 0; ITEM < ITEMS_PER_THREAD && (ITEM*TB + tid < COUNT2); ++ITEM) {
 if (!selection_flags[ITEM]) continue;
 auto mat_idx4 = atomicAdd((int*)MAT_IDX4, 1);
 MAT4aggr0__tmp_attr0[mat_idx4] = reg_aggr0__tmp_attr0[ITEM];
