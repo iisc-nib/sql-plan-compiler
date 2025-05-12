@@ -34,7 +34,7 @@ def get_top_kernels(report, percentile=0.9):
         cumulative_time += kernel_time
         kernel_name = my_range.action_by_idx(kernel_idx).name()
         top_percentile_kernels.append(kernel_idx)
-        print(f"Kernel: {kernel_name} took {kernel_time/1000.0} ms")
+        # print(f"Kernel: {kernel_name} took {kernel_time/1000.0} ms")
         if cumulative_time / total_time >= percentile:
             break
 
@@ -45,24 +45,36 @@ def print_divergence_top_kernels(report):
     for kernel_idx in top_kernels:
         kernel = report.range_by_idx(0).action_by_idx(kernel_idx)
         warp_divergence = round(kernel.metric_by_name("smsp__thread_inst_executed_per_inst_executed.ratio").as_double(), 2)
-        print(f"Kernel: {kernel.name()} has {warp_divergence} avg. active threads per warp")
+        kernel_gpu_time = kernel.metric_by_name("gpu__time_duration.sum").as_double()/1000.0
+        print(f"{kernel.name()}, {kernel_gpu_time} ms, {warp_divergence}")
+
+def print_report(report_file):
+
+    if not os.path.exists(report_file):
+        print(f"-- Report file {report_file} does not exist. --") 
+    # Load the report
+    report = ncu_report.load_report(report_file)
+    print(f"-- Loaded report: {report_file} --")
+
+    # print the top divergence
+    print_divergence_top_kernels(report)
+    print(f"-- Finished printing report: {report_file} --")
+    
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python print-report-overview.py <report-file>")
         sys.exit(1)
 
-    report_file = sys.argv[1]
-    if not os.path.exists(report_file):
-        print(f"Report file {report_file} does not exist.")
-        sys.exit(1)
+    if (os.path.isdir(sys.argv[1])):
+        for report_file in os.listdir(sys.argv[1]):
+            if report_file.endswith(".ncu-rep"):
+                report_file = os.path.join(sys.argv[1], report_file)
+                print_report(report_file)
+    else:
+        report_file = sys.argv[1]
 
-    # Load the report
-    report = ncu_report.load_report(report_file)
-    print(f"Loaded report: {report_file}")
-
-    # print the top divergence
-    print_divergence_top_kernels(report)
+    
 
 
 
