@@ -24,7 +24,8 @@ query:
                 "--generate-code=arch=compute_86,code=[compute_86,sm_86]"   \
                 -shared \
                 -Xcompiler -fPIC -o build/q$(Q).codegen.so \
-                -Xcompiler --no-gnu-unique
+                -Xcompiler --no-gnu-unique \
+                -lineinfo
 
 run:
 	./build/dbruntime --data_dir $(DATA_PATH)
