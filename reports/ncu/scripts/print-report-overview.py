@@ -10,29 +10,60 @@ def print_metrics(kernel):
     print(f"Kernel: {kernel.name()}")
     print(f"  Kernel metrics:", {kernel.metric_names()})
 
-report_folder = parent(parent(parent(__file__)))
-print(f"Report folder: {report_folder}")
+def get_top_kernels(report, percentile=0.9):
+    """
+    Get the top kernels from the report that contribute to the given percentile of total time.
+    """
+    top_kernels = {}
+    total_time = 0.0
+    
+    assert(report.num_ranges() == 1)
+    my_range = report.range_by_idx(0)
+    for j in range(my_range.num_actions()):
+        kernel = my_range.action_by_idx(j)
+        kernel_time = kernel.metric_by_name("gpu__time_duration.sum").as_double()
+        top_kernels[j] = kernel_time
+        total_time += kernel_time
 
-first_report = ncu_report.load_report(
-    os.path.join(report_folder, "ncu", "4060", "ssb-1", "q11-ssb.ncu-rep"))
+    # Sort kernels by their execution time in descending order
+    sorted_kernels = sorted(top_kernels.items(), key=lambda item: item[1], reverse=True)
 
-num_ranges = first_report.num_ranges()
-print(f"Number of ranges: {num_ranges}")
+    cumulative_time = 0.0
+    top_percentile_kernels = []
+    for kernel_idx, kernel_time in sorted_kernels:
+        cumulative_time += kernel_time
+        kernel_name = my_range.action_by_idx(kernel_idx).name()
+        top_percentile_kernels.append(kernel_idx)
+        print(f"Kernel: {kernel_name} took {kernel_time/1000.0} ms")
+        if cumulative_time / total_time >= percentile:
+            break
 
-my_range = first_report.range_by_idx(0)
-print(f"Range name: {my_range.num_actions()}")
+    return top_percentile_kernels
 
-first_kernel = my_range.action_by_idx(0)
-print_metrics(first_kernel)
+def print_divergence_top_kernels(report):
+    top_kernels = get_top_kernels(report, 0.90)
+    for kernel_idx in top_kernels:
+        kernel = report.range_by_idx(0).action_by_idx(kernel_idx)
+        warp_divergence = round(kernel.metric_by_name("smsp__thread_inst_executed_per_inst_executed.ratio").as_double(), 2)
+        print(f"Kernel: {kernel.name()} has {warp_divergence} avg. active threads per warp")
 
-# # action is a kernel
-# for i in range(my_range.num_actions()):
-#     kernel = my_range.action_by_idx(i)
-#     warp_divergence = round(kernel.metric_by_name(f"smsp__thread_inst_executed_per_inst_executed.ratio").as_double(), 2)
-#     print(f"Kernel: {kernel.name()} took {warp_divergence} ms")
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python print-report-overview.py <report-file>")
+        sys.exit(1)
 
+    report_file = sys.argv[1]
+    if not os.path.exists(report_file):
+        print(f"Report file {report_file} does not exist.")
+        sys.exit(1)
 
-    # get the time taken by the action
+    # Load the report
+    report = ncu_report.load_report(report_file)
+    print(f"Loaded report: {report_file}")
+
+    # print the top divergence
+    print_divergence_top_kernels(report)
+
 
 
 
