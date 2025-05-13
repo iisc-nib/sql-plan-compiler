@@ -97,7 +97,12 @@ void runQuery(std::string &libPath)
             DBI16Type *,
             std::unordered_map<DBI16Type, std::string> &,
             std::unordered_map<DBI16Type, std::string> &,
-            std::unordered_map<DBI16Type, std::string> &)>(dlsym(lib, "control"));
+            std::unordered_map<DBI16Type, std::string> &,
+            DBI16Type*,
+            std::unordered_map<DBI16Type, std::string> &,
+            DBI16Type*,
+            std::unordered_map<DBI16Type, std::string> &
+        )>(dlsym(lib, "control"));
         auto start = std::chrono::high_resolution_clock::now();
         control(
             d_nation__n_nationkey,
@@ -172,7 +177,12 @@ void runQuery(std::string &libPath)
             d_nation__n_name_encoded,
             nation__n_name_map,
             nation__n_name_map,
-            nation__n_name_map);
+            nation__n_name_map,
+            d_orders__o_orderpriority_encoded,
+            orders__o_orderpriority_map,
+            d_customer__c_name_encoded,
+            customer__c_name_map
+            );
         auto stop = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
         std::clog << "Query execution time: " << duration.count() / 1000. << "milliseconds.\n";

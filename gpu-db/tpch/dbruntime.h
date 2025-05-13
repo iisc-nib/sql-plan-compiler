@@ -60,12 +60,16 @@ DBI32Type *d_orders__o_custkey;
 DBDecimalType *d_orders__o_totalprice;
 DBDateType *d_orders__o_orderdate;
 DBStringType *d_orders__o_orderpriority;
+DBI16Type *d_orders__o_orderpriority_encoded;
+std::unordered_map<DBI16Type, std::string> orders__o_orderpriority_map;
 DBStringType *d_orders__o_clerk;
 DBI32Type *d_orders__o_shippriority;
 DBStringType *d_orders__o_comment;
 size_t orders_size;
 DBI32Type *d_customer__c_custkey;
 DBStringType *d_customer__c_name;
+DBI16Type *d_customer__c_name_encoded;
+std::unordered_map<DBI16Type, std::string> customer__c_name_map;
 DBStringType *d_customer__c_address;
 DBI32Type *d_customer__c_nationkey;
 DBStringType *d_customer__c_phone;
@@ -203,6 +207,12 @@ void initTpchDb(std::string dbDir)
     d_orders__o_orderpriority = allocateAndTransferStrings(o_orderpriority, orders_size);
     free(o_orderpriority);
 
+    DBStringEncodedType *d_orders__o_orderpriority_enc = readStringEncodedColumn<1>(orders_table, "o_orderpriority");
+    d_orders__o_orderpriority_encoded = allocateAndTransfer<DBI16Type>(d_orders__o_orderpriority_enc->buffer, orders_size);
+    orders__o_orderpriority_map = d_orders__o_orderpriority_enc->rev_dict;
+    free(d_orders__o_orderpriority_enc->buffer);
+    free(d_orders__o_orderpriority_enc);
+
     DBStringType *o_clerk = readStringColumn<1>(orders_table, "o_clerk");
     d_orders__o_clerk = allocateAndTransferStrings(o_clerk, orders_size);
     free(o_clerk);
@@ -233,6 +243,12 @@ void initTpchDb(std::string dbDir)
     DBStringType *c_name = readStringColumn<1>(customer_table, "c_name");
     d_customer__c_name = allocateAndTransferStrings(c_name, customer_size);
     free(c_name);
+
+    DBStringEncodedType *d_customer__c_name_enc = readStringEncodedColumn<1>(customer_table, "c_name");
+    d_customer__c_name_encoded = allocateAndTransfer<DBI16Type>(d_customer__c_name_enc->buffer, customer_size);
+    customer__c_name_map = d_customer__c_name_enc->rev_dict;
+    free(d_customer__c_name_enc->buffer);
+    free(d_customer__c_name_enc);
 
     DBStringType *c_address = readStringColumn<1>(customer_table, "c_address");
     d_customer__c_address = allocateAndTransferStrings(c_address, customer_size);
