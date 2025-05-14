@@ -101,6 +101,18 @@ void runQuery(std::string &libPath)
             DBI16Type*,
             std::unordered_map<DBI16Type, std::string> &,
             DBI16Type*,
+            std::unordered_map<DBI16Type, std::string> &,
+            DBI16Type*,
+            std::unordered_map<DBI16Type, std::string> &,
+            DBI16Type*,
+            std::unordered_map<DBI16Type, std::string> &,
+            DBI16Type*,
+            std::unordered_map<DBI16Type, std::string> &,
+            DBI16Type*,
+            std::unordered_map<DBI16Type, std::string> &,
+            DBI16Type*,
+            std::unordered_map<DBI16Type, std::string> &,
+            DBI16Type*,
             std::unordered_map<DBI16Type, std::string> &
         )>(dlsym(lib, "control"));
         auto start = std::chrono::high_resolution_clock::now();
@@ -181,7 +193,19 @@ void runQuery(std::string &libPath)
             d_orders__o_orderpriority_encoded,
             orders__o_orderpriority_map,
             d_customer__c_name_encoded,
-            customer__c_name_map
+            customer__c_name_map,
+            d_customer__c_comment_encoded,
+            customer__c_comment_map,
+            d_customer__c_phone_encoded,
+            customer__c_phone_map,
+            d_customer__c_address_encoded,
+            customer__c_address_map,
+            d_supplier__s_name_encoded,
+            supplier__s_name_map,
+            d_part__p_brand_encoded,
+            part__p_brand_map,
+            d_part__p_type_encoded,
+            part__p_type_map
             );
         auto stop = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);

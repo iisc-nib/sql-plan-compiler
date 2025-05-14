@@ -16,6 +16,8 @@ size_t nation_size;
 DBI32Type *d_supplier__s_suppkey;
 DBI32Type *d_supplier__s_nationkey;
 DBStringType *d_supplier__s_name;
+DBI16Type *d_supplier__s_name_encoded;
+std::unordered_map<DBI16Type, std::string> supplier__s_name_map;
 DBStringType *d_supplier__s_address;
 DBStringType *d_supplier__s_phone;
 DBDecimalType *d_supplier__s_acctbal;
@@ -31,7 +33,11 @@ DBI32Type *d_part__p_partkey;
 DBStringType *d_part__p_name;
 DBStringType *d_part__p_mfgr;
 DBStringType *d_part__p_brand;
+DBI16Type *d_part__p_brand_encoded;
+std::unordered_map<DBI16Type, std::string> part__p_brand_map;
 DBStringType *d_part__p_type;
+DBI16Type *d_part__p_type_encoded;
+std::unordered_map<DBI16Type, std::string> part__p_type_map;
 DBI32Type *d_part__p_size;
 DBStringType *d_part__p_container;
 DBDecimalType *d_part__p_retailprice;
@@ -71,11 +77,17 @@ DBStringType *d_customer__c_name;
 DBI16Type *d_customer__c_name_encoded;
 std::unordered_map<DBI16Type, std::string> customer__c_name_map;
 DBStringType *d_customer__c_address;
+DBI16Type *d_customer__c_address_encoded;
+std::unordered_map<DBI16Type, std::string> customer__c_address_map;
 DBI32Type *d_customer__c_nationkey;
 DBStringType *d_customer__c_phone;
+DBI16Type *d_customer__c_phone_encoded;
+std::unordered_map<DBI16Type, std::string> customer__c_phone_map;
 DBDecimalType *d_customer__c_acctbal;
 DBStringType *d_customer__c_mktsegment;
 DBStringType *d_customer__c_comment;
+DBI16Type *d_customer__c_comment_encoded;
+std::unordered_map<DBI16Type, std::string> customer__c_comment_map;
 size_t customer_size;
 DBI32Type *d_region__r_regionkey;
 DBStringType *d_region__r_name;
@@ -250,6 +262,24 @@ void initTpchDb(std::string dbDir)
     free(d_customer__c_name_enc->buffer);
     free(d_customer__c_name_enc);
 
+    DBStringEncodedType *d_customer__c_comment_enc = readStringEncodedColumn<1>(customer_table, "c_comment");
+    d_customer__c_comment_encoded = allocateAndTransfer<DBI16Type>(d_customer__c_comment_enc->buffer, customer_size);
+    customer__c_comment_map = d_customer__c_comment_enc->rev_dict;
+    free(d_customer__c_comment_enc->buffer);
+    free(d_customer__c_comment_enc);
+
+    DBStringEncodedType *d_customer__c_phone_enc = readStringEncodedColumn<1>(customer_table, "c_phone");
+    d_customer__c_phone_encoded = allocateAndTransfer<DBI16Type>(d_customer__c_phone_enc->buffer, customer_size);
+    customer__c_phone_map = d_customer__c_phone_enc->rev_dict;
+    free(d_customer__c_phone_enc->buffer);
+    free(d_customer__c_phone_enc);
+
+    DBStringEncodedType *d_customer__c_address_enc = readStringEncodedColumn<1>(customer_table, "c_address");
+    d_customer__c_address_encoded = allocateAndTransfer<DBI16Type>(d_customer__c_address_enc->buffer, customer_size);
+    customer__c_address_map = d_customer__c_address_enc->rev_dict;
+    free(d_customer__c_address_enc->buffer);
+    free(d_customer__c_address_enc);
+
     DBStringType *c_address = readStringColumn<1>(customer_table, "c_address");
     d_customer__c_address = allocateAndTransferStrings(c_address, customer_size);
     free(c_address);
@@ -341,6 +371,13 @@ void initTpchDb(std::string dbDir)
     d_supplier__s_name = allocateAndTransferStrings(s_name, supplier_size);
     free(s_name);
 
+    DBStringEncodedType *d_supplier__s_name_enc = readStringEncodedColumn<1>(supplier_table, "s_name");
+    d_supplier__s_name_encoded = allocateAndTransfer<DBI16Type>(d_supplier__s_name_enc->buffer, supplier_size);
+    supplier__s_name_map = d_supplier__s_name_enc->rev_dict;
+    free(d_supplier__s_name_enc->buffer);
+    free(d_supplier__s_name_enc);
+
+
     DBStringType *s_address = readStringColumn<1>(supplier_table, "s_address");
     d_supplier__s_address = allocateAndTransferStrings(s_address, supplier_size);
     free(s_address);
@@ -405,9 +442,21 @@ void initTpchDb(std::string dbDir)
     d_part__p_brand = allocateAndTransferStrings(p_brand, part_size);
     free(p_brand);
 
+    DBStringEncodedType *d_part__p_brand_enc = readStringEncodedColumn<1>(part_table, "p_brand");
+    d_part__p_brand_encoded = allocateAndTransfer<DBI16Type>(d_part__p_brand_enc->buffer, part_size);
+    part__p_brand_map = d_part__p_brand_enc->rev_dict;
+    free(d_part__p_brand_enc->buffer);
+    free(d_part__p_brand_enc);
+
     DBStringType *p_type = readStringColumn<1>(part_table, "p_type");
     d_part__p_type = allocateAndTransferStrings(p_type, part_size);
     free(p_type);
+
+    DBStringEncodedType *d_part__p_type_enc = readStringEncodedColumn<1>(part_table, "p_type");
+    d_part__p_type_encoded = allocateAndTransfer<DBI16Type>(d_part__p_type_enc->buffer, part_size);
+    part__p_type_map = d_part__p_type_enc->rev_dict;
+    free(d_part__p_type_enc->buffer);
+    free(d_part__p_type_enc);
 
     DBI32Type *p_size = readIntegerColumn<DBI32Type, 1>(part_table, "p_size");
     d_part__p_size = allocateAndTransfer<DBI32Type>(p_size, part_size);

@@ -60,8 +60,27 @@ __device__ void aggregate_any(char** a, char* v) {
 __device__ void aggregate_any(double* a, double v) {
   *a = v;
 }
+__device__ void aggregate_any(DBI16Type* a, DBI16Type v) {
+  *a = v;
+}
 __device__ void aggregate_count(int64_t* a, float v) {
   atomicAdd((int*)a, 1);
+}
+
+__device__ bool Like(DBStringType str, const char* pattern) {
+  int i = 0, j = 0; 
+  if (pattern[0]!='%')  {
+    while(str[i]!='\0' && (pattern[j]!='\0' && pattern[j]!='%')) {
+      if (str[i++] != pattern[j++]) {
+        // printf("str: %s, pattern: %s\n", str, pattern);
+        return false;
+      }
+    }
+    if (pattern[j] != '\0' && pattern[j] != '%') {
+      return false;
+    }
+  }
+  return true;
 }
 
 template<typename HT>
@@ -112,6 +131,14 @@ __device__ static inline bool evaluatePredicate(const DBStringType str1, const D
         if (str1[i++] != str2[j++]) return false;
       }
       return str1[i] == str2[j];
+    }
+    break;
+    case Predicate::neq:
+    {
+      while(str1[i]!='\0' && str2[j]!='\0') {
+        if (str1[i++] != str2[j++]) return true;
+      }
+      return str1[i] != str2[j];
     }
     break;
     case Predicate::like:
