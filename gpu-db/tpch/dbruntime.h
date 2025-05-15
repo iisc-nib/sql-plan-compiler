@@ -19,6 +19,8 @@ DBStringType *d_supplier__s_name;
 DBI16Type *d_supplier__s_name_encoded;
 std::unordered_map<DBI16Type, std::string> supplier__s_name_map;
 DBStringType *d_supplier__s_address;
+DBI16Type *d_supplier__s_address_encoded;
+std::unordered_map<DBI16Type, std::string> supplier__s_address_map;
 DBStringType *d_supplier__s_phone;
 DBDecimalType *d_supplier__s_acctbal;
 DBStringType *d_supplier__s_comment;
@@ -58,6 +60,8 @@ DBI32Type *d_lineitem__l_commitdate;
 DBI32Type *d_lineitem__l_receiptdate;
 DBStringType *d_lineitem__l_shipinstruct;
 DBStringType *d_lineitem__l_shipmode;
+DBI16Type *d_lineitem__l_shipmode_encoded;
+std::unordered_map<DBI16Type, std::string> lineitem__l_shipmode_map;
 DBStringType *d_lineitem__comments;
 size_t lineitem_size;
 DBI32Type *d_orders__o_orderkey;
@@ -186,6 +190,12 @@ void initTpchDb(std::string dbDir)
     DBStringType *l_shipmode = readStringColumn<1>(lineitem_table, "l_shipmode");
     d_lineitem__l_shipmode = allocateAndTransferStrings(l_shipmode, lineitem_size);
     free(l_shipmode);
+
+    DBStringEncodedType *d_lineitem__l_shipmode_enc = readStringEncodedColumn<1>(lineitem_table, "l_shipmode");
+    d_lineitem__l_shipmode_encoded = allocateAndTransfer<DBI16Type>(d_lineitem__l_shipmode_enc->buffer, lineitem_size);
+    lineitem__l_shipmode_map = d_lineitem__l_shipmode_enc->rev_dict;
+    free(d_lineitem__l_shipmode_enc->buffer);
+    free(d_lineitem__l_shipmode_enc);
 
     // orders table
     auto orders_table = getArrowTable(dbDir, "orders");
@@ -381,6 +391,12 @@ void initTpchDb(std::string dbDir)
     DBStringType *s_address = readStringColumn<1>(supplier_table, "s_address");
     d_supplier__s_address = allocateAndTransferStrings(s_address, supplier_size);
     free(s_address);
+    
+    DBStringEncodedType *d_supplier__s_address_enc = readStringEncodedColumn<1>(supplier_table, "s_address");
+    d_supplier__s_address_encoded = allocateAndTransfer<DBI16Type>(d_supplier__s_address_enc->buffer, supplier_size);
+    supplier__s_address_map = d_supplier__s_address_enc->rev_dict;
+    free(d_supplier__s_address_enc->buffer);
+    free(d_supplier__s_address_enc);
 
     DBStringType *s_phone = readStringColumn<1>(supplier_table, "s_phone");
     d_supplier__s_phone = allocateAndTransferStrings(s_phone, supplier_size);
