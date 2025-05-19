@@ -83,8 +83,9 @@ __global__ void count_3(uint64_t *BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_INSERT 
     if (flag)
         HT_2.insert(cuco::pair{KEY_2, 1});
 }
+#define USE_SHUFFLE 1
 template <typename HASHTABLE_PROBE, typename HASHTABLE_FIND>
-__global__ void main_3(uint64_t *BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_FIND HT_2, DBDecimalType *aggr0__tmp_attr0, DBI32Type *lineorder__lo_discount, DBDecimalType *lineorder__lo_extendedprice, DBI32Type *lineorder__lo_orderdate, DBI32Type *lineorder__lo_quantity, size_t lineorder_size)
+__global__ void main_3(uint64_t *BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_FIND HT_2, DBDecimalType *aggr0__tmp_attr0, DBI32Type *lineorder__lo_discount, DBDecimalType *lineorder__lo_extendedprice, DBI32Type *lineorder__lo_orderdate, DBI32Type *lineorder__lo_quantity, size_t lineorder_size, unsigned int* temp_size)
 {
     size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid >= lineorder_size)
@@ -95,6 +96,22 @@ __global__ void main_3(uint64_t *BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_FIND HT_
     auto reg_lineorder__lo_quantity = lineorder__lo_quantity[tid];
     if (!(evaluatePredicate(reg_lineorder__lo_quantity, 25, Predicate::lt)))
         return;
+
+#if USE_SHUFFLE
+    // ---- shuffle constructs --- //
+    struct shuffle_buffer {
+      size_t row_idx; // row_idx of the row that was being processed
+      size_t buf_idx; // index of the
+    };
+    __shared__ unsigned int shuffle_buf_idx; // the current index of the shuffle buffer
+    __shared__ shuffle_buffer shuffle_buf[128]; // shuffle buffer to populate
+    // ---- end of shuffle constructs --- //
+
+    shuffle_buf_idx = 0; // initialize the shuffle buffer index
+    __syncthreads(); // sync all the threads across the warp
+
+#endif // USE_SHUFFLE
+
     if (!(!(false)))
         return;
     if (!(!(false)))
@@ -113,13 +130,57 @@ __global__ void main_3(uint64_t *BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_FIND HT_
     KEY_0 |= reg_lineorder__lo_orderdate;
     // Probe Hash table
     auto SLOT_0 = HT_0.find(KEY_0);
+#if !USE_SHUFFLE
     if (SLOT_0 == HT_0.end())
         return;
+
+    atomicAdd(temp_size, 1); // total processed rows
+#else
+    // -- save state for shuffle --
+    if (SLOT_0 != HT_0.end()) {
+        // atomicAdd(temp_size, 1); // total processed rows
+        auto old_shuffle_buf_idx = atomicAdd_block(&shuffle_buf_idx, 1);
+        // printf("Pushing to the shuffle buffer %u, tid=%zu, buf_idx=%lld\n", old_shuffle_buf_idx, (size_t)tid, (long long)SLOT_0->second);
+        shuffle_buf[old_shuffle_buf_idx].row_idx = tid;
+        shuffle_buf[old_shuffle_buf_idx].buf_idx = SLOT_0->second;
+    }
+    // -- save state for shuffle --
+
+    __syncthreads(); // sync all the threads across the threadblock    
+
+    if (threadIdx.x == 0) {
+        atomicAdd(temp_size, shuffle_buf_idx); // total processed rows
+        printf("Shuffle buffer size: %u\n", shuffle_buf_idx);
+    }
+
+
+    // -- retrieve state for shuffle if valid --
+    
+    if (threadIdx.x >= shuffle_buf_idx) 
+        return; // we are beyond the shuffle buffer elements    
+
+    if (threadIdx.x == 0) {
+        atomicAdd(temp_size, shuffle_buf_idx); // total processed rows
+        printf("Shuffle buffer size: %u\n", shuffle_buf_idx);
+    }
+
+    // atomicAdd(temp_size, 1); // total processed rows    
+
+    tid = shuffle_buf[threadIdx.x].row_idx;
+    auto buf_idx = shuffle_buf[threadIdx.x].buf_idx; // pointers to row IDs of join slot
+    // -- retrieve state for shuffle if valid -- // -- save state for shuffle --
+#endif // USE_SHUFFLE
+
     if (!(true))
         return;
     uint64_t KEY_2 = 0;
     // Aggregate in hashtable
     auto buf_idx_2 = HT_2.find(KEY_2)->second;
+
+#if USE_SHUFFLE
+    reg_lineorder__lo_discount = lineorder__lo_discount[tid];
+#endif // USE_SHUFFLE
+
     auto reg_lineorder__lo_extendedprice = lineorder__lo_extendedprice[tid];
     auto reg_map0__tmp_attr1 = (reg_lineorder__lo_extendedprice) * ((DBDecimalType)(reg_lineorder__lo_discount));
     aggregate_sum(&aggr0__tmp_attr0[buf_idx_2], reg_map0__tmp_attr1);
@@ -172,7 +233,13 @@ extern "C" void control(DBI32Type *d_supplier__s_suppkey, DBStringType *d_suppli
     DBDecimalType *d_aggr0__tmp_attr0;
     cudaMalloc(&d_aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT2);
     cudaMemset(d_aggr0__tmp_attr0, 0, sizeof(DBDecimalType) * COUNT2);
-    main_3<<<std::ceil((float)lineorder_size / 128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::find), d_aggr0__tmp_attr0, d_lineorder__lo_discount, d_lineorder__lo_extendedprice, d_lineorder__lo_orderdate, d_lineorder__lo_quantity, lineorder_size);
+    unsigned int *d_temp_size;
+    cudaMalloc(&d_temp_size, sizeof(unsigned int));
+    cudaMemset(d_temp_size, 0, sizeof(unsigned int));
+    main_3<<<std::ceil((float)lineorder_size / 128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::find), d_aggr0__tmp_attr0, d_lineorder__lo_discount, d_lineorder__lo_extendedprice, d_lineorder__lo_orderdate, d_lineorder__lo_quantity, lineorder_size, d_temp_size);
+    unsigned int temp_size;
+    cudaMemcpy(&temp_size, d_temp_size, sizeof(unsigned int), cudaMemcpyDeviceToHost);
+    std::cout << "total processed elements: " << temp_size << std::endl;
     // Materialize count
     uint64_t *d_COUNT4;
     cudaMalloc(&d_COUNT4, sizeof(uint64_t));
