@@ -30,7 +30,7 @@ HT_0.insert(cuco::pair{KEY_0, buf_idx_0});
 BUF_0[buf_idx_0 * 1 + 0] = tid;
 }
 template<typename HASHTABLE_PROBE, typename HASHTABLE_INSERT>
-__global__ void count_3(uint64_t* BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_INSERT HT_2, DBI32Type* part__p_partkey, size_t part_size) {
+__global__ void count_3(uint64_t* BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_INSERT HT_2, DBI32Type* part__p_partkey, DBStringType* part__p_type, size_t part_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= part_size) return;
 uint64_t KEY_0 = 0;
@@ -42,6 +42,7 @@ HT_0.for_each(KEY_0, [&] __device__ (auto const SLOT_0) {
 
 auto const [slot_first0, slot_second0] = SLOT_0;
 if (!(true)) return;
+auto reg_part__p_type = part__p_type[tid];
 uint64_t KEY_2 = 0;
 //Create aggregation hash table
 HT_2.insert(cuco::pair{KEY_2, 1});
@@ -59,6 +60,7 @@ KEY_0 |= reg_part__p_partkey;
 HT_0.for_each(KEY_0, [&] __device__ (auto const SLOT_0) {
 auto const [slot_first0, slot_second0] = SLOT_0;
 if (!(true)) return;
+auto reg_part__p_type = part__p_type[tid];
 uint64_t KEY_2 = 0;
 //Aggregate in hashtable
 auto buf_idx_2 = HT_2.find(KEY_2)->second;
@@ -66,8 +68,7 @@ auto reg_lineitem__l_discount = lineitem__l_discount[BUF_0[slot_second0 * 1 + 0]
 auto reg_lineitem__l_extendedprice = lineitem__l_extendedprice[BUF_0[slot_second0 * 1 + 0]];
 auto reg_map0__tmp_attr3 = (reg_lineitem__l_extendedprice) * ((1.0) - (reg_lineitem__l_discount));
 aggregate_sum(&aggr0__tmp_attr2[buf_idx_2], reg_map0__tmp_attr3);
-auto reg_part__p_type = part__p_type[tid];
-auto reg_map0__tmp_attr1 = ((Like(reg_part__p_type, "PROMO%"))) ? ((reg_lineitem__l_extendedprice) * ((1.0) - (reg_lineitem__l_discount))) : (0.0);
+auto reg_map0__tmp_attr1 = ((Like(reg_part__p_type, "PROMO", "", nullptr, nullptr, 0))) ? ((reg_lineitem__l_extendedprice) * ((1.0) - (reg_lineitem__l_discount))) : (0.0);
 aggregate_sum(&aggr0__tmp_attr0[buf_idx_2], reg_map0__tmp_attr1);
 });
 }
@@ -105,7 +106,7 @@ auto d_HT_0 = cuco::experimental::static_multimap{ (int)COUNT0*2, cuco::empty_ke
 main_1<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_0, d_BUF_IDX_0, d_HT_0.ref(cuco::insert), d_lineitem__l_partkey, d_lineitem__l_shipdate, lineitem_size);
 //Create aggregation hash table
 auto d_HT_2 = cuco::static_map{ (int)1*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-count_3<<<std::ceil((float)part_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::for_each), d_HT_2.ref(cuco::insert), d_part__p_partkey, part_size);
+count_3<<<std::ceil((float)part_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::for_each), d_HT_2.ref(cuco::insert), d_part__p_partkey, d_part__p_type, part_size);
 size_t COUNT2 = d_HT_2.size();
 thrust::device_vector<int64_t> keys_2(COUNT2), vals_2(COUNT2);
 d_HT_2.retrieve_all(keys_2.begin(), vals_2.begin());

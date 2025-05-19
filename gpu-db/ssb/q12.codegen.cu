@@ -18,8 +18,8 @@ if (!(!(false))) return;
 //Materialize count
 atomicAdd((int*)COUNT0, 1);
 }
-template<typename HASHTABLE_INSERT>
-__global__ void main_1(uint64_t* BUF_0, uint64_t* BUF_IDX_0, HASHTABLE_INSERT HT_0, DBI32Type* date__d_datekey, DBI32Type* date__d_yearmonthnum, size_t date_size) {
+template<typename HASHTABLE_INSERT_PK>
+__global__ void main_1(uint64_t* BUF_0, uint64_t* BUF_IDX_0, HASHTABLE_INSERT_PK HT_0, DBI32Type* date__d_datekey, DBI32Type* date__d_yearmonthnum, size_t date_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= date_size) return;
 auto reg_date__d_yearmonthnum = date__d_yearmonthnum[tid];
@@ -37,8 +37,8 @@ auto buf_idx_0 = atomicAdd((int*)BUF_IDX_0, 1);
 HT_0.insert(cuco::pair{KEY_0, buf_idx_0});
 BUF_0[buf_idx_0 * 1 + 0] = tid;
 }
-template<typename HASHTABLE_PROBE, typename HASHTABLE_INSERT>
-__global__ void count_3(uint64_t* BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_INSERT HT_2, DBI32Type* lineorder__lo_discount, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_quantity, size_t lineorder_size) {
+template<typename HASHTABLE_PROBE_PK, typename HASHTABLE_INSERT>
+__global__ void count_3(uint64_t* BUF_0, HASHTABLE_PROBE_PK HT_0, HASHTABLE_INSERT HT_2, DBI32Type* lineorder__lo_discount, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_quantity, size_t lineorder_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineorder_size) return;
 auto reg_lineorder__lo_discount = lineorder__lo_discount[tid];
@@ -63,8 +63,8 @@ uint64_t KEY_2 = 0;
 //Create aggregation hash table
 HT_2.insert(cuco::pair{KEY_2, 1});
 }
-template<typename HASHTABLE_PROBE, typename HASHTABLE_FIND>
-__global__ void main_3(uint64_t* BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_FIND HT_2, DBDecimalType* aggr0__tmp_attr0, DBI32Type* lineorder__lo_discount, DBDecimalType* lineorder__lo_extendedprice, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_quantity, size_t lineorder_size) {
+template<typename HASHTABLE_PROBE_PK, typename HASHTABLE_FIND>
+__global__ void main_3(uint64_t* BUF_0, HASHTABLE_PROBE_PK HT_0, HASHTABLE_FIND HT_2, DBDecimalType* aggr0__tmp_attr0, DBI32Type* lineorder__lo_discount, DBDecimalType* lineorder__lo_extendedprice, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_quantity, size_t lineorder_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineorder_size) return;
 auto reg_lineorder__lo_discount = lineorder__lo_discount[tid];

@@ -59,8 +59,8 @@ auto buf_idx_4 = atomicAdd((int*)BUF_IDX_4, 1);
 HT_4.insert(cuco::pair{KEY_4, buf_idx_4});
 BUF_4[buf_idx_4 * 1 + 0] = tid;
 }
-template<typename HASHTABLE_PROBE, typename HASHTABLE_FIND>
-__global__ void main_7(uint64_t* BUF_0, uint64_t* BUF_2, uint64_t* BUF_4, HASHTABLE_PROBE HT_0, HASHTABLE_PROBE HT_2, HASHTABLE_PROBE HT_4, HASHTABLE_FIND HT_6, DBI32Type* KEY_6date__d_year, DBI16Type* KEY_6part__p_brand1_encoded, int* SLOT_COUNT_6, DBDecimalType* aggr0__tmp_attr0, DBI32Type* date__d_year, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_partkey, DBDecimalType* lineorder__lo_revenue, DBI32Type* lineorder__lo_suppkey, size_t lineorder_size, DBI16Type* part__p_brand1_encoded) {
+template<typename HASHTABLE_PROBE_PK, typename HASHTABLE_FIND>
+__global__ void main_7(uint64_t* BUF_0, uint64_t* BUF_2, uint64_t* BUF_4, HASHTABLE_PROBE_PK HT_0, HASHTABLE_PROBE_PK HT_2, HASHTABLE_PROBE_PK HT_4, HASHTABLE_FIND HT_6, DBI32Type* KEY_6date__d_year, DBI16Type* KEY_6part__p_brand1_encoded, int* SLOT_COUNT_6, DBDecimalType* aggr0__tmp_attr0, DBI32Type* date__d_year, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_partkey, DBDecimalType* lineorder__lo_revenue, DBI32Type* lineorder__lo_suppkey, size_t lineorder_size, DBI16Type* part__p_brand1_encoded) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineorder_size) return;
 if (!(!(false))) return;
@@ -150,8 +150,8 @@ cudaMalloc(&d_BUF_4, sizeof(uint64_t) * COUNT4 * 1);
 auto d_HT_4 = cuco::static_map{ (int)COUNT4*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 main_5<<<std::ceil((float)date_size/128.), 128>>>(d_BUF_4, d_BUF_IDX_4, d_HT_4.ref(cuco::insert), d_date__d_datekey, date_size);
 cudaFree(d_BUF_IDX_4);
-size_t COUNT6 = 391755;
-auto d_HT_6 = cuco::static_map{ (int)391755*2, cuco::empty_key{(int64_t)-1},         cuco::empty_value{(int64_t)-1},         thrust::equal_to<int64_t>{},         cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+size_t COUNT6 = 52974;
+auto d_HT_6 = cuco::static_map{ (int)52974*2, cuco::empty_key{(int64_t)-1},         cuco::empty_value{(int64_t)-1},         thrust::equal_to<int64_t>{},         cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 int* d_SLOT_COUNT_6;
 cudaMalloc(&d_SLOT_COUNT_6, sizeof(int));
 cudaMemset(d_SLOT_COUNT_6, 0, sizeof(int));
@@ -182,12 +182,14 @@ auto MAT8part__p_brand1_encoded = (DBI16Type*)malloc(sizeof(DBI16Type) * COUNT8)
 DBI16Type* d_MAT8part__p_brand1_encoded;
 cudaMalloc(&d_MAT8part__p_brand1_encoded, sizeof(DBI16Type) * COUNT8);
 main_9<<<std::ceil((float)COUNT6/128.), 128>>>(COUNT6, d_MAT8aggr0__tmp_attr0, d_MAT8date__d_year, d_MAT8part__p_brand1_encoded, d_MAT_IDX8, d_aggr0__tmp_attr0, d_KEY_6date__d_year, d_KEY_6part__p_brand1_encoded);
+uint64_t MATCOUNT_8 = 0;
+cudaMemcpy(&MATCOUNT_8, d_MAT_IDX8, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 cudaMemcpy(MAT8aggr0__tmp_attr0, d_MAT8aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT8, cudaMemcpyDeviceToHost);
 cudaMemcpy(MAT8date__d_year, d_MAT8date__d_year, sizeof(DBI32Type) * COUNT8, cudaMemcpyDeviceToHost);
 cudaMemcpy(MAT8part__p_brand1_encoded, d_MAT8part__p_brand1_encoded, sizeof(DBI16Type) * COUNT8, cudaMemcpyDeviceToHost);
-for (auto i=0ull; i < COUNT8; i++) { std::cout << "" << MAT8aggr0__tmp_attr0[i];
-std::cout << "," << MAT8date__d_year[i];
-std::cout << "," << part__p_brand1_map[MAT8part__p_brand1_encoded[i]];
+for (auto i=0ull; i < MATCOUNT_8; i++) { std::cout << "" << MAT8aggr0__tmp_attr0[i];
+std::cout << "|" << MAT8date__d_year[i];
+std::cout << "|" << part__p_brand1_map[MAT8part__p_brand1_encoded[i]];
 std::cout << std::endl; }
 cudaFree(d_BUF_0);
 cudaFree(d_BUF_IDX_0);

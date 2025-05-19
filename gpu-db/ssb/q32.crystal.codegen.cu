@@ -755,9 +755,9 @@ cudaMemcpy(MAT8supplier__s_city_encoded, d_MAT8supplier__s_city_encoded, sizeof(
 cudaMemcpy(MAT8date__d_year, d_MAT8date__d_year, sizeof(DBI32Type) * COUNT8, cudaMemcpyDeviceToHost);
 cudaMemcpy(MAT8aggr0__tmp_attr0, d_MAT8aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT8, cudaMemcpyDeviceToHost);
 for (auto i=0ull; i < COUNT8; i++) { std::cout << "" << customer__c_city_map[MAT8customer__c_city_encoded[i]];
-std::cout << "," << supplier__s_city_map[MAT8supplier__s_city_encoded[i]];
-std::cout << "," << MAT8date__d_year[i];
-std::cout << "," << MAT8aggr0__tmp_attr0[i];
+std::cout << "|" << supplier__s_city_map[MAT8supplier__s_city_encoded[i]];
+std::cout << "|" << MAT8date__d_year[i];
+std::cout << "|" << MAT8aggr0__tmp_attr0[i];
 std::cout << std::endl; }
 cudaFree(d_BUF_0);
 cudaFree(d_BUF_IDX_0);

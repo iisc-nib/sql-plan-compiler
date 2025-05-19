@@ -12,8 +12,8 @@ if (tid >= orders_size) return;
 //Materialize count
 atomicAdd((int*)COUNT0, 1);
 }
-template<typename HASHTABLE_INSERT>
-__global__ void main_1(uint64_t* BUF_0, uint64_t* BUF_IDX_0, HASHTABLE_INSERT HT_0, DBI32Type* orders__o_orderkey, size_t orders_size) {
+template<typename HASHTABLE_INSERT_PK>
+__global__ void main_1(uint64_t* BUF_0, uint64_t* BUF_IDX_0, HASHTABLE_INSERT_PK HT_0, DBI32Type* orders__o_orderkey, size_t orders_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= orders_size) return;
 uint64_t KEY_0 = 0;
@@ -25,8 +25,8 @@ auto buf_idx_0 = atomicAdd((int*)BUF_IDX_0, 1);
 HT_0.insert(cuco::pair{KEY_0, buf_idx_0});
 BUF_0[buf_idx_0 * 1 + 0] = tid;
 }
-template<typename HASHTABLE_PROBE, typename HASHTABLE_INSERT>
-__global__ void count_3(uint64_t* BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_INSERT HT_2, DBDateType* lineitem__l_commitdate, DBI32Type* lineitem__l_orderkey, DBDateType* lineitem__l_receiptdate, DBDateType* lineitem__l_shipdate, DBStringType* lineitem__l_shipmode, DBI16Type* lineitem__l_shipmode_encoded, size_t lineitem_size) {
+template<typename HASHTABLE_PROBE_PK, typename HASHTABLE_INSERT>
+__global__ void count_3(uint64_t* BUF_0, HASHTABLE_PROBE_PK HT_0, HASHTABLE_INSERT HT_2, DBDateType* lineitem__l_commitdate, DBI32Type* lineitem__l_orderkey, DBDateType* lineitem__l_receiptdate, DBDateType* lineitem__l_shipdate, DBStringType* lineitem__l_shipmode, DBI16Type* lineitem__l_shipmode_encoded, size_t lineitem_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineitem_size) return;
 auto reg_lineitem__l_receiptdate = lineitem__l_receiptdate[tid];
@@ -42,9 +42,8 @@ auto reg_lineitem__l_orderkey = lineitem__l_orderkey[tid];
 
 KEY_0 |= reg_lineitem__l_orderkey;
 //Probe Hash table
-HT_0.for_each(KEY_0, [&] __device__ (auto const SLOT_0) {
-
-auto const [slot_first0, slot_second0] = SLOT_0;
+auto SLOT_0 = HT_0.find(KEY_0);
+if (SLOT_0 == HT_0.end()) return;
 if (!(true)) return;
 uint64_t KEY_2 = 0;
 auto reg_lineitem__l_shipmode_encoded = lineitem__l_shipmode_encoded[tid];
@@ -52,10 +51,9 @@ auto reg_lineitem__l_shipmode_encoded = lineitem__l_shipmode_encoded[tid];
 KEY_2 |= reg_lineitem__l_shipmode_encoded;
 //Create aggregation hash table
 HT_2.insert(cuco::pair{KEY_2, 1});
-});
 }
-template<typename HASHTABLE_PROBE, typename HASHTABLE_FIND>
-__global__ void main_3(uint64_t* BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_FIND HT_2, DBI16Type* KEY_2lineitem__l_shipmode_encoded, DBI32Type* aggr0__tmp_attr0, DBI32Type* aggr0__tmp_attr2, DBDateType* lineitem__l_commitdate, DBI32Type* lineitem__l_orderkey, DBDateType* lineitem__l_receiptdate, DBDateType* lineitem__l_shipdate, DBStringType* lineitem__l_shipmode, DBI16Type* lineitem__l_shipmode_encoded, size_t lineitem_size, DBStringType* orders__o_orderpriority) {
+template<typename HASHTABLE_PROBE_PK, typename HASHTABLE_FIND>
+__global__ void main_3(uint64_t* BUF_0, HASHTABLE_PROBE_PK HT_0, HASHTABLE_FIND HT_2, DBI16Type* KEY_2lineitem__l_shipmode_encoded, DBI32Type* aggr0__tmp_attr0, DBI32Type* aggr0__tmp_attr2, DBDateType* lineitem__l_commitdate, DBI32Type* lineitem__l_orderkey, DBDateType* lineitem__l_receiptdate, DBDateType* lineitem__l_shipdate, DBStringType* lineitem__l_shipmode, DBI16Type* lineitem__l_shipmode_encoded, size_t lineitem_size, DBStringType* orders__o_orderpriority) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineitem_size) return;
 auto reg_lineitem__l_receiptdate = lineitem__l_receiptdate[tid];
@@ -71,8 +69,8 @@ auto reg_lineitem__l_orderkey = lineitem__l_orderkey[tid];
 
 KEY_0 |= reg_lineitem__l_orderkey;
 //Probe Hash table
-HT_0.for_each(KEY_0, [&] __device__ (auto const SLOT_0) {
-auto const [slot_first0, slot_second0] = SLOT_0;
+auto SLOT_0 = HT_0.find(KEY_0);
+if (SLOT_0 == HT_0.end()) return;
 if (!(true)) return;
 uint64_t KEY_2 = 0;
 auto reg_lineitem__l_shipmode_encoded = lineitem__l_shipmode_encoded[tid];
@@ -80,13 +78,12 @@ auto reg_lineitem__l_shipmode_encoded = lineitem__l_shipmode_encoded[tid];
 KEY_2 |= reg_lineitem__l_shipmode_encoded;
 //Aggregate in hashtable
 auto buf_idx_2 = HT_2.find(KEY_2)->second;
-auto reg_orders__o_orderpriority = orders__o_orderpriority[BUF_0[slot_second0 * 1 + 0]];
+auto reg_orders__o_orderpriority = orders__o_orderpriority[BUF_0[SLOT_0->second * 1 + 0]];
 auto reg_map0__tmp_attr3 = (((evaluatePredicate(reg_orders__o_orderpriority, "1-URGENT", Predicate::neq)) && (evaluatePredicate(reg_orders__o_orderpriority, "2-HIGH", Predicate::neq))));
 aggregate_sum(&aggr0__tmp_attr2[buf_idx_2], reg_map0__tmp_attr3);
 auto reg_map0__tmp_attr1 = (((evaluatePredicate(reg_orders__o_orderpriority, "1-URGENT", Predicate::eq)) || (evaluatePredicate(reg_orders__o_orderpriority, "2-HIGH", Predicate::eq))));
 aggregate_sum(&aggr0__tmp_attr0[buf_idx_2], reg_map0__tmp_attr1);
 KEY_2lineitem__l_shipmode_encoded[buf_idx_2] = reg_lineitem__l_shipmode_encoded;
-});
 }
 __global__ void count_5(size_t COUNT2, uint64_t* COUNT4) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -120,11 +117,11 @@ cudaMalloc(&d_BUF_IDX_0, sizeof(uint64_t));
 cudaMemset(d_BUF_IDX_0, 0, sizeof(uint64_t));
 uint64_t* d_BUF_0;
 cudaMalloc(&d_BUF_0, sizeof(uint64_t) * COUNT0 * 1);
-auto d_HT_0 = cuco::experimental::static_multimap{ (int)COUNT0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+auto d_HT_0 = cuco::static_map{ (int)COUNT0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 main_1<<<std::ceil((float)orders_size/128.), 128>>>(d_BUF_0, d_BUF_IDX_0, d_HT_0.ref(cuco::insert), d_orders__o_orderkey, orders_size);
 //Create aggregation hash table
 auto d_HT_2 = cuco::static_map{ (int)17582*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-count_3<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::for_each), d_HT_2.ref(cuco::insert), d_lineitem__l_commitdate, d_lineitem__l_orderkey, d_lineitem__l_receiptdate, d_lineitem__l_shipdate, d_lineitem__l_shipmode, d_lineitem__l_shipmode_encoded, lineitem_size);
+count_3<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::insert), d_lineitem__l_commitdate, d_lineitem__l_orderkey, d_lineitem__l_receiptdate, d_lineitem__l_shipdate, d_lineitem__l_shipmode, d_lineitem__l_shipmode_encoded, lineitem_size);
 size_t COUNT2 = d_HT_2.size();
 thrust::device_vector<int64_t> keys_2(COUNT2), vals_2(COUNT2);
 d_HT_2.retrieve_all(keys_2.begin(), vals_2.begin());
@@ -141,7 +138,7 @@ cudaMemset(d_aggr0__tmp_attr0, 0, sizeof(DBI32Type) * COUNT2);
 DBI16Type* d_KEY_2lineitem__l_shipmode_encoded;
 cudaMalloc(&d_KEY_2lineitem__l_shipmode_encoded, sizeof(DBI16Type) * COUNT2);
 cudaMemset(d_KEY_2lineitem__l_shipmode_encoded, 0, sizeof(DBI16Type) * COUNT2);
-main_3<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::for_each), d_HT_2.ref(cuco::find), d_KEY_2lineitem__l_shipmode_encoded, d_aggr0__tmp_attr0, d_aggr0__tmp_attr2, d_lineitem__l_commitdate, d_lineitem__l_orderkey, d_lineitem__l_receiptdate, d_lineitem__l_shipdate, d_lineitem__l_shipmode, d_lineitem__l_shipmode_encoded, lineitem_size, d_orders__o_orderpriority);
+main_3<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::find), d_KEY_2lineitem__l_shipmode_encoded, d_aggr0__tmp_attr0, d_aggr0__tmp_attr2, d_lineitem__l_commitdate, d_lineitem__l_orderkey, d_lineitem__l_receiptdate, d_lineitem__l_shipdate, d_lineitem__l_shipmode, d_lineitem__l_shipmode_encoded, lineitem_size, d_orders__o_orderpriority);
 //Materialize count
 uint64_t* d_COUNT4;
 cudaMalloc(&d_COUNT4, sizeof(uint64_t));

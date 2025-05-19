@@ -860,8 +860,8 @@ cudaMemcpy(MAT10date__d_year, d_MAT10date__d_year, sizeof(DBI32Type) * COUNT10, 
 cudaMemcpy(MAT10customer__c_nation_encoded, d_MAT10customer__c_nation_encoded, sizeof(DBI16Type) * COUNT10, cudaMemcpyDeviceToHost);
 cudaMemcpy(MAT10aggr0__tmp_attr0, d_MAT10aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT10, cudaMemcpyDeviceToHost);
 for (auto i=0ull; i < COUNT10; i++) { std::cout << "" << MAT10date__d_year[i];
-std::cout << "," << customer__c_nation_map[MAT10customer__c_nation_encoded[i]];
-std::cout << "," << MAT10aggr0__tmp_attr0[i];
+std::cout << "|" << customer__c_nation_map[MAT10customer__c_nation_encoded[i]];
+std::cout << "|" << MAT10aggr0__tmp_attr0[i];
 std::cout << std::endl; }
 cudaFree(d_BUF_0);
 cudaFree(d_BUF_IDX_0);

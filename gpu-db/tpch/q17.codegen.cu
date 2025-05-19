@@ -16,8 +16,8 @@ if (!(evaluatePredicate(reg_part__p_brand, "Brand#23", Predicate::eq))) return;
 //Materialize count
 atomicAdd((int*)COUNT0, 1);
 }
-template<typename HASHTABLE_INSERT>
-__global__ void main_1(uint64_t* BUF_0, uint64_t* BUF_IDX_0, HASHTABLE_INSERT HT_0, DBStringType* part__p_brand, DBStringType* part__p_container, DBI32Type* part__p_partkey, size_t part_size) {
+template<typename HASHTABLE_INSERT_PK>
+__global__ void main_1(uint64_t* BUF_0, uint64_t* BUF_IDX_0, HASHTABLE_INSERT_PK HT_0, DBStringType* part__p_brand, DBStringType* part__p_container, DBI32Type* part__p_partkey, size_t part_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= part_size) return;
 auto reg_part__p_container = part__p_container[tid];
@@ -33,8 +33,8 @@ auto buf_idx_0 = atomicAdd((int*)BUF_IDX_0, 1);
 HT_0.insert(cuco::pair{KEY_0, buf_idx_0});
 BUF_0[buf_idx_0 * 1 + 0] = tid;
 }
-template<typename HASHTABLE_PROBE, typename HASHTABLE_INSERT>
-__global__ void count_3(uint64_t* BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_INSERT HT_2, size_t lineitem_size, DBI32Type* lineitem_u_1__l_partkey) {
+template<typename HASHTABLE_PROBE_PK, typename HASHTABLE_INSERT>
+__global__ void count_3(uint64_t* BUF_0, HASHTABLE_PROBE_PK HT_0, HASHTABLE_INSERT HT_2, size_t lineitem_size, DBI32Type* lineitem_u_1__l_partkey) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineitem_size) return;
 uint64_t KEY_0 = 0;
@@ -42,19 +42,17 @@ auto reg_lineitem_u_1__l_partkey = lineitem_u_1__l_partkey[tid];
 
 KEY_0 |= reg_lineitem_u_1__l_partkey;
 //Probe Hash table
-HT_0.for_each(KEY_0, [&] __device__ (auto const SLOT_0) {
-
-auto const [slot_first0, slot_second0] = SLOT_0;
+auto SLOT_0 = HT_0.find(KEY_0);
+if (SLOT_0 == HT_0.end()) return;
 if (!(true)) return;
 uint64_t KEY_2 = 0;
 
 KEY_2 |= reg_lineitem_u_1__l_partkey;
 //Create aggregation hash table
 HT_2.insert(cuco::pair{KEY_2, 1});
-});
 }
-template<typename HASHTABLE_PROBE, typename HASHTABLE_FIND>
-__global__ void main_3(uint64_t* BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_FIND HT_2, DBI32Type* KEY_2lineitem_u_1__l_partkey, DBDecimalType* aggr_rw__rw0, DBI64Type* aggr_rw__rw1, size_t lineitem_size, DBI32Type* lineitem_u_1__l_partkey, DBDecimalType* lineitem_u_1__l_quantity, DBI32Type* moved_aggr__p_partkey, DBI32Type* part__p_partkey) {
+template<typename HASHTABLE_PROBE_PK, typename HASHTABLE_FIND>
+__global__ void main_3(uint64_t* BUF_0, HASHTABLE_PROBE_PK HT_0, HASHTABLE_FIND HT_2, DBI32Type* KEY_2lineitem_u_1__l_partkey, DBDecimalType* aggr_rw__rw0, DBI64Type* aggr_rw__rw1, size_t lineitem_size, DBI32Type* lineitem_u_1__l_partkey, DBDecimalType* lineitem_u_1__l_quantity, DBI32Type* moved_aggr__p_partkey, DBI32Type* part__p_partkey) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineitem_size) return;
 uint64_t KEY_0 = 0;
@@ -62,8 +60,8 @@ auto reg_lineitem_u_1__l_partkey = lineitem_u_1__l_partkey[tid];
 
 KEY_0 |= reg_lineitem_u_1__l_partkey;
 //Probe Hash table
-HT_0.for_each(KEY_0, [&] __device__ (auto const SLOT_0) {
-auto const [slot_first0, slot_second0] = SLOT_0;
+auto SLOT_0 = HT_0.find(KEY_0);
+if (SLOT_0 == HT_0.end()) return;
 if (!(true)) return;
 uint64_t KEY_2 = 0;
 
@@ -73,10 +71,9 @@ auto buf_idx_2 = HT_2.find(KEY_2)->second;
 auto reg_lineitem_u_1__l_quantity = lineitem_u_1__l_quantity[tid];
 aggregate_sum(&aggr_rw__rw0[buf_idx_2], reg_lineitem_u_1__l_quantity);
 aggregate_sum(&aggr_rw__rw1[buf_idx_2], 1);
-auto reg_part__p_partkey = part__p_partkey[BUF_0[slot_second0 * 1 + 0]];
+auto reg_part__p_partkey = part__p_partkey[BUF_0[SLOT_0->second * 1 + 0]];
 aggregate_any(&moved_aggr__p_partkey[buf_idx_2], reg_part__p_partkey);
 KEY_2lineitem_u_1__l_partkey[buf_idx_2] = reg_lineitem_u_1__l_partkey;
-});
 }
 __global__ void count_5(size_t COUNT2, uint64_t* COUNT4, DBI32Type* moved_aggr__p_partkey) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -85,8 +82,8 @@ if (!(!(false))) return;
 //Materialize count
 atomicAdd((int*)COUNT4, 1);
 }
-template<typename HASHTABLE_INSERT>
-__global__ void main_5(uint64_t* BUF_4, uint64_t* BUF_IDX_4, size_t COUNT2, HASHTABLE_INSERT HT_4, DBI32Type* moved_aggr__p_partkey) {
+template<typename HASHTABLE_INSERT_PK>
+__global__ void main_5(uint64_t* BUF_4, uint64_t* BUF_IDX_4, size_t COUNT2, HASHTABLE_INSERT_PK HT_4, DBI32Type* moved_aggr__p_partkey) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= COUNT2) return;
 if (!(!(false))) return;
@@ -99,8 +96,8 @@ auto buf_idx_4 = atomicAdd((int*)BUF_IDX_4, 1);
 HT_4.insert(cuco::pair{KEY_4, buf_idx_4});
 BUF_4[buf_idx_4 * 1 + 0] = tid;
 }
-template<typename HASHTABLE_PROBE, typename HASHTABLE_INSERT>
-__global__ void count_7(uint64_t* BUF_4, HASHTABLE_PROBE HT_4, HASHTABLE_INSERT HT_6, DBDecimalType* aggr_rw__rw0, DBI64Type* aggr_rw__rw1, DBI32Type* lineitem__l_partkey, DBDecimalType* lineitem__l_quantity, size_t lineitem_size) {
+template<typename HASHTABLE_PROBE_PK, typename HASHTABLE_INSERT>
+__global__ void count_7(uint64_t* BUF_4, HASHTABLE_PROBE_PK HT_4, HASHTABLE_INSERT HT_6, DBDecimalType* aggr_rw__rw0, DBI64Type* aggr_rw__rw1, DBI32Type* lineitem__l_partkey, DBDecimalType* lineitem__l_quantity, size_t lineitem_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineitem_size) return;
 uint64_t KEY_4 = 0;
@@ -108,22 +105,20 @@ auto reg_lineitem__l_partkey = lineitem__l_partkey[tid];
 
 KEY_4 |= reg_lineitem__l_partkey;
 //Probe Hash table
-HT_4.for_each(KEY_4, [&] __device__ (auto const SLOT_4) {
-
-auto const [slot_first4, slot_second4] = SLOT_4;
+auto SLOT_4 = HT_4.find(KEY_4);
+if (SLOT_4 == HT_4.end()) return;
 auto reg_lineitem__l_quantity = lineitem__l_quantity[tid];
-auto reg_aggr_rw__rw1 = aggr_rw__rw1[BUF_4[slot_second4 * 1 + 0]];
-auto reg_aggr_rw__rw0 = aggr_rw__rw0[BUF_4[slot_second4 * 1 + 0]];
+auto reg_aggr_rw__rw1 = aggr_rw__rw1[BUF_4[SLOT_4->second * 1 + 0]];
+auto reg_aggr_rw__rw0 = aggr_rw__rw0[BUF_4[SLOT_4->second * 1 + 0]];
 auto reg_aggr0__tmp_attr0 = (reg_aggr_rw__rw0) / ((DBDecimalType)(reg_aggr_rw__rw1));
 auto reg_map0__tmp_attr1 = (0.2) * (reg_aggr0__tmp_attr0);
 if (!((evaluatePredicate(((DBDecimalType)reg_lineitem__l_quantity), reg_map0__tmp_attr1, Predicate::lt)) && (true))) return;
 uint64_t KEY_6 = 0;
 //Create aggregation hash table
 HT_6.insert(cuco::pair{KEY_6, 1});
-});
 }
-template<typename HASHTABLE_PROBE, typename HASHTABLE_FIND>
-__global__ void main_7(uint64_t* BUF_4, HASHTABLE_PROBE HT_4, HASHTABLE_FIND HT_6, DBDecimalType* aggr1__tmp_attr2, DBDecimalType* aggr_rw__rw0, DBI64Type* aggr_rw__rw1, DBDecimalType* lineitem__l_extendedprice, DBI32Type* lineitem__l_partkey, DBDecimalType* lineitem__l_quantity, size_t lineitem_size) {
+template<typename HASHTABLE_PROBE_PK, typename HASHTABLE_FIND>
+__global__ void main_7(uint64_t* BUF_4, HASHTABLE_PROBE_PK HT_4, HASHTABLE_FIND HT_6, DBDecimalType* aggr1__tmp_attr2, DBDecimalType* aggr_rw__rw0, DBI64Type* aggr_rw__rw1, DBDecimalType* lineitem__l_extendedprice, DBI32Type* lineitem__l_partkey, DBDecimalType* lineitem__l_quantity, size_t lineitem_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineitem_size) return;
 uint64_t KEY_4 = 0;
@@ -131,11 +126,11 @@ auto reg_lineitem__l_partkey = lineitem__l_partkey[tid];
 
 KEY_4 |= reg_lineitem__l_partkey;
 //Probe Hash table
-HT_4.for_each(KEY_4, [&] __device__ (auto const SLOT_4) {
-auto const [slot_first4, slot_second4] = SLOT_4;
+auto SLOT_4 = HT_4.find(KEY_4);
+if (SLOT_4 == HT_4.end()) return;
 auto reg_lineitem__l_quantity = lineitem__l_quantity[tid];
-auto reg_aggr_rw__rw1 = aggr_rw__rw1[BUF_4[slot_second4 * 1 + 0]];
-auto reg_aggr_rw__rw0 = aggr_rw__rw0[BUF_4[slot_second4 * 1 + 0]];
+auto reg_aggr_rw__rw1 = aggr_rw__rw1[BUF_4[SLOT_4->second * 1 + 0]];
+auto reg_aggr_rw__rw0 = aggr_rw__rw0[BUF_4[SLOT_4->second * 1 + 0]];
 auto reg_aggr0__tmp_attr0 = (reg_aggr_rw__rw0) / ((DBDecimalType)(reg_aggr_rw__rw1));
 auto reg_map0__tmp_attr1 = (0.2) * (reg_aggr0__tmp_attr0);
 if (!((evaluatePredicate(((DBDecimalType)reg_lineitem__l_quantity), reg_map0__tmp_attr1, Predicate::lt)) && (true))) return;
@@ -144,7 +139,6 @@ uint64_t KEY_6 = 0;
 auto buf_idx_6 = HT_6.find(KEY_6)->second;
 auto reg_lineitem__l_extendedprice = lineitem__l_extendedprice[tid];
 aggregate_sum(&aggr1__tmp_attr2[buf_idx_6], reg_lineitem__l_extendedprice);
-});
 }
 __global__ void count_9(size_t COUNT6, uint64_t* COUNT8) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -175,11 +169,11 @@ cudaMalloc(&d_BUF_IDX_0, sizeof(uint64_t));
 cudaMemset(d_BUF_IDX_0, 0, sizeof(uint64_t));
 uint64_t* d_BUF_0;
 cudaMalloc(&d_BUF_0, sizeof(uint64_t) * COUNT0 * 1);
-auto d_HT_0 = cuco::experimental::static_multimap{ (int)COUNT0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+auto d_HT_0 = cuco::static_map{ (int)COUNT0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 main_1<<<std::ceil((float)part_size/128.), 128>>>(d_BUF_0, d_BUF_IDX_0, d_HT_0.ref(cuco::insert), d_part__p_brand, d_part__p_container, d_part__p_partkey, part_size);
 //Create aggregation hash table
 auto d_HT_2 = cuco::static_map{ (int)6001215*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-count_3<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::for_each), d_HT_2.ref(cuco::insert), lineitem_size, d_lineitem__l_partkey);
+count_3<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::insert), lineitem_size, d_lineitem__l_partkey);
 size_t COUNT2 = d_HT_2.size();
 thrust::device_vector<int64_t> keys_2(COUNT2), vals_2(COUNT2);
 d_HT_2.retrieve_all(keys_2.begin(), vals_2.begin());
@@ -199,7 +193,7 @@ cudaMemset(d_moved_aggr__p_partkey, 0, sizeof(DBI32Type) * COUNT2);
 DBI32Type* d_KEY_2lineitem_u_1__l_partkey;
 cudaMalloc(&d_KEY_2lineitem_u_1__l_partkey, sizeof(DBI32Type) * COUNT2);
 cudaMemset(d_KEY_2lineitem_u_1__l_partkey, 0, sizeof(DBI32Type) * COUNT2);
-main_3<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::for_each), d_HT_2.ref(cuco::find), d_KEY_2lineitem_u_1__l_partkey, d_aggr_rw__rw0, d_aggr_rw__rw1, lineitem_size, d_lineitem__l_partkey, d_lineitem__l_quantity, d_moved_aggr__p_partkey, d_part__p_partkey);
+main_3<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::find), d_KEY_2lineitem_u_1__l_partkey, d_aggr_rw__rw0, d_aggr_rw__rw1, lineitem_size, d_lineitem__l_partkey, d_lineitem__l_quantity, d_moved_aggr__p_partkey, d_part__p_partkey);
 //Materialize count
 uint64_t* d_COUNT4;
 cudaMalloc(&d_COUNT4, sizeof(uint64_t));
@@ -213,11 +207,11 @@ cudaMalloc(&d_BUF_IDX_4, sizeof(uint64_t));
 cudaMemset(d_BUF_IDX_4, 0, sizeof(uint64_t));
 uint64_t* d_BUF_4;
 cudaMalloc(&d_BUF_4, sizeof(uint64_t) * COUNT4 * 1);
-auto d_HT_4 = cuco::experimental::static_multimap{ (int)COUNT4*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+auto d_HT_4 = cuco::static_map{ (int)COUNT4*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 main_5<<<std::ceil((float)COUNT2/128.), 128>>>(d_BUF_4, d_BUF_IDX_4, COUNT2, d_HT_4.ref(cuco::insert), d_moved_aggr__p_partkey);
 //Create aggregation hash table
 auto d_HT_6 = cuco::static_map{ (int)1*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
-count_7<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_4, d_HT_4.ref(cuco::for_each), d_HT_6.ref(cuco::insert), d_aggr_rw__rw0, d_aggr_rw__rw1, d_lineitem__l_partkey, d_lineitem__l_quantity, lineitem_size);
+count_7<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_4, d_HT_4.ref(cuco::find), d_HT_6.ref(cuco::insert), d_aggr_rw__rw0, d_aggr_rw__rw1, d_lineitem__l_partkey, d_lineitem__l_quantity, lineitem_size);
 size_t COUNT6 = d_HT_6.size();
 thrust::device_vector<int64_t> keys_6(COUNT6), vals_6(COUNT6);
 d_HT_6.retrieve_all(keys_6.begin(), vals_6.begin());
@@ -228,7 +222,7 @@ insertKeys<<<std::ceil((float)COUNT6/128.), 128>>>(raw_keys6, d_HT_6.ref(cuco::i
 DBDecimalType* d_aggr1__tmp_attr2;
 cudaMalloc(&d_aggr1__tmp_attr2, sizeof(DBDecimalType) * COUNT6);
 cudaMemset(d_aggr1__tmp_attr2, 0, sizeof(DBDecimalType) * COUNT6);
-main_7<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_4, d_HT_4.ref(cuco::for_each), d_HT_6.ref(cuco::find), d_aggr1__tmp_attr2, d_aggr_rw__rw0, d_aggr_rw__rw1, d_lineitem__l_extendedprice, d_lineitem__l_partkey, d_lineitem__l_quantity, lineitem_size);
+main_7<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_4, d_HT_4.ref(cuco::find), d_HT_6.ref(cuco::find), d_aggr1__tmp_attr2, d_aggr_rw__rw0, d_aggr_rw__rw1, d_lineitem__l_extendedprice, d_lineitem__l_partkey, d_lineitem__l_quantity, lineitem_size);
 //Materialize count
 uint64_t* d_COUNT8;
 cudaMalloc(&d_COUNT8, sizeof(uint64_t));

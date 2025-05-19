@@ -29,8 +29,8 @@ auto buf_idx_0 = atomicAdd((int*)BUF_IDX_0, 1);
 HT_0.insert(cuco::pair{KEY_0, buf_idx_0});
 BUF_0[buf_idx_0 * 1 + 0] = tid;
 }
-template<typename HASHTABLE_PROBE, typename HASHTABLE_FIND>
-__global__ void main_3(uint64_t* BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_FIND HT_2, int* SLOT_COUNT_2, DBDecimalType* aggr0__tmp_attr0, DBI32Type* lineorder__lo_discount, DBDecimalType* lineorder__lo_extendedprice, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_quantity, size_t lineorder_size) {
+template<typename HASHTABLE_PROBE_PK, typename HASHTABLE_FIND>
+__global__ void main_3(uint64_t* BUF_0, HASHTABLE_PROBE_PK HT_0, HASHTABLE_FIND HT_2, int* SLOT_COUNT_2, DBDecimalType* aggr0__tmp_attr0, DBI32Type* lineorder__lo_discount, DBDecimalType* lineorder__lo_extendedprice, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_quantity, size_t lineorder_size) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 if (tid >= lineorder_size) return;
 auto reg_lineorder__lo_discount = lineorder__lo_discount[tid];
@@ -97,8 +97,10 @@ auto MAT4aggr0__tmp_attr0 = (DBDecimalType*)malloc(sizeof(DBDecimalType) * COUNT
 DBDecimalType* d_MAT4aggr0__tmp_attr0;
 cudaMalloc(&d_MAT4aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT4);
 main_5<<<std::ceil((float)COUNT2/128.), 128>>>(COUNT2, d_MAT4aggr0__tmp_attr0, d_MAT_IDX4, d_aggr0__tmp_attr0);
+uint64_t MATCOUNT_4 = 0;
+cudaMemcpy(&MATCOUNT_4, d_MAT_IDX4, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 cudaMemcpy(MAT4aggr0__tmp_attr0, d_MAT4aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT4, cudaMemcpyDeviceToHost);
-for (auto i=0ull; i < COUNT4; i++) { std::cout << "" << MAT4aggr0__tmp_attr0[i];
+for (auto i=0ull; i < MATCOUNT_4; i++) { std::cout << "" << MAT4aggr0__tmp_attr0[i];
 std::cout << std::endl; }
 cudaFree(d_BUF_0);
 cudaFree(d_BUF_IDX_0);
