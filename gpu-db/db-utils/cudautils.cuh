@@ -67,16 +67,47 @@ __device__ void aggregate_count(int64_t* a, float v) {
   atomicAdd((int*)a, 1);
 }
 
-__device__ bool Like(DBStringType str, const char* pattern) {
-  int i = 0, j = 0; 
-  if (pattern[0]!='%')  {
-    while(str[i]!='\0' && (pattern[j]!='\0' && pattern[j]!='%')) {
-      if (str[i++] != pattern[j++]) {
-        // printf("str: %s, pattern: %s\n", str, pattern);
-        return false;
+/**
+ * pat1%pat2%pat3
+ * arguments: str, "pat1", "3tap", ["pat2"], [3], 1
+ */
+__device__ static inline bool Like(DBStringType str, const char* starts_with, const char* ends_with, const char** mid_patterns, const int* mid_pattern_sizes, int mid_count) {
+  int str_end = 0;
+  while (str[str_end] != '\0') {
+    str_end++;
+  }
+  int str_start = 0;
+  int p_idx = 0;
+  while(starts_with[p_idx] != '\0') {
+    if (str_start == str_end || str[str_start] != starts_with[p_idx]) {
+      return false;
+    }
+    str_start++;
+    p_idx++;
+  }
+  while(ends_with[p_idx] != '\0') {
+    if (str_end == str_start || str[str_end] != ends_with[p_idx]) {
+      return false;
+    }
+    str_end--;
+    p_idx++;
+  }
+  for (int i=0; i<mid_count; i++) {
+    bool match = false;
+    for (int j=str_start; j<str_end - mid_pattern_sizes[i] + 1; j++) {
+      bool found = true;
+      for (int k=0; k < mid_pattern_sizes[i]; k++) {
+        if (str[j + k] != mid_patterns[i][k]) {
+          found = false;
+        }
+      }
+      match = match || found;
+      if (found) {
+        str_start = j + mid_pattern_sizes[i];
+        break;
       }
     }
-    if (pattern[j] != '\0' && pattern[j] != '%') {
+    if (!match) {
       return false;
     }
   }
