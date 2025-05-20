@@ -141,9 +141,9 @@ if (flag) {
 }
 
 }
-#define USE_SHUFFLE 0
+#define USE_SHUFFLE 1
 template<typename HASHTABLE_PROBE, typename HASHTABLE_FIND>
-__global__ void main_7(uint64_t* BUF_0, uint64_t* BUF_2, uint64_t* BUF_4, HASHTABLE_PROBE HT_0, HASHTABLE_PROBE HT_2, HASHTABLE_PROBE HT_4, HASHTABLE_FIND HT_6, DBI32Type* KEY_6date__d_year, DBI16Type* KEY_6part__p_brand1_encoded, DBDecimalType* aggr0__tmp_attr0, DBI32Type* date__d_year, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_partkey, DBDecimalType* lineorder__lo_revenue, DBI32Type* lineorder__lo_suppkey, size_t lineorder_size, DBI16Type* part__p_brand1_encoded, unsigned int *temp_size) {
+__global__ void main_7(uint64_t* BUF_0, uint64_t* BUF_2, uint64_t* BUF_4, HASHTABLE_PROBE HT_0, HASHTABLE_PROBE HT_2, HASHTABLE_PROBE HT_4, HASHTABLE_FIND HT_6, DBI32Type* KEY_6date__d_year, DBI16Type* KEY_6part__p_brand1_encoded, DBDecimalType* aggr0__tmp_attr0, DBI32Type* date__d_year, DBI32Type* lineorder__lo_orderdate, DBI32Type* lineorder__lo_partkey, DBDecimalType* lineorder__lo_revenue, DBI32Type* lineorder__lo_suppkey, size_t lineorder_size, DBI16Type* part__p_brand1_encoded) {
 size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 #if USE_SHUFFLE
   SHUFFLE_BUFFER_INIT(128)
@@ -163,14 +163,12 @@ auto SLOT_0 = HT_0.find(KEY_0);
 #if !USE_SHUFFLE
 if (SLOT_0 == HT_0.end()) return;
 auto first_probe_buf_idx = SLOT_0->second;
-atomicAdd(temp_size, 1);
 #else
 if (SLOT_0 != HT_0.end())
     save_to_shuffle_buffer(tid, SLOT_0->second, &shuffle_buf_idx[0], shuffle_buf);
 
 __syncthreads(); // sync all the threads across the threadblock
 RETURN_IF_THREAD_BEYOND_SHUFFLE(); // we are beyond the shuffle buffer elements
-atomicAdd(temp_size, 1);
 
 // -- retrieve state for shuffle if valid --
 tid = shuffle_buf[threadIdx.x].row_idx;
@@ -293,13 +291,7 @@ cudaMemset(d_KEY_6date__d_year, 0, sizeof(DBI32Type) * COUNT6);
 DBI16Type* d_KEY_6part__p_brand1_encoded;
 cudaMalloc(&d_KEY_6part__p_brand1_encoded, sizeof(DBI16Type) * COUNT6);
 cudaMemset(d_KEY_6part__p_brand1_encoded, 0, sizeof(DBI16Type) * COUNT6);
-unsigned int *d_temp_size, temp_size;
-cudaMalloc(&d_temp_size, sizeof(unsigned int));
-cudaMemset(d_temp_size, 0, sizeof(unsigned int));
-main_7<<<std::ceil((float)lineorder_size/128.), 128>>>(d_BUF_0, d_BUF_2, d_BUF_4, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::find), d_HT_4.ref(cuco::find), d_HT_6.ref(cuco::find), d_KEY_6date__d_year, d_KEY_6part__p_brand1_encoded, d_aggr0__tmp_attr0, d_date__d_year, d_lineorder__lo_orderdate, d_lineorder__lo_partkey, d_lineorder__lo_revenue, d_lineorder__lo_suppkey, lineorder_size, d_part__p_brand1_encoded, d_temp_size);
-
-cudaMemcpy(&temp_size, d_temp_size, sizeof(unsigned int), cudaMemcpyDeviceToHost);
-std::cout << "Processing " << temp_size << " rows" << std::endl;
+main_7<<<std::ceil((float)lineorder_size/128.), 128>>>(d_BUF_0, d_BUF_2, d_BUF_4, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::find), d_HT_4.ref(cuco::find), d_HT_6.ref(cuco::find), d_KEY_6date__d_year, d_KEY_6part__p_brand1_encoded, d_aggr0__tmp_attr0, d_date__d_year, d_lineorder__lo_orderdate, d_lineorder__lo_partkey, d_lineorder__lo_revenue, d_lineorder__lo_suppkey, lineorder_size, d_part__p_brand1_encoded);
 
 //Materialize count
 uint64_t* d_COUNT8;
