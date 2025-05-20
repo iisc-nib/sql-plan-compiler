@@ -309,3 +309,28 @@ T* allocateAndTransfer(T* h_data, size_t table_size) {
   cudaMemcpy(d_data, h_data, sizeof(T)*table_size, cudaMemcpyHostToDevice);
   return d_data;
 }
+
+// --- [Start] Pyper Shuffle Constructs --- //
+
+struct shuffle_buffer_type {
+  size_t row_idx; // row_idx of the row that was being processed by this thread
+  size_t buf_idx; // value of the hash table slot. Points to tuples of row_ids for join
+};
+
+#define SHUFFLE_BUFFER_INIT(buffer_size) \
+        __shared__ unsigned int shuffle_buf_idx[1]; \
+        __shared__ shuffle_buffer_type shuffle_buf[buffer_size]; \
+        if (threadIdx.x == 0) { \
+            shuffle_buf_idx[0] = 0; \
+        } \
+        __syncthreads();
+
+__device__ void save_to_shuffle_buffer(size_t row_idx, size_t slot_buf_idx, unsigned int* shuffle_buf_idx, shuffle_buffer_type* shuffle_buf) {
+  auto old_shuffle_buf_idx = atomicAdd_block(shuffle_buf_idx, 1);
+  shuffle_buf[old_shuffle_buf_idx].row_idx = row_idx;
+  shuffle_buf[old_shuffle_buf_idx].buf_idx = slot_buf_idx;
+}
+
+#define RETURN_IF_THREAD_BEYOND_SHUFFLE() if (threadIdx.x >= shuffle_buf_idx[0]) return;
+
+// --- [End] Pyper Shuffle Constructs --- //
