@@ -6,6 +6,7 @@
 #include "cudautils.cuh"
 #include "db_types.h"
 #include "dbruntime.h"
+#include <chrono>
 #define ITEMS_PER_THREAD 4
 #define TILE_SIZE 512
 #define TB TILE_SIZE/ITEMS_PER_THREAD
@@ -456,6 +457,8 @@ MAT10aggr0__tmp_attr0[mat_idx10] = reg_aggr0__tmp_attr0[ITEM];
 }
 }
 extern "C" void control (DBI32Type* d_supplier__s_suppkey, DBStringType* d_supplier__s_name, DBStringType* d_supplier__s_address, DBStringType* d_supplier__s_city, DBStringType* d_supplier__s_nation, DBStringType* d_supplier__s_region, DBStringType* d_supplier__s_phone, size_t supplier_size, DBI32Type* d_part__p_partkey, DBStringType* d_part__p_name, DBStringType* d_part__p_mfgr, DBStringType* d_part__p_category, DBStringType* d_part__p_brand1, DBStringType* d_part__p_color, DBStringType* d_part__p_type, DBI32Type* d_part__p_size, DBStringType* d_part__p_container, size_t part_size, DBI32Type* d_lineorder__lo_orderkey, DBI32Type* d_lineorder__lo_linenumber, DBI32Type* d_lineorder__lo_custkey, DBI32Type* d_lineorder__lo_partkey, DBI32Type* d_lineorder__lo_suppkey, DBDateType* d_lineorder__lo_orderdate, DBDateType* d_lineorder__lo_commitdate, DBStringType* d_lineorder__lo_orderpriority, DBCharType* d_lineorder__lo_shippriority, DBI32Type* d_lineorder__lo_quantity, DBDecimalType* d_lineorder__lo_extendedprice, DBDecimalType* d_lineorder__lo_ordtotalprice, DBDecimalType* d_lineorder__lo_revenue, DBDecimalType* d_lineorder__lo_supplycost, DBI32Type* d_lineorder__lo_discount, DBI32Type* d_lineorder__lo_tax, DBStringType* d_lineorder__lo_shipmode, size_t lineorder_size, DBI32Type* d_date__d_datekey, DBStringType* d_date__d_date, DBStringType* d_date__d_dayofweek, DBStringType* d_date__d_month, DBI32Type* d_date__d_year, DBI32Type* d_date__d_yearmonthnum, DBStringType* d_date__d_yearmonth, DBI32Type* d_date__d_daynuminweek, DBI32Type* d_date__d_daynuminmonth, DBI32Type* d_date__d_daynuminyear, DBI32Type* d_date__d_monthnuminyear, DBI32Type* d_date__d_weeknuminyear, DBStringType* d_date__d_sellingseason, DBI32Type* d_date__d_lastdayinweekfl, DBI32Type* d_date__d_lastdayinmonthfl, DBI32Type* d_date__d_holidayfl, DBI32Type* d_date__d_weekdayfl, size_t date_size, DBI32Type* d_customer__c_custkey, DBStringType* d_customer__c_name, DBStringType* d_customer__c_address, DBStringType* d_customer__c_city, DBStringType* d_customer__c_nation, DBStringType* d_customer__c_region, DBStringType* d_customer__c_phone, DBStringType* d_customer__c_mktsegment, size_t customer_size, DBI32Type* d_region__r_regionkey, DBStringType* d_region__r_name, DBStringType* d_region__r_comment, size_t region_size, DBI16Type* d_part__p_brand1_encoded, DBI16Type* d_supplier__s_nation_encoded, DBI16Type* d_customer__c_city_encoded, DBI16Type* d_supplier__s_city_encoded, DBI16Type* d_customer__c_nation_encoded, DBI16Type* d_part__p_category_encoded, std::unordered_map<DBI16Type, std::string>& part__p_brand1_map, std::unordered_map<DBI16Type, std::string>& supplier__s_nation_map, std::unordered_map<DBI16Type, std::string>& customer__c_city_map, std::unordered_map<DBI16Type, std::string>& supplier__s_city_map, std::unordered_map<DBI16Type, std::string>& customer__c_nation_map, std::unordered_map<DBI16Type, std::string>& part__p_category_map) {
+size_t used_mem = usedGpuMem();
+auto start = std::chrono::high_resolution_clock::now();
 size_t COUNT0 = supplier_size;
 // Insert hash table control;
 uint64_t* d_BUF_IDX_0;
@@ -536,11 +539,18 @@ cudaMemcpy(MAT10date__d_year, d_MAT10date__d_year, sizeof(DBI32Type) * COUNT10, 
 cudaMemcpy(MAT10supplier__s_nation_encoded, d_MAT10supplier__s_nation_encoded, sizeof(DBI16Type) * COUNT10, cudaMemcpyDeviceToHost);
 cudaMemcpy(MAT10part__p_category_encoded, d_MAT10part__p_category_encoded, sizeof(DBI16Type) * COUNT10, cudaMemcpyDeviceToHost);
 cudaMemcpy(MAT10aggr0__tmp_attr0, d_MAT10aggr0__tmp_attr0, sizeof(DBDecimalType) * COUNT10, cudaMemcpyDeviceToHost);
+auto end = std::chrono::high_resolution_clock::now();
+auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+std::clog << "Query execution time: " << duration.count() / 1000. << " milliseconds." << std::endl;
+
 for (auto i=0ull; i < MATCOUNT_10; i++) { std::cout << "" << MAT10date__d_year[i];
 std::cout << "|" << supplier__s_nation_map[MAT10supplier__s_nation_encoded[i]];
 std::cout << "|" << part__p_category_map[MAT10part__p_category_encoded[i]];
 std::cout << "|" << MAT10aggr0__tmp_attr0[i];
 std::cout << std::endl; }
+std::clog << "Used memory: " << used_mem / (1024 * 1024) << " MB" << std::endl; 
+size_t aux_mem = usedGpuMem() - used_mem;
+std::clog << "Auxiliary memory: " << aux_mem / (1024) << " KB" << std::endl;
 cudaFree(d_BUF_0);
 cudaFree(d_BUF_IDX_0);
 cudaFree(d_BUF_2);

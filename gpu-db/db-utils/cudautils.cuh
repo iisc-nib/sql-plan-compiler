@@ -39,6 +39,23 @@ public:
   }
 };
 
+extern "C" size_t totalGpuMem() {
+  size_t total_t;
+  cudaMemGetInfo(nullptr, &total_t);
+  return total_t;
+}
+
+extern "C" size_t freeGpuMem() {
+  size_t free_t;
+  cudaMemGetInfo(&free_t, nullptr);
+  return free_t;
+}
+
+extern "C" size_t usedGpuMem() {
+  size_t free_t, total_t;
+  cudaMemGetInfo(&free_t, &total_t);
+  return total_t - free_t;
+}
 __device__ void aggregate_sum(int64_t* a, int64_t v) {
   atomicAdd((int*)a, (int)v);
 }
