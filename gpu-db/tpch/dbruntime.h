@@ -113,6 +113,8 @@ extern "C" void checkGpuMem()
             free_t, free_m, total_t, total_m, used_m);
 }
 
+
+
 void initTpchDb(std::string dbDir)
 {
 
