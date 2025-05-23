@@ -83,7 +83,7 @@ __global__ void count_3(uint64_t *BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_INSERT 
     if (flag)
         HT_2.insert(cuco::pair{KEY_2, 1});
 }
-#define USE_SHUFFLE 0
+#define USE_SHUFFLE 1
 template <typename HASHTABLE_PROBE, typename HASHTABLE_FIND>
 __global__ void main_3(uint64_t *BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_FIND HT_2, DBDecimalType *aggr0__tmp_attr0, DBI32Type *lineorder__lo_discount, DBDecimalType *lineorder__lo_extendedprice, DBI32Type *lineorder__lo_orderdate, DBI32Type *lineorder__lo_quantity, size_t lineorder_size, unsigned int* temp_size)
 {
@@ -111,7 +111,7 @@ __global__ void main_3(uint64_t *BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_FIND HT_
           validElement = true;
 #else
         if (SLOT_0 != HT_0.end())
-          save_to_shuffle_buffer(tid, SLOT_0->second, &shuffle_buf_idx[0], shuffle_buf);
+          save_to_shuffle_buffer(tid, SLOT_0->second, &shuffle_buf_idx, &shuffle_buf[0]);
 #endif // !USE_SHUFFLE
 		} // lo_quantity < 25
 	} // lo_discount >= 1 && lo_discount <= 3
@@ -120,10 +120,8 @@ __global__ void main_3(uint64_t *BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_FIND HT_
 	__syncthreads(); // sync all the threads across the threadblock
 	RETURN_IF_THREAD_BEYOND_SHUFFLE(); // we are beyond the shuffle buffer elements
 
-	// -- retrieve state for shuffle if valid --
-	tid = shuffle_buf[threadIdx.x].row_idx;
-	auto buf_idx = shuffle_buf[threadIdx.x].buf_idx; // pointers to row IDs of join slot
-	// -- retrieve state for shuffle if valid --
+    idx_type_t buf_idx = 0;
+    retrieve_from_shuffle_buffer(threadIdx.x, &tid, &buf_idx, &shuffle_buf[0]);
 	
 	reg_lineorder__lo_discount = lineorder__lo_discount[tid];
 #else

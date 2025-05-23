@@ -165,15 +165,13 @@ if (SLOT_0 == HT_0.end()) return;
 auto first_probe_buf_idx = SLOT_0->second;
 #else
 if (SLOT_0 != HT_0.end())
-    save_to_shuffle_buffer(tid, SLOT_0->second, &shuffle_buf_idx[0], shuffle_buf);
+    save_to_shuffle_buffer(tid, SLOT_0->second, &shuffle_buf_idx, &shuffle_buf);
 
 __syncthreads(); // sync all the threads across the threadblock
 RETURN_IF_THREAD_BEYOND_SHUFFLE(); // we are beyond the shuffle buffer elements
 
-// -- retrieve state for shuffle if valid --
-tid = shuffle_buf[threadIdx.x].row_idx;
-auto first_probe_buf_idx = shuffle_buf[threadIdx.x].buf_idx; // pointers to row IDs of join slot
-// -- retrieve state for shuffle if valid --
+idx_type_t first_probe_buf_idx = 0;
+retrieve_from_shuffle_buffer(threadIdx.x, (idx_type_t*)&tid, (idx_type_t*)&first_probe_buf_idx, &shuffle_buf);
 
 #endif // USE_SHUFFLE
 
@@ -292,6 +290,7 @@ DBI16Type* d_KEY_6part__p_brand1_encoded;
 cudaMalloc(&d_KEY_6part__p_brand1_encoded, sizeof(DBI16Type) * COUNT6);
 cudaMemset(d_KEY_6part__p_brand1_encoded, 0, sizeof(DBI16Type) * COUNT6);
 main_7<<<std::ceil((float)lineorder_size/128.), 128>>>(d_BUF_0, d_BUF_2, d_BUF_4, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::find), d_HT_4.ref(cuco::find), d_HT_6.ref(cuco::find), d_KEY_6date__d_year, d_KEY_6part__p_brand1_encoded, d_aggr0__tmp_attr0, d_date__d_year, d_lineorder__lo_orderdate, d_lineorder__lo_partkey, d_lineorder__lo_revenue, d_lineorder__lo_suppkey, lineorder_size, d_part__p_brand1_encoded);
+
 
 //Materialize count
 uint64_t* d_COUNT8;
