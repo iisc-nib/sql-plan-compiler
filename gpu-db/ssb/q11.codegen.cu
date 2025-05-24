@@ -121,7 +121,7 @@ __global__ void main_3(uint64_t *BUF_0, HASHTABLE_PROBE HT_0, HASHTABLE_FIND HT_
 	RETURN_IF_THREAD_BEYOND_SHUFFLE(); // we are beyond the shuffle buffer elements
 
     idx_type_t buf_idx = 0;
-    retrieve_from_shuffle_buffer(threadIdx.x, &tid, &buf_idx, &shuffle_buf[0]);
+    retrieve_from_shuffle_buffer(threadIdx.x, (idx_type_t*)&tid, (idx_type_t*)&buf_idx, &shuffle_buf[0]);
 	
 	reg_lineorder__lo_discount = lineorder__lo_discount[tid];
 #else
