@@ -292,6 +292,10 @@ void initSsbDb(std::string dbDir)
     d_part__p_partkey = allocateAndTransfer<DBI32Type>(p_partkey, part_size);
     free(p_partkey);
 
+    DBI32Type *p_size = readIntegerColumn<DBI32Type, 1>(part_table, "p_size");
+    d_part__p_size = allocateAndTransfer<DBI32Type>(p_size, part_size);
+    free(p_size);
+
     DBStringEncodedType *p_brand1 = readStringEncodedColumn<1>(part_table, "p_brand1");
     d_part__p_brand1_encoded = allocateAndTransfer<DBI16Type>(p_brand1->buffer, part_size);
     part__p_brand1_map = p_brand1->rev_dict;
