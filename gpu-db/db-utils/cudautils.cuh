@@ -39,6 +39,23 @@ public:
   }
 };
 
+extern "C" size_t totalGpuMem() {
+  size_t total_t;
+  cudaMemGetInfo(nullptr, &total_t);
+  return total_t;
+}
+
+extern "C" size_t freeGpuMem() {
+  size_t free_t;
+  cudaMemGetInfo(&free_t, nullptr);
+  return free_t;
+}
+
+extern "C" size_t usedGpuMem() {
+  size_t free_t, total_t;
+  cudaMemGetInfo(&free_t, &total_t);
+  return total_t - free_t;
+}
 __device__ void aggregate_sum(int64_t* a, int64_t v) {
   atomicAdd((int*)a, (int)v);
 }
@@ -60,8 +77,58 @@ __device__ void aggregate_any(char** a, char* v) {
 __device__ void aggregate_any(double* a, double v) {
   *a = v;
 }
+__device__ void aggregate_any(DBI16Type* a, DBI16Type v) {
+  *a = v;
+}
 __device__ void aggregate_count(int64_t* a, float v) {
   atomicAdd((int*)a, 1);
+}
+
+/**
+ * pat1%pat2%pat3
+ * arguments: str, "pat1", "3tap", ["pat2"], [3], 1
+ */
+__device__ static inline bool Like(DBStringType str, const char* starts_with, const char* ends_with, const char** mid_patterns, const int* mid_pattern_sizes, int mid_count) {
+  int str_end = 0;
+  while (str[str_end] != '\0') {
+    str_end++;
+  }
+  int str_start = 0;
+  int p_idx = 0;
+  while(starts_with[p_idx] != '\0') {
+    if (str_start == str_end || str[str_start] != starts_with[p_idx]) {
+      return false;
+    }
+    str_start++;
+    p_idx++;
+  }
+  while(ends_with[p_idx] != '\0') {
+    if (str_end == str_start || str[str_end] != ends_with[p_idx]) {
+      return false;
+    }
+    str_end--;
+    p_idx++;
+  }
+  for (int i=0; i<mid_count; i++) {
+    bool match = false;
+    for (int j=str_start; j<str_end - mid_pattern_sizes[i] + 1; j++) {
+      bool found = true;
+      for (int k=0; k < mid_pattern_sizes[i]; k++) {
+        if (str[j + k] != mid_patterns[i][k]) {
+          found = false;
+        }
+      }
+      match = match || found;
+      if (found) {
+        str_start = j + mid_pattern_sizes[i];
+        break;
+      }
+    }
+    if (!match) {
+      return false;
+    }
+  }
+  return true;
 }
 
 template<typename HT>
@@ -112,6 +179,14 @@ __device__ static inline bool evaluatePredicate(const DBStringType str1, const D
         if (str1[i++] != str2[j++]) return false;
       }
       return str1[i] == str2[j];
+    }
+    break;
+    case Predicate::neq:
+    {
+      while(str1[i]!='\0' && str2[j]!='\0') {
+        if (str1[i++] != str2[j++]) return true;
+      }
+      return str1[i] != str2[j];
     }
     break;
     case Predicate::like:

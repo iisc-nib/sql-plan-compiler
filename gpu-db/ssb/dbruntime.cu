@@ -197,7 +197,7 @@ void runQuery(std::string libPath)
             part__p_category_map);
         auto stop = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-        std::clog << "Query execution time: " << duration.count() / 1000. << "milliseconds.\n";
+        // std::clog << "Query execution time: " << duration.count() / 1000. << "milliseconds.\n";
         dlclose(lib);
     }
 }
