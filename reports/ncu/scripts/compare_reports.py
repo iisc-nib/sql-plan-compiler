@@ -1,12 +1,12 @@
 import os
-from helper.ncu_report_helper import get_top_kernels, load_report, get_kernel_divergence, get_kernel_occupancy, get_kernel_time
+from helper.ncu_report_helper import get_top_kernels, load_report, get_kernel_divergence, get_kernel_occupancy, get_kernel_time, get_compute_throughput
 import sys
 
-attributes_list = ["occupancy"]
+attributes_list = ["gpu_time", "compute_throughput", "occupancy", "warp_divergence"]
 
 class kernel_attributes:
     def __init__(self, kernel_name:str):
-        self.kernel_name = ""
+        self.kernel_name = kernel_name
         self.attributes = {}
 
 class report_stats:
@@ -38,17 +38,31 @@ def parse_report(report_file_path, attributes_list, kernel_names=None):
         kernels = [i for i in range(report_actions.num_actions()) if report_actions.action_by_idx(i).name() in kernel_names]
 
     report_printable_name = os.path.basename(report_file_path).replace(".ncu-rep", "")
+    values = []
     for kernel_idx in kernels:
         kernel = report.range_by_idx(0).action_by_idx(kernel_idx)
-        warp_divergence = get_kernel_divergence(kernel)
-        kernel_gpu_time = get_kernel_time(kernel)
-        print(f"{(report_printable_name)}, {kernel_gpu_time}, {warp_divergence}")
+        for attribute in attributes_list:
+            if attribute == "occupancy":
+                value = get_kernel_occupancy(kernel)
+            elif attribute == "warp_divergence":
+                value = get_kernel_divergence(kernel)
+            elif attribute == "gpu_time":
+                value = get_kernel_time(kernel)
+            elif attribute == "compute_throughput":
+                value = get_compute_throughput(kernel)
+            else:
+                raise ValueError(f"Unknown attribute: {attribute}")
+
+            values.append(value)
+
+        print(f"{(report_printable_name)}", end=", ")
+        for value in values:
+            print(f"{value}", end=", " if value != values[-1] else "\n")
 
 def print_header(attributes_list):
     print("variation,", end="")
     for attribute in attributes_list:
-        print(f"{attribute}", end=", ")
-    print("\n")
+        print(f"{attribute}", end=", " if attribute != attributes_list[-1] else "\n")
 
 def compare_reports_directory(report_dir):
     if not os.path.exists(report_dir):

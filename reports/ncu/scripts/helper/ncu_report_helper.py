@@ -56,6 +56,9 @@ def get_kernel_time(kernel):
     kernel_time = kernel.metric_by_name("gpu__time_duration.sum").as_double() / 1000.0  # Convert to ms
     return round(kernel_time, 2)
 
+def get_compute_throughput(kernel):
+    compute_throughput = kernel.metric_by_name("sm__throughput.avg.pct_of_peak_sustained_elapsed").as_double() / 1000.0  # Convert to K
+
 def print_divergence_top_kernels(report):
     top_kernels = get_top_kernels(report, 0.90)
     for kernel_idx in top_kernels:
