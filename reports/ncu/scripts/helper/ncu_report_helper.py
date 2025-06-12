@@ -115,6 +115,7 @@ class kernel:
         plt.xticks(range(33))
         plt.grid(axis='y', linestyle='--', alpha=0.7)
         plt.tight_layout()
+        plt.close()
 
 class ncu_report_wrapper:
     @staticmethod
@@ -191,6 +192,7 @@ class ncu_report_wrapper:
         plt.xticks(range(33))
         plt.grid(axis='y', linestyle='--', alpha=0.7)
         plt.tight_layout()
+        plt.close()
 
         if pdf_ref:
             plt.savefig(pdf_ref, format='pdf', bbox_inches='tight', pad_inches=10/72.0)
