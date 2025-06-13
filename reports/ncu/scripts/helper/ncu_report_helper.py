@@ -82,7 +82,7 @@ class kernel:
         print(f"  Kernel metrics:", {self.metric_names()})
 
     def get_memory_bandwidth(self):
-        memory_bandwidth = self.action.metric_by_name("dram__bytes.sum").as_double()  # Convert to KB
+        memory_bandwidth = self.action.metric_by_name("gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed").as_double()  # Convert to KBMemory Throughput [%]
         return round(memory_bandwidth, 2)
 
     def get_compute_throughput(self):
@@ -163,11 +163,14 @@ class ncu_report_wrapper:
     def get_mean_branch_divergence(self):
         return self.__get_mean_metric__(lambda k: k.get_mean_divergence())
     
-    def get_mean_computed_throughput(self):
+    def get_mean_compute_throughput(self):
         return self.__get_mean_metric__(lambda k: k.get_compute_throughput())
 
     def get_weighted_compute_throughput(self):
         return self.__get_weighted_metric__(lambda k: k.get_compute_throughput())
+    
+    def get_weighted_memory_throughput(self):
+        return self.__get_weighted_metric__(lambda k: k.get_memory_bandwidth())
     
     def print_inst_level_weighted_divergence(self):
         print(f"Kernel Name, Weighted Branch Divergence, Mean Branch Divergence From Metric, Mean Divergence From Instructions")

@@ -19,7 +19,7 @@ def print_report(report_file):
     print(f"Total Time: {report.total_time} ms")
     print(f"Report Name: {report.name}")
 
-def print_report_directory(report_dir):
+def generate_histogram_dir(report_dir):
     if not os.path.exists(report_dir):
         print(f"-- Report directory {report_dir} does not exist. --")
         return
@@ -39,6 +39,24 @@ def print_report_directory(report_dir):
 
     pdf_ref.close()
 
+def get_basic_stats(report_dir):
+    if not os.path.exists(report_dir):
+        print(f"-- Report directory {report_dir} does not exist. --")
+        return
+    
+    print(f"report_name, compute_throughput (weighted metric mean), memory_throughput (weighted metric mean)")
+
+    for report_file in sorted(os.listdir(report_dir)):
+        if report_file.endswith(".ncu-rep"):
+            report_file_path = os.path.join(report_dir, report_file)
+            report = ncu_report_wrapper.load_report(report_file_path)
+            if report is None:
+                print(f"-- Failed to load report {report_file_path}. --")
+                continue
+
+            print(f"{report.name}, {report.get_weighted_compute_throughput()}, {report.get_weighted_memory_throughput()}")
+            
+            
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python print-report-overview.py <report-file>")
@@ -46,7 +64,7 @@ if __name__ == "__main__":
 
     if (os.path.isdir(sys.argv[1])):
         report_dir = sys.argv[1]
-        print_report_directory(report_dir)
+        get_basic_stats(report_dir)
     else:
         report_file = sys.argv[1]
         print_report(report_file)
