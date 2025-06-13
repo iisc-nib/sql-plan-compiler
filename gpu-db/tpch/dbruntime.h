@@ -5,6 +5,10 @@
 #include "db_types.h"
 #include <iostream>
 #include <map>
+#include <iomanip>  // For std::put_time
+#include <chrono>   // For std::chrono
+#include <sstream>  // For std::stringstream
+#include <arrow/scalar.h>
 
 DBI32Type *d_nation__n_nationkey;
 DBStringType *d_nation__n_name;
@@ -501,4 +505,40 @@ void initTpchDb(std::string dbDir)
 #ifdef GPUMEMINFO
     checkGpuMem();
 #endif
+}
+
+std::string Date32ScalarToString(DBDateType date32) {
+    const std::shared_ptr<arrow::Date32Scalar>& date32_scalar = std::make_shared<arrow::Date32Scalar>(date32);
+    const std::string& format_string = "%Y-%m-%d";
+    if (!date32_scalar->is_valid)
+        return "NULL"; // Handle null values
+
+    // Date32 stores days since the Unix epoch
+    int32_t days_since_epoch = date32_scalar->value;
+
+    // For C++17 and earlier, manually convert days to seconds duration
+    // Unix epoch starts Jan 1, 1970 00:00:00 UTC.
+    // Each day has 24 * 60 * 60 = 86400 seconds.
+    long long total_seconds = static_cast<long long>(days_since_epoch) * 24 * 60 * 60;
+
+    // Create a time_point from the total seconds
+    // std::chrono::system_clock::from_time_t is available since C++11
+    std::chrono::system_clock::time_point date_time_point =
+        std::chrono::system_clock::from_time_t(static_cast<std::time_t>(total_seconds));
+
+    // Convert to std::time_t (which is typically seconds since epoch)
+    // This step is redundant if we already have total_seconds, but good for consistency
+    // before passing to C-style time functions.
+    std::time_t time_val = std::chrono::system_clock::to_time_t(date_time_point);
+
+    // Convert to std::tm (broken-down time, local time zone)
+    // std::localtime is not thread-safe. For production, consider localtime_r (POSIX)
+    // or _localtime32_s/_localtime64_s (Windows) for thread safety.
+    std::tm* tm_val = std::localtime(&time_val);
+    if (tm_val == nullptr)
+        return "Error converting time";
+
+    std::stringstream ss;
+    ss << std::put_time(tm_val, format_string.c_str());
+    return ss.str();
 }
