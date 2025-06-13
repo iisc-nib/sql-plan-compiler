@@ -16,7 +16,7 @@ struct DBDecimalColumn {
 typedef DBDecimalColumn<2> DBDecimalPrecisionType;
 #endif
 
-typedef char* DBStringType;
+typedef const char* DBStringType;
 typedef int32_t DBDateType;
 typedef double DBDecimalType;
 typedef int16_t DBI16Type;
