@@ -2,6 +2,7 @@ import os
 from helper.ncu_report_helper import ncu_report_wrapper
 import sys
 from matplotlib.backends.backend_pdf import PdfPages
+import numpy as np
 
 def print_report(report_file):
 
@@ -16,7 +17,7 @@ def print_report(report_file):
     print(f"Mean Branch Divergence: {report.get_mean_branch_divergence()}")
     print(f"Weighted Computed Throughput: {report.get_weighted_compute_throughput()}")
     print(f"Mean Computed Throughput: {report.get_mean_computed_throughput()}")
-    print(f"Total Time: {report.total_time} ms")
+    print(f"Total Time: {np.round(report.total_time, 0)} ms")
     print(f"Report Name: {report.name}")
 
 def generate_histogram_dir(report_dir):
@@ -44,8 +45,8 @@ def get_basic_stats(report_dir):
         print(f"-- Report directory {report_dir} does not exist. --")
         return
     
-    print(f"report_name, compute_throughput (weighted metric mean), memory_throughput (weighted metric mean)")
-
+    print(f"report_name, gpu_time (ms), compute_throughput (weighted metric mean), memory_throughput (weighted metric mean)")
+    gpu_name = os.path.basename(os.path.dirname(report_dir)) # get the parent folder name as GPU name
     for report_file in sorted(os.listdir(report_dir)):
         if report_file.endswith(".ncu-rep"):
             report_file_path = os.path.join(report_dir, report_file)
@@ -54,9 +55,9 @@ def get_basic_stats(report_dir):
                 print(f"-- Failed to load report {report_file_path}. --")
                 continue
 
-            print(f"{report.name}, {report.get_weighted_compute_throughput()}, {report.get_weighted_memory_throughput()}")
-            
-            
+            report_name = gpu_name + "_" + os.path.splitext(report.name)[0]
+            print(f"{report_name}, {report.get_time_in_ms()}, {np.round(report.get_weighted_compute_throughput(),2)}, {np.round(report.get_weighted_memory_throughput(),2)}")
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python print-report-overview.py <report-file>")

@@ -4,8 +4,17 @@ import math
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import platform
 
-sys.path.append("/opt/nvidia/nsight-compute/2025.1.1/extras/python")
+# Check if the operating system is Windows
+if platform.system() == "Windows":
+    # Use Windows path for Nsight Compute Python libraries
+    nsight_path = os.path.normpath("C:/Program Files/NVIDIA Corporation/Nsight Compute 2025.2.0/extras/python")
+    if os.path.exists(nsight_path):
+        sys.path.append(nsight_path)
+else:
+    # Use Linux path
+    sys.path.append("/opt/nvidia/nsight-compute/2025.1.1/extras/python")
 import ncu_report
 
 class instruction:
@@ -216,6 +225,9 @@ class ncu_report_wrapper:
                 plt.close()
 
             self.__print_weighted_kernel_histogram__(pdf_ref)
+
+    def get_time_in_ms(self):
+        return np.round(self.total_time/1000.0, 0) # convert from microseconds to milliseconds
        
 
 def get_top_kernels(report, percentile=0.9):
