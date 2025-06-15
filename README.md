@@ -2,6 +2,10 @@
 
 ## Generating Data for TPC-H Benchmark Queries
 * Generate the data files using the tools in the lingo-db fork (TODO make this more detailed).
+	```bash
+	cd <lingo-db-root>
+	make resources/data/tpch-10/.stamp # for others use the appropriate folder for given scale factor
+	```
 * Convert the generated data files from arrow to parquet using the following command:
 	```bash
 	cd <repo_root>/gpu-db/tpch_auto_gen_v2/utils/arrow_to_parquet

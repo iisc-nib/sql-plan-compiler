@@ -384,3 +384,96 @@ T* allocateAndTransfer(T* h_data, size_t table_size) {
   cudaMemcpy(d_data, h_data, sizeof(T)*table_size, cudaMemcpyHostToDevice);
   return d_data;
 }
+
+// --- [Start] Pyper Shuffle Constructs --- //
+
+typedef size_t idx_type_t;
+#define USE_STRUCT_OF_ARRAYS 0
+
+struct shuffle_buffer_type_aos {
+  idx_type_t row_idx; // row_idx of the row that was being processed by this thread
+  idx_type_t buf_idx; // value of the hash table slot. Points to tuples of row_ids for join
+  idx_type_t second_buf_idx;
+};
+
+struct shuffle_buffer_type_soa {
+  idx_type_t row_idx[128]; // row_idx of the row that was being processed by this thread
+  idx_type_t buf_idx[128]; // value of the hash table slot. Points to tuples of row_ids for join  
+};
+
+#if USE_STRUCT_OF_ARRAYS
+
+#define SHUFFLE_BUFFER_INIT(buffer_size) \
+        __shared__ uint32_t shuffle_buf_idx; \
+        __shared__ shuffle_buffer_type_soa shuffle_buf; \
+        bool threadActive = true; \
+        if (threadIdx.x == 0) { \
+            shuffle_buf_idx = 0; \
+        } \
+        __syncthreads();
+
+// struct of arrays version
+__device__ void save_to_shuffle_buffer(idx_type_t row_idx, idx_type_t slot_buf_idx, uint32_t* shuffle_buf_idx, shuffle_buffer_type_soa* shuffle_buf) {
+  auto old_shuffle_buf_idx = atomicAdd_block(shuffle_buf_idx, 1);
+  shuffle_buf->row_idx[old_shuffle_buf_idx] = row_idx;
+  shuffle_buf->buf_idx[old_shuffle_buf_idx] = slot_buf_idx;
+}
+
+__device__ void retrieve_from_shuffle_buffer(uint32_t shuffle_buf_idx, idx_type_t *row_idx, idx_type_t *slot_buf_idx, shuffle_buffer_type_soa* shuffle_buf) {
+  *row_idx = shuffle_buf->row_idx[shuffle_buf_idx];
+  *slot_buf_idx = shuffle_buf->buf_idx[shuffle_buf_idx];
+}
+
+#else
+
+#define SHUFFLE_BUFFER_INIT(buffer_size) \
+        __shared__ uint32_t shuffle_buf_idx; \
+        __shared__ shuffle_buffer_type_aos shuffle_buf[buffer_size]; \
+        bool threadActive = true; \
+        if (threadIdx.x == 0) { \
+            shuffle_buf_idx = 0; \
+        } \
+        __syncthreads();
+
+#define RESET_SHUFFLE_BUF_IDX() \
+        if (threadIdx.x == 0) \
+          shuffle_buf_idx = 0; \
+        __syncthreads();
+        
+// array of structs version
+__device__ void save_to_shuffle_buffer(idx_type_t row_idx, idx_type_t slot_buf_idx, uint32_t* shuffle_buf_idx, shuffle_buffer_type_aos* shuffle_buf) {
+  auto old_shuffle_buf_idx = atomicAdd_block(shuffle_buf_idx, 1);
+  shuffle_buf[old_shuffle_buf_idx].row_idx = row_idx;
+  shuffle_buf[old_shuffle_buf_idx].buf_idx = slot_buf_idx;
+}
+
+__device__ void retrieve_from_shuffle_buffer(uint32_t shuffle_buf_idx, idx_type_t *row_idx, idx_type_t *slot_buf_idx, shuffle_buffer_type_aos* shuffle_buf) {
+  *row_idx = shuffle_buf[shuffle_buf_idx].row_idx;
+  *slot_buf_idx = shuffle_buf[shuffle_buf_idx].buf_idx;
+}
+
+// array of structs version
+__device__ void save_to_shuffle_buffer(idx_type_t row_idx, idx_type_t slot_buf_idx, idx_type_t second_buf_idx, uint32_t* shuffle_buf_idx, shuffle_buffer_type_aos* shuffle_buf) {
+  auto old_shuffle_buf_idx = atomicAdd_block(shuffle_buf_idx, 1);
+  shuffle_buf[old_shuffle_buf_idx].row_idx = row_idx;
+  shuffle_buf[old_shuffle_buf_idx].buf_idx = slot_buf_idx;
+  shuffle_buf[old_shuffle_buf_idx].second_buf_idx = second_buf_idx;
+}
+
+__device__ void retrieve_from_shuffle_buffer(uint32_t shuffle_buf_idx, idx_type_t *row_idx, idx_type_t *slot_buf_idx, idx_type_t *second_buf_idx, shuffle_buffer_type_aos* shuffle_buf) {
+  *row_idx = shuffle_buf[shuffle_buf_idx].row_idx;
+  *slot_buf_idx = shuffle_buf[shuffle_buf_idx].buf_idx;
+  *second_buf_idx = shuffle_buf[shuffle_buf_idx].second_buf_idx;
+}
+
+#endif
+
+#define RETURN_IF_THREAD_BEYOND_SHUFFLE() if (threadIdx.x >= shuffle_buf_idx) return;
+#define INVALIDATE_IF_THREAD_BEYOND_SHUFFLE() if (threadIdx.x >= shuffle_buf_idx) threadActive = false;
+
+#define PRINT_SHUFFLE_MAX() \
+        if (threadIdx.x == 0) { \
+            printf("Max shuffle buffer size: %d\n", shuffle_buf_idx); \
+        }
+
+// --- [End] Pyper Shuffle Constructs --- //
