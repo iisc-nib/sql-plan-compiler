@@ -317,7 +317,7 @@ std::clog << "Query execution time: " << duration.count() / 1000. << " milliseco
 
 for (auto i=0ull; i < COUNT10; i++) { std::cout << "" << MAT10aggr__c_custkey[i];
 std::cout << "|" << MAT10orders__o_orderkey[i];
-std::cout << "|" << MAT10aggr__o_orderdate[i];
+std::cout << "|" << Date32ScalarToString(MAT10aggr__o_orderdate[i]);
 std::cout << "|" << MAT10aggr__o_totalprice[i];
 std::cout << "|" << MAT10aggr1__tmp_attr1[i];
 std::cout << std::endl; }

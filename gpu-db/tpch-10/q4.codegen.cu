@@ -104,7 +104,7 @@ cudaMemcpy(&COUNT0, d_COUNT0, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 auto d_HT_0 = cuco::static_map{ (int)COUNT0*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 main_1<<<std::ceil((float)lineitem_size/128.), 128>>>(d_HT_0.ref(cuco::insert), d_lineitem__l_commitdate, d_lineitem__l_orderkey, d_lineitem__l_receiptdate, lineitem_size);
 //Create aggregation hash table
-auto d_HT_2 = cuco::static_map{ (int)498047*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+auto d_HT_2 = cuco::static_map{ (int)644532*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 count_3<<<std::ceil((float)orders_size/128.), 128>>>(d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::insert), d_orders__o_orderdate, d_orders__o_orderkey, d_orders__o_orderpriority_encoded, orders_size);
 size_t COUNT2 = d_HT_2.size();
 thrust::device_vector<int64_t> keys_2(COUNT2), vals_2(COUNT2);

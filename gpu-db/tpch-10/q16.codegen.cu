@@ -178,7 +178,7 @@ cudaMemcpy(&COUNT2, d_COUNT2, sizeof(uint64_t), cudaMemcpyDeviceToHost);
 auto d_HT_2 = cuco::static_map{ (int)COUNT2*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 main_3<<<std::ceil((float)supplier_size/128.), 128>>>(d_HT_2.ref(cuco::insert), d_supplier__s_comment, d_supplier__s_suppkey, supplier_size);
 //Create aggregation hash table
-auto d_HT_4 = cuco::static_map{ (int)1303414*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+auto d_HT_4 = cuco::static_map{ (int)1092682*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 count_5<<<std::ceil((float)partsupp_size/128.), 128>>>(d_BUF_0, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::find), d_HT_4.ref(cuco::insert), d_part__p_brand_encoded, d_part__p_size, d_part__p_type_encoded, d_partsupp__ps_partkey, d_partsupp__ps_suppkey, partsupp_size);
 size_t COUNT4 = d_HT_4.size();
 thrust::device_vector<int64_t> keys_4(COUNT4), vals_4(COUNT4);

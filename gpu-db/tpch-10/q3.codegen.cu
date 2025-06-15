@@ -174,7 +174,7 @@ cudaMalloc(&d_BUF_2, sizeof(uint64_t) * COUNT2 * 2);
 auto d_HT_2 = cuco::static_map{ (int)COUNT2*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 main_3<<<std::ceil((float)orders_size/128.), 128>>>(d_BUF_0, d_BUF_2, d_BUF_IDX_2, d_HT_0.ref(cuco::find), d_HT_2.ref(cuco::insert), d_orders__o_custkey, d_orders__o_orderdate, d_orders__o_orderkey, orders_size);
 //Create aggregation hash table
-auto d_HT_4 = cuco::static_map{ (int)3133196*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+auto d_HT_4 = cuco::static_map{ (int)3167814*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 count_5<<<std::ceil((float)lineitem_size/128.), 128>>>(d_BUF_2, d_HT_2.ref(cuco::find), d_HT_4.ref(cuco::insert), d_lineitem__l_orderkey, d_lineitem__l_shipdate, lineitem_size);
 size_t COUNT4 = d_HT_4.size();
 thrust::device_vector<int64_t> keys_4(COUNT4), vals_4(COUNT4);
@@ -230,7 +230,7 @@ std::clog << "Query execution time: " << duration.count() / 1000. << " milliseco
 
 for (auto i=0ull; i < COUNT6; i++) { std::cout << "" << MAT6lineitem__l_orderkey[i];
 std::cout << "|" << MAT6aggr0__tmp_attr0[i];
-std::cout << "|" << MAT6aggr__o_orderdate[i];
+std::cout << "|" << Date32ScalarToString(MAT6aggr__o_orderdate[i]);
 std::cout << "|" << MAT6aggr__o_shippriority[i];
 std::cout << std::endl; }
 std::clog << "Used memory: " << used_mem / (1024 * 1024) << " MB" << std::endl; 

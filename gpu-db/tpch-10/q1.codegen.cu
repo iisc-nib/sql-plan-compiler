@@ -100,7 +100,7 @@ extern "C" void control (DBI32Type * d_nation__n_nationkey, DBStringType * d_nat
 size_t used_mem = usedGpuMem();
 auto startTime = std::chrono::high_resolution_clock::now();
 //Create aggregation hash table
-auto d_HT_0 = cuco::static_map{ (int)59048770*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+auto d_HT_0 = cuco::static_map{ (int)58990190*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 count_1<<<std::ceil((float)lineitem_size/128.), 128>>>(d_HT_0.ref(cuco::insert), d_lineitem__l_linestatus, d_lineitem__l_returnflag, d_lineitem__l_shipdate, lineitem_size);
 size_t COUNT0 = d_HT_0.size();
 thrust::device_vector<int64_t> keys_0(COUNT0), vals_0(COUNT0);

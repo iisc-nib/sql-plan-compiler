@@ -223,7 +223,7 @@ cudaMalloc(&d_BUF_4, sizeof(uint64_t) * COUNT4 * 1);
 auto d_HT_4 = cuco::static_map{ (int)COUNT4*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 main_5<<<std::ceil((float)nation_size/128.), 128>>>(d_BUF_4, d_BUF_IDX_4, d_HT_4.ref(cuco::insert), d_nation__n_nationkey, nation_size);
 //Create aggregation hash table
-auto d_HT_6 = cuco::static_map{ (int)466296*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
+auto d_HT_6 = cuco::static_map{ (int)472646*2, cuco::empty_key{(int64_t)-1},cuco::empty_value{(int64_t)-1},thrust::equal_to<int64_t>{},cuco::linear_probing<1, cuco::default_hash_function<int64_t>>() };
 count_7<<<std::ceil((float)customer_size/128.), 128>>>(d_BUF_2, d_BUF_4, d_HT_2.ref(cuco::for_each), d_HT_4.ref(cuco::find), d_HT_6.ref(cuco::insert), d_customer__c_custkey, d_customer__c_nationkey, customer_size);
 size_t COUNT6 = d_HT_6.size();
 thrust::device_vector<int64_t> keys_6(COUNT6), vals_6(COUNT6);
